@@ -15,9 +15,9 @@
  */
 
 import type { Queue } from 'bullmq';
+import { logger } from '../logger/index.js';
 import { createQueue } from '../queue/bullmq.js';
 import type { EventMap } from './types.js';
-import { logger } from '../logger/index.js';
 
 // Her event tipi için bir BullMQ queue
 const queues = new Map<string, Queue>();

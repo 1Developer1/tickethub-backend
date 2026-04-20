@@ -9,20 +9,17 @@
  */
 
 import type { FastifyInstance } from 'fastify';
+import { requireUser } from '../../shared/middleware/auth.js';
+import { loginSchema, refreshSchema, registerSchema } from './users.schema.js';
 import { usersService } from './users.service.js';
-import { registerSchema, loginSchema, refreshSchema } from './users.schema.js';
 
 export async function userRoutes(app: FastifyInstance): Promise<void> {
   // ── POST /api/v1/auth/register ──
-  app.post(
-    '/register',
-    { config: { public: true } },
-    async (request, reply) => {
-      const input = registerSchema.parse(request.body);
-      const result = await usersService.register(input);
-      return reply.status(201).send({ data: result });
-    },
-  );
+  app.post('/register', { config: { public: true } }, async (request, reply) => {
+    const input = registerSchema.parse(request.body);
+    const result = await usersService.register(input);
+    return reply.status(201).send({ data: result });
+  });
 
   // ── POST /api/v1/auth/login ──
   // Rate limit: 5 deneme/dakika (brute force koruması)
@@ -42,31 +39,23 @@ export async function userRoutes(app: FastifyInstance): Promise<void> {
   );
 
   // ── POST /api/v1/auth/refresh ──
-  app.post(
-    '/refresh',
-    { config: { public: true } },
-    async (request, reply) => {
-      const { refreshToken } = refreshSchema.parse(request.body);
-      const tokens = await usersService.refresh(refreshToken);
-      return reply.send({ data: tokens });
-    },
-  );
+  app.post('/refresh', { config: { public: true } }, async (request, reply) => {
+    const { refreshToken } = refreshSchema.parse(request.body);
+    const tokens = await usersService.refresh(refreshToken);
+    return reply.send({ data: tokens });
+  });
 
   // ── POST /api/v1/auth/logout ──
-  app.post(
-    '/logout',
-    { config: { public: true } },
-    async (request, reply) => {
-      const { refreshToken } = refreshSchema.parse(request.body);
-      await usersService.logout(refreshToken);
-      return reply.status(204).send();
-    },
-  );
+  app.post('/logout', { config: { public: true } }, async (request, reply) => {
+    const { refreshToken } = refreshSchema.parse(request.body);
+    await usersService.logout(refreshToken);
+    return reply.status(204).send();
+  });
 
   // ── GET /api/v1/auth/me ──
   // Protected endpoint — JWT access token gerekli
   app.get('/me', async (request, reply) => {
-    const userId = request.user!.sub;
+    const userId = requireUser(request).sub;
     const profile = await usersService.getProfile(userId);
     return reply.send({ data: profile });
   });

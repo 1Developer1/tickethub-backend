@@ -2,9 +2,9 @@
  * Users Module — Unit & API Tests
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
 import * as argon2 from 'argon2';
-import { registerSchema, loginSchema } from '../users.schema.js';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { loginSchema, registerSchema } from '../users.schema.js';
 
 // ── Schema Validation Tests ──
 describe('Users Schema Validation', () => {

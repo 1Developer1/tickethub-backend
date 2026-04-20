@@ -5,7 +5,7 @@
  * Idempotent: tekrar çalıştırılabilir (upsert kullanıyor).
  */
 
-import { PrismaClient, UserRole, EventStatus, EventCategory } from '@prisma/client';
+import { EventCategory, EventStatus, PrismaClient, UserRole } from '@prisma/client';
 import { hash } from 'argon2';
 
 const prisma = new PrismaClient();
@@ -98,7 +98,7 @@ async function main(): Promise<void> {
         VIP: { rows: 5, seatsPerRow: 25, basePriceInCents: 100000 },
         'Tribün A': { rows: 15, seatsPerRow: 40, basePriceInCents: 60000 },
         'Tribün B': { rows: 15, seatsPerRow: 40, basePriceInCents: 40000 },
-        'Ayakta': { rows: 1, seatsPerRow: 1000, basePriceInCents: 25000 },
+        Ayakta: { rows: 1, seatsPerRow: 1000, basePriceInCents: 25000 },
       },
     },
   });
@@ -153,7 +153,7 @@ async function main(): Promise<void> {
       venueId: venue1.id,
       organizerId: organizer.id,
       name: 'Hamlet - Shakespeare Festivali',
-      description: 'William Shakespeare\'in ölümsüz eseri Hamlet, yıldız kadrosuyla sahnede.',
+      description: "William Shakespeare'in ölümsüz eseri Hamlet, yıldız kadrosuyla sahnede.",
       category: EventCategory.THEATER,
       status: EventStatus.DRAFT,
       startsAt: inTwoMonths,

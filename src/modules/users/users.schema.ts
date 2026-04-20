@@ -33,7 +33,10 @@ export type RegisterInput = z.infer<typeof registerSchema>;
 
 // ── Login ──
 export const loginSchema = z.object({
-  email: z.string().email().transform((v) => v.toLowerCase().trim()),
+  email: z
+    .string()
+    .email()
+    .transform((v) => v.toLowerCase().trim()),
   password: z.string().min(1, 'Password is required'),
 });
 

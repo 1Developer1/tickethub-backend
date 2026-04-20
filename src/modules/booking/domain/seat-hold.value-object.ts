@@ -32,13 +32,27 @@ export class SeatHold {
     return new SeatHold(props);
   }
 
-  get seatHoldId(): string { return this.props.seatHoldId; }
-  get eventId(): string { return this.props.eventId; }
-  get sectionName(): string { return this.props.sectionName; }
-  get row(): number { return this.props.row; }
-  get seat(): number { return this.props.seat; }
-  get priceInCents(): number { return this.props.priceInCents; }
-  get expiresAt(): Date { return this.props.expiresAt; }
+  get seatHoldId(): string {
+    return this.props.seatHoldId;
+  }
+  get eventId(): string {
+    return this.props.eventId;
+  }
+  get sectionName(): string {
+    return this.props.sectionName;
+  }
+  get row(): number {
+    return this.props.row;
+  }
+  get seat(): number {
+    return this.props.seat;
+  }
+  get priceInCents(): number {
+    return this.props.priceInCents;
+  }
+  get expiresAt(): Date {
+    return this.props.expiresAt;
+  }
 
   /** Koltuk tanımlayıcı string (lock key olarak da kullanılır) */
   get seatKey(): string {

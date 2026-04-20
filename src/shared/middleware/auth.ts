@@ -14,15 +14,27 @@
  * (her refresh'te eski token iptal edilir, yeni token verilir).
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import jwt from 'jsonwebtoken';
-import { UnauthorizedError, ForbiddenError } from '../errors/http-errors.js';
+import { ForbiddenError, UnauthorizedError } from '../errors/http-errors.js';
 
 export interface JwtPayload {
   sub: string; // userId
   role: 'USER' | 'ORGANIZER' | 'ADMIN';
   iat: number;
   exp: number;
+}
+
+/**
+ * Authenticated request'ten user'ı al. Auth middleware'den sonra çağrılmalı.
+ * Eğer user yoksa UnauthorizedError fırlatır — bu, auth middleware'in
+ * doğru çalışmadığı anlamına gelir (programmer hatası).
+ */
+export function requireUser(request: FastifyRequest): JwtPayload {
+  if (!request.user) {
+    throw new UnauthorizedError('Authentication required');
+  }
+  return request.user;
 }
 
 // Fastify request'e user bilgisi ekle
@@ -87,9 +99,7 @@ export function authorize(
     }
 
     if (!roles.includes(request.user.role)) {
-      throw new ForbiddenError(
-        `This action requires one of these roles: ${roles.join(', ')}`,
-      );
+      throw new ForbiddenError(`This action requires one of these roles: ${roles.join(', ')}`);
     }
   };
 }

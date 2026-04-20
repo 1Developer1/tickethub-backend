@@ -45,10 +45,10 @@
  * ```
  */
 
-import { SeatHold } from './seat-hold.value-object.js';
-import { Money } from './money.value-object.js';
-import type { ReservationDomainEvent } from './reservation.events.js';
 import { CANCELLATION_DEADLINE_HOURS } from '../../../config/constants.js';
+import type { Money } from './money.value-object.js';
+import type { ReservationDomainEvent } from './reservation.events.js';
+import type { SeatHold } from './seat-hold.value-object.js';
 
 export type ReservationStatus = 'PENDING' | 'CONFIRMED' | 'EXPIRED' | 'CANCELLED';
 
@@ -120,18 +120,42 @@ export class Reservation {
 
   // ── Getters (private field'lar dışarıdan DEĞİŞTİRİLEMEZ) ──
 
-  get id(): string { return this.props.id; }
-  get userId(): string { return this.props.userId; }
-  get eventId(): string { return this.props.eventId; }
-  get status(): ReservationStatus { return this.props.status; }
-  get seatHolds(): ReadonlyArray<SeatHold> { return this.props.seatHolds; }
-  get totalPrice(): Money { return this.props.totalPrice; }
-  get version(): number { return this.props.version; }
-  get expiresAt(): Date { return this.props.expiresAt; }
-  get confirmedAt(): Date | undefined { return this.props.confirmedAt; }
-  get cancelledAt(): Date | undefined { return this.props.cancelledAt; }
-  get paymentId(): string | undefined { return this.props.paymentId; }
-  get createdAt(): Date { return this.props.createdAt; }
+  get id(): string {
+    return this.props.id;
+  }
+  get userId(): string {
+    return this.props.userId;
+  }
+  get eventId(): string {
+    return this.props.eventId;
+  }
+  get status(): ReservationStatus {
+    return this.props.status;
+  }
+  get seatHolds(): ReadonlyArray<SeatHold> {
+    return this.props.seatHolds;
+  }
+  get totalPrice(): Money {
+    return this.props.totalPrice;
+  }
+  get version(): number {
+    return this.props.version;
+  }
+  get expiresAt(): Date {
+    return this.props.expiresAt;
+  }
+  get confirmedAt(): Date | undefined {
+    return this.props.confirmedAt;
+  }
+  get cancelledAt(): Date | undefined {
+    return this.props.cancelledAt;
+  }
+  get paymentId(): string | undefined {
+    return this.props.paymentId;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
 
   /** Üretilen domain event'leri al ve temizle */
   pullDomainEvents(): ReservationDomainEvent[] {
@@ -234,7 +258,7 @@ export class Reservation {
       if (hoursUntilEvent < CANCELLATION_DEADLINE_HOURS) {
         throw new Error(
           `Cannot cancel: event starts in ${hoursUntilEvent.toFixed(0)} hours. ` +
-          `Cancellation deadline is ${CANCELLATION_DEADLINE_HOURS} hours before event.`,
+            `Cancellation deadline is ${CANCELLATION_DEADLINE_HOURS} hours before event.`,
         );
       }
     }

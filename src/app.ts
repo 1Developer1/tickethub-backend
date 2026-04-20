@@ -18,29 +18,29 @@
  * main.ts'de: buildApp() → listen. Test'te: buildApp() → supertest.
  */
 
-import Fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
-import { logger } from './shared/logger/index.js';
+import Fastify, { type FastifyInstance } from 'fastify';
+import { API_PREFIX } from './config/constants.js';
 import { errorHandler } from './shared/errors/error-handler.js';
-import { requestIdPlugin } from './shared/middleware/request-id.js';
+import { healthRoutes } from './shared/health/routes.js';
+import { logger } from './shared/logger/index.js';
 import { authPlugin } from './shared/middleware/auth.js';
 import { rateLimitPlugin } from './shared/middleware/rate-limit.js';
-import { healthRoutes } from './shared/health/routes.js';
-import { API_PREFIX } from './config/constants.js';
+import { requestIdPlugin } from './shared/middleware/request-id.js';
 
+import { bookingRoutes } from './modules/booking/booking.routes.js';
+import { eventRoutes } from './modules/events/events.routes.js';
+import { paymentRoutes } from './modules/payments/payments.routes.js';
+import { pricingRoutes } from './modules/pricing/pricing.routes.js';
+import { ticketRoutes } from './modules/tickets/tickets.routes.js';
 // Module routes
 import { userRoutes } from './modules/users/users.routes.js';
 import { venueRoutes } from './modules/venues/venues.routes.js';
-import { eventRoutes } from './modules/events/events.routes.js';
-import { pricingRoutes } from './modules/pricing/pricing.routes.js';
-import { bookingRoutes } from './modules/booking/booking.routes.js';
-import { paymentRoutes } from './modules/payments/payments.routes.js';
-import { ticketRoutes } from './modules/tickets/tickets.routes.js';
 
-export async function buildApp(): Promise<FastifyInstance> {
-  const app = Fastify({
-    loggerInstance: logger,
+export async function buildApp() {
+  const app: FastifyInstance = Fastify({
+    loggerInstance: logger as unknown as FastifyInstance['log'],
     // Request ID'yi Fastify'ın kendi mekanizması ile üret
     genReqId: (req) => {
       return (req.headers['x-request-id'] as string) || crypto.randomUUID();

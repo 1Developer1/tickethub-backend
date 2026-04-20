@@ -73,10 +73,7 @@ export function parsePaginationParams(query: {
   cursor?: string;
   limit?: string | number;
 }): CursorPaginationParams {
-  const limit = Math.min(
-    Math.max(Number(query.limit) || DEFAULT_PAGE_SIZE, 1),
-    MAX_PAGE_SIZE,
-  );
+  const limit = Math.min(Math.max(Number(query.limit) || DEFAULT_PAGE_SIZE, 1), MAX_PAGE_SIZE);
 
   return {
     cursor: query.cursor || undefined,

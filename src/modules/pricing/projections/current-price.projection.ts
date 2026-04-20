@@ -15,11 +15,11 @@
  * İkisi birlikte: Redis cache → miss → DB projeksiyon → miss → event replay.
  */
 
-import { pricingRepository } from '../pricing.repository.js';
-import { replayPricingEvents, type PricingDomainEvent } from '../domain/pricing.events.js';
-import { cache } from '../../../shared/redis/cache.js';
 import { CACHE_TTL } from '../../../config/constants.js';
 import { logger } from '../../../shared/logger/index.js';
+import { cache } from '../../../shared/redis/cache.js';
+import { type PricingDomainEvent, replayPricingEvents } from '../domain/pricing.events.js';
+import { pricingRepository } from '../pricing.repository.js';
 
 const CACHE_PREFIX = 'price:current:';
 
@@ -27,7 +27,10 @@ export const currentPriceProjection = {
   /**
    * Projeksiyon rebuild: tüm event'leri replay'le, güncel fiyatı hesapla, DB + cache'e yaz.
    */
-  async rebuild(eventId: string, sectionName: string): Promise<{
+  async rebuild(
+    eventId: string,
+    sectionName: string,
+  ): Promise<{
     basePriceInCents: number;
     currentPriceInCents: number;
     multiplier: number;
@@ -36,7 +39,7 @@ export const currentPriceProjection = {
 
     const domainEvents = events.map((e) => ({
       type: e.type,
-      ...e.payload as Record<string, unknown>,
+      ...(e.payload as Record<string, unknown>),
       eventId: e.eventId,
       sectionName: e.sectionName,
     })) as PricingDomainEvent[];
@@ -54,10 +57,7 @@ export const currentPriceProjection = {
     const cacheKey = `${CACHE_PREFIX}${eventId}:${sectionName}`;
     await cache.set(cacheKey, result, CACHE_TTL.CURRENT_PRICE);
 
-    logger.debug(
-      { eventId, sectionName, ...result },
-      'Price projection rebuilt',
-    );
+    logger.debug({ eventId, sectionName, ...result }, 'Price projection rebuilt');
 
     return result;
   },
@@ -65,7 +65,10 @@ export const currentPriceProjection = {
   /**
    * Güncel fiyatı getir: Redis cache → DB projeksiyon → event replay.
    */
-  async get(eventId: string, sectionName: string): Promise<{
+  async get(
+    eventId: string,
+    sectionName: string,
+  ): Promise<{
     basePriceInCents: number;
     currentPriceInCents: number;
     multiplier: number;

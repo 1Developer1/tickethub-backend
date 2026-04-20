@@ -20,9 +20,9 @@
  */
 
 import { NotFoundError } from '../../shared/errors/http-errors.js';
+import { type PaginatedResponse, buildPaginatedResponse } from '../../shared/utils/pagination.js';
 import { venueRepository } from './venues.repository.js';
 import type { CreateVenueInput, UpdateVenueInput } from './venues.schema.js';
-import { buildPaginatedResponse, type PaginatedResponse } from '../../shared/utils/pagination.js';
 
 interface VenueResponse {
   id: string;

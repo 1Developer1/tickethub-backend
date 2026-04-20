@@ -7,9 +7,9 @@
  */
 
 import { prisma } from '../../shared/database/prisma-client.js';
-import { generateQRPayload, verifyQRPayload, generateQRImage } from './qr-generator.js';
 import { NotFoundError, ValidationError } from '../../shared/errors/http-errors.js';
 import { logger } from '../../shared/logger/index.js';
+import { generateQRImage, generateQRPayload, verifyQRPayload } from './qr-generator.js';
 
 export const ticketsService = {
   /**
@@ -45,10 +45,7 @@ export const ticketsService = {
       });
     }
 
-    logger.info(
-      { reservationId, ticketCount: reservation.seatHolds.length },
-      'Tickets generated',
-    );
+    logger.info({ reservationId, ticketCount: reservation.seatHolds.length }, 'Tickets generated');
   },
 
   /**

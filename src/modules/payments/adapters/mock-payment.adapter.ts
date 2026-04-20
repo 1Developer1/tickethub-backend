@@ -10,8 +10,13 @@
  * - Edge case test: "Stripe hata verdi" senaryosunu simüle et
  */
 
-import type { PaymentGateway, PaymentIntent, PaymentResult, RefundResult } from '../ports/payment-gateway.port.js';
 import { v4 as uuidv4 } from 'uuid';
+import type {
+  PaymentGateway,
+  PaymentIntent,
+  PaymentResult,
+  RefundResult,
+} from '../ports/payment-gateway.port.js';
 
 export class MockPaymentAdapter implements PaymentGateway {
   private shouldFail: boolean;

@@ -34,7 +34,7 @@ export class CircuitBreaker {
   constructor(options: {
     serviceName: string;
     failureThreshold?: number; // Kaç hatada açılsın (default: 5)
-    cooldownMs?: number;       // Ne kadar açık kalsın (default: 30s)
+    cooldownMs?: number; // Ne kadar açık kalsın (default: 30s)
   }) {
     this.serviceName = options.serviceName;
     this.failureThreshold = options.failureThreshold ?? 5;

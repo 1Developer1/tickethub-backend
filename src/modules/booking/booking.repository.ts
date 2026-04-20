@@ -19,9 +19,9 @@
 
 import { prisma } from '../../shared/database/prisma-client.js';
 import { ConflictError } from '../../shared/errors/http-errors.js';
+import { Money } from './domain/money.value-object.js';
 import { Reservation, type ReservationStatus } from './domain/reservation.entity.js';
 import { SeatHold } from './domain/seat-hold.value-object.js';
-import { Money } from './domain/money.value-object.js';
 
 export const bookingRepository = {
   /**
@@ -80,10 +80,9 @@ export const bookingRepository = {
     });
 
     if (result.count === 0) {
-      throw new ConflictError(
-        'Reservation was modified by another process. Please retry.',
-        { reservationId: data.id },
-      );
+      throw new ConflictError('Reservation was modified by another process. Please retry.', {
+        reservationId: data.id,
+      });
     }
   },
 
@@ -169,7 +168,12 @@ export const bookingRepository = {
   /**
    * Koltuk müsait mi? (aktif hold var mı?)
    */
-  async isSeatAvailable(eventId: string, sectionName: string, row: number, seat: number): Promise<boolean> {
+  async isSeatAvailable(
+    eventId: string,
+    sectionName: string,
+    row: number,
+    seat: number,
+  ): Promise<boolean> {
     const existing = await prisma.seatHold.findFirst({
       where: {
         eventId,

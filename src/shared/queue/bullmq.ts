@@ -23,9 +23,9 @@
  * BullMQ delayed job: Tam zamanında, TEK bir reservation için çalışır → O(1)
  */
 
-import { Queue, Worker, type Job, type WorkerOptions } from 'bullmq';
-import { bullmqRedis } from '../redis/redis-client.js';
+import { type Job, Queue, Worker, type WorkerOptions } from 'bullmq';
 import { logger } from '../logger/index.js';
+import { bullmqRedis } from '../redis/redis-client.js';
 
 const defaultQueueOptions = {
   connection: bullmqRedis,

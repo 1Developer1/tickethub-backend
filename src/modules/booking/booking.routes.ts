@@ -6,8 +6,9 @@
  */
 
 import type { FastifyInstance } from 'fastify';
+import { requireUser } from '../../shared/middleware/auth.js';
+import { confirmReservationSchema, createReservationSchema } from './booking.schema.js';
 import { bookingService } from './booking.service.js';
-import { createReservationSchema, confirmReservationSchema } from './booking.schema.js';
 
 export async function bookingRoutes(app: FastifyInstance): Promise<void> {
   // ── POST /api/v1/bookings/hold ── (Koltuk tut — 10 dk)
@@ -20,7 +21,7 @@ export async function bookingRoutes(app: FastifyInstance): Promise<void> {
     },
     async (request, reply) => {
       const input = createReservationSchema.parse(request.body);
-      const result = await bookingService.createReservation(request.user!.sub, input);
+      const result = await bookingService.createReservation(requireUser(request).sub, input);
       return reply.status(201).send({ data: result });
     },
   );
@@ -28,7 +29,7 @@ export async function bookingRoutes(app: FastifyInstance): Promise<void> {
   // ── GET /api/v1/bookings/:id ── (Reservation detayı)
   app.get('/:id', async (request, reply) => {
     const { id } = request.params as { id: string };
-    const result = await bookingService.getReservation(request.user!.sub, id);
+    const result = await bookingService.getReservation(requireUser(request).sub, id);
     return reply.send({ data: result });
   });
 
@@ -36,21 +37,21 @@ export async function bookingRoutes(app: FastifyInstance): Promise<void> {
   app.post('/:id/confirm', async (request, reply) => {
     const { id } = request.params as { id: string };
     const { paymentId } = confirmReservationSchema.parse(request.body);
-    const result = await bookingService.confirmReservation(request.user!.sub, id, paymentId);
+    const result = await bookingService.confirmReservation(requireUser(request).sub, id, paymentId);
     return reply.send({ data: result });
   });
 
   // ── POST /api/v1/bookings/:id/cancel ── (İptal)
   app.post('/:id/cancel', async (request, reply) => {
     const { id } = request.params as { id: string };
-    const result = await bookingService.cancelReservation(request.user!.sub, id);
+    const result = await bookingService.cancelReservation(requireUser(request).sub, id);
     return reply.send({ data: result });
   });
 
   // ── DELETE /api/v1/bookings/:id/hold ── (Hold'u iptal et — kullanıcı vazgeçti)
   app.delete('/:id/hold', async (request, reply) => {
     const { id } = request.params as { id: string };
-    await bookingService.cancelReservation(request.user!.sub, id);
+    await bookingService.cancelReservation(requireUser(request).sub, id);
     return reply.status(204).send();
   });
 }

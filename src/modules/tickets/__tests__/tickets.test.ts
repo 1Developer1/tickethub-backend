@@ -2,8 +2,8 @@
  * Tickets Module — Unit Tests (QR HMAC)
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
-import { generateQRPayload, verifyQRPayload, type QRPayloadData } from '../qr-generator.js';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { type QRPayloadData, generateQRPayload, verifyQRPayload } from '../qr-generator.js';
 
 // Test secret
 beforeAll(() => {

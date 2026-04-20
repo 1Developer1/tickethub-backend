@@ -14,17 +14,17 @@
  * 3. Key "processing" durumundaysa: 409 Conflict (önceki istek hâlâ işleniyor)
  */
 
-import type { FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 declare module 'fastify' {
   interface FastifyRequest {
     idempotencyCacheKey?: string;
   }
 }
-import { redis } from '../redis/redis-client.js';
 import { IDEMPOTENCY_TTL_SECONDS } from '../../config/constants.js';
 import { ConflictError } from '../errors/http-errors.js';
 import { logger } from '../logger/index.js';
+import { redis } from '../redis/redis-client.js';
 
 const IDEMPOTENCY_PREFIX = 'idempotency:';
 

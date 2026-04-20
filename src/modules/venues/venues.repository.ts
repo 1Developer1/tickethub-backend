@@ -12,9 +12,9 @@
  */
 
 import type { Prisma, Venue } from '@prisma/client';
+import { DEFAULT_PAGE_SIZE } from '../../config/constants.js';
 import { prisma } from '../../shared/database/prisma-client.js';
 import { decodeCursor } from '../../shared/utils/pagination.js';
-import { DEFAULT_PAGE_SIZE } from '../../config/constants.js';
 
 export const venueRepository = {
   async create(data: Prisma.VenueCreateInput): Promise<Venue> {

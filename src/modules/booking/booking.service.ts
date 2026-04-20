@@ -35,24 +35,24 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Reservation } from './domain/reservation.entity.js';
-import { SeatHold } from './domain/seat-hold.value-object.js';
-import { Money } from './domain/money.value-object.js';
-import { bookingRepository } from './booking.repository.js';
-import { pricingService } from '../pricing/pricing.service.js';
-import { acquireSeatLock } from '../../shared/lock/redlock.js';
-import { syncEventBus } from '../../shared/events/sync-event-bus.js';
-import { asyncEventBus } from '../../shared/events/async-event-bus.js';
-import { RESERVATION_TTL_MS, MAX_SEATS_PER_BOOKING } from '../../config/constants.js';
+import { MAX_SEATS_PER_BOOKING, RESERVATION_TTL_MS } from '../../config/constants.js';
 import {
-  NotFoundError,
   ForbiddenError,
-  SeatUnavailableError,
   HoldExpiredError,
+  NotFoundError,
+  SeatUnavailableError,
   ValidationError,
 } from '../../shared/errors/http-errors.js';
+import { asyncEventBus } from '../../shared/events/async-event-bus.js';
+import { syncEventBus } from '../../shared/events/sync-event-bus.js';
+import { acquireSeatLock } from '../../shared/lock/redlock.js';
 import { logger } from '../../shared/logger/index.js';
+import { pricingService } from '../pricing/pricing.service.js';
+import { bookingRepository } from './booking.repository.js';
 import type { CreateReservationInput } from './booking.schema.js';
+import { Money } from './domain/money.value-object.js';
+import { Reservation } from './domain/reservation.entity.js';
+import { SeatHold } from './domain/seat-hold.value-object.js';
 
 export const bookingService = {
   /**
@@ -83,7 +83,10 @@ export const bookingService = {
       // 3. Koltuk müsaitlik kontrolü (DB'de aktif hold var mı?)
       for (const seat of seats) {
         const available = await bookingRepository.isSeatAvailable(
-          eventId, seat.section, seat.row, seat.seat,
+          eventId,
+          seat.section,
+          seat.row,
+          seat.seat,
         );
         if (!available) {
           throw new SeatUnavailableError(`${seat.section}-${seat.row}-${seat.seat}`);
@@ -145,14 +148,18 @@ export const bookingService = {
       await bookingRepository.createReservation(reservation);
 
       // 7. BullMQ delayed job: 10 dk sonra expire
-      await asyncEventBus.emit('reservation.expired', {
-        reservationId: reservation.id,
-        eventId,
-        seats: seats.map((s) => ({ section: s.section, row: s.row, seat: s.seat })),
-      }, {
-        delay: RESERVATION_TTL_MS,
-        jobId: `expire-${reservation.id}`, // Duplicate önleme
-      });
+      await asyncEventBus.emit(
+        'reservation.expired',
+        {
+          reservationId: reservation.id,
+          eventId,
+          seats: seats.map((s) => ({ section: s.section, row: s.row, seat: s.seat })),
+        },
+        {
+          delay: RESERVATION_TTL_MS,
+          jobId: `expire-${reservation.id}`, // Duplicate önleme
+        },
+      );
 
       // 8. Sync event yayınla (pricing recalculate trigger)
       await syncEventBus.emit('reservation.created', {

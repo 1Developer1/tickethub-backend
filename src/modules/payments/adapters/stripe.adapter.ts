@@ -6,8 +6,13 @@
  */
 
 import Stripe from 'stripe';
-import type { PaymentGateway, PaymentIntent, PaymentResult, RefundResult } from '../ports/payment-gateway.port.js';
 import { logger } from '../../../shared/logger/index.js';
+import type {
+  PaymentGateway,
+  PaymentIntent,
+  PaymentResult,
+  RefundResult,
+} from '../ports/payment-gateway.port.js';
 
 export class StripeAdapter implements PaymentGateway {
   private stripe: Stripe;
@@ -34,7 +39,10 @@ export class StripeAdapter implements PaymentGateway {
       capture_method: 'automatic',
     });
 
-    logger.info({ paymentIntentId: intent.id, amount: amountInCents }, 'Stripe PaymentIntent created');
+    logger.info(
+      { paymentIntentId: intent.id, amount: amountInCents },
+      'Stripe PaymentIntent created',
+    );
 
     return {
       id: intent.id,

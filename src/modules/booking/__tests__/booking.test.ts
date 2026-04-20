@@ -5,14 +5,16 @@
  * Reservation entity'nin durum geçişlerini, invariant kontrollerini, edge case'leri test et.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import { Money } from '../domain/money.value-object.js';
 import { Reservation } from '../domain/reservation.entity.js';
 import { SeatHold } from '../domain/seat-hold.value-object.js';
-import { Money } from '../domain/money.value-object.js';
 
 // ── Test Helpers ──
 
-function createTestSeatHold(overrides?: Partial<{ sectionName: string; row: number; seat: number }>): SeatHold {
+function createTestSeatHold(
+  overrides?: Partial<{ sectionName: string; row: number; seat: number }>,
+): SeatHold {
   return SeatHold.create({
     seatHoldId: 'sh-1',
     eventId: 'evt-1',
@@ -166,7 +168,7 @@ describe('Reservation Entity', () => {
       const reservation = createTestReservation();
       const events = reservation.pullDomainEvents();
       expect(events).toHaveLength(1);
-      expect(events[0]!.type).toBe('reservation.created');
+      expect(events[0]?.type).toBe('reservation.created');
     });
   });
 
@@ -184,7 +186,7 @@ describe('Reservation Entity', () => {
 
       const events = reservation.pullDomainEvents();
       expect(events).toHaveLength(1);
-      expect(events[0]!.type).toBe('reservation.confirmed');
+      expect(events[0]?.type).toBe('reservation.confirmed');
     });
 
     it('should reject confirming EXPIRED reservation', () => {
@@ -233,7 +235,7 @@ describe('Reservation Entity', () => {
 
       expect(reservation.status).toBe('CANCELLED');
       const events = reservation.pullDomainEvents();
-      expect(events[0]!.type).toBe('reservation.cancelled');
+      expect(events[0]?.type).toBe('reservation.cancelled');
     });
 
     it('should cancel CONFIRMED reservation (48+ hours before event)', () => {

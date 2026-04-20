@@ -17,7 +17,6 @@
  * 7. Insan Kaynaklari   — Salary, WorkingHours, EmployeeId
  */
 
-
 // ══════════════════════════════════════════════════════════════
 // 1. HER SEKTORDE — bunlar her projede lazim
 // ══════════════════════════════════════════════════════════════
@@ -50,8 +49,12 @@ export class Money {
     return new Money(0, currency);
   }
 
-  get cents(): number { return this._cents; }
-  get currency(): string { return this._currency; }
+  get cents(): number {
+    return this._cents;
+  }
+  get currency(): string {
+    return this._currency;
+  }
 
   add(other: Money): Money {
     this.assertSameCurrency(other);
@@ -68,8 +71,13 @@ export class Money {
     return new Money(Math.round(this._cents * factor), this._currency);
   }
 
-  isZero(): boolean { return this._cents === 0; }
-  isGreaterThan(other: Money): boolean { this.assertSameCurrency(other); return this._cents > other._cents; }
+  isZero(): boolean {
+    return this._cents === 0;
+  }
+  isGreaterThan(other: Money): boolean {
+    this.assertSameCurrency(other);
+    return this._cents > other._cents;
+  }
 
   equals(other: Money): boolean {
     return this._cents === other._cents && this._currency === other._currency;
@@ -85,7 +93,6 @@ export class Money {
   }
 }
 
-
 /**
  * EMAIL — E-posta Adresi
  * Nerede: User kaydi, bildirim, fatura, iletisim.
@@ -96,25 +103,31 @@ export class Email {
   private static readonly PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   private constructor(private readonly _value: string) {
-    if (!Email.PATTERN.test(_value))
-      throw new Error(`Gecersiz email: ${_value}`);
+    if (!Email.PATTERN.test(_value)) throw new Error(`Gecersiz email: ${_value}`);
   }
 
   static create(email: string): Email {
     return new Email(email.trim().toLowerCase());
   }
 
-  get value(): string { return this._value; }
-  get domain(): string { return this._value.split('@')[1]; }
-  get localPart(): string { return this._value.split('@')[0]; }
+  get value(): string {
+    return this._value;
+  }
+  get domain(): string {
+    return this._value.split('@')[1];
+  }
+  get localPart(): string {
+    return this._value.split('@')[0];
+  }
 
   equals(other: Email): boolean {
     return this._value === other._value;
   }
 
-  toString(): string { return this._value; }
+  toString(): string {
+    return this._value;
+  }
 }
-
 
 /**
  * PHONE NUMBER — Telefon Numarasi
@@ -127,10 +140,8 @@ export class PhoneNumber {
     private readonly _countryCode: string,
     private readonly _number: string,
   ) {
-    if (!/^\+\d{1,3}$/.test(_countryCode))
-      throw new Error(`Gecersiz ulke kodu: ${_countryCode}`);
-    if (!/^\d{7,15}$/.test(_number))
-      throw new Error(`Gecersiz numara: ${_number}`);
+    if (!/^\+\d{1,3}$/.test(_countryCode)) throw new Error(`Gecersiz ulke kodu: ${_countryCode}`);
+    if (!/^\d{7,15}$/.test(_number)) throw new Error(`Gecersiz numara: ${_number}`);
   }
 
   static create(countryCode: string, number: string): PhoneNumber {
@@ -146,16 +157,23 @@ export class PhoneNumber {
     return new PhoneNumber(match[1], match[2]);
   }
 
-  get countryCode(): string { return this._countryCode; }
-  get number(): string { return this._number; }
-  get e164(): string { return `${this._countryCode}${this._number}`; }
-  get formatted(): string { return `${this._countryCode} ${this._number.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3')}`; }
+  get countryCode(): string {
+    return this._countryCode;
+  }
+  get number(): string {
+    return this._number;
+  }
+  get e164(): string {
+    return `${this._countryCode}${this._number}`;
+  }
+  get formatted(): string {
+    return `${this._countryCode} ${this._number.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3')}`;
+  }
 
   equals(other: PhoneNumber): boolean {
     return this._countryCode === other._countryCode && this._number === other._number;
   }
 }
-
 
 /**
  * ADDRESS — Adres
@@ -176,32 +194,53 @@ export class Address {
   }
 
   static create(props: {
-    street: string; city: string; state: string; postalCode: string; country: string;
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
   }): Address {
     return new Address(
-      props.street.trim(), props.city.trim(), props.state.trim(),
-      props.postalCode.trim(), props.country.trim().toUpperCase(),
+      props.street.trim(),
+      props.city.trim(),
+      props.state.trim(),
+      props.postalCode.trim(),
+      props.country.trim().toUpperCase(),
     );
   }
 
-  get street(): string { return this._street; }
-  get city(): string { return this._city; }
-  get state(): string { return this._state; }
-  get postalCode(): string { return this._postalCode; }
-  get country(): string { return this._country; }
+  get street(): string {
+    return this._street;
+  }
+  get city(): string {
+    return this._city;
+  }
+  get state(): string {
+    return this._state;
+  }
+  get postalCode(): string {
+    return this._postalCode;
+  }
+  get country(): string {
+    return this._country;
+  }
 
   get oneLine(): string {
     return [this._street, this._city, this._state, this._postalCode, this._country]
-      .filter(Boolean).join(', ');
+      .filter(Boolean)
+      .join(', ');
   }
 
   equals(other: Address): boolean {
-    return this._street === other._street && this._city === other._city
-      && this._state === other._state && this._postalCode === other._postalCode
-      && this._country === other._country;
+    return (
+      this._street === other._street &&
+      this._city === other._city &&
+      this._state === other._state &&
+      this._postalCode === other._postalCode &&
+      this._country === other._country
+    );
   }
 }
-
 
 /**
  * DATE RANGE — Tarih Araligi
@@ -215,19 +254,31 @@ export class DateRange {
     private readonly _end: Date,
   ) {
     if (_start >= _end)
-      throw new Error(`Baslangic bitiisten once olmali: ${_start.toISOString()} >= ${_end.toISOString()}`);
+      throw new Error(
+        `Baslangic bitiisten once olmali: ${_start.toISOString()} >= ${_end.toISOString()}`,
+      );
   }
 
   static create(start: Date, end: Date): DateRange {
     return new DateRange(new Date(start), new Date(end));
   }
 
-  get start(): Date { return new Date(this._start); }
-  get end(): Date { return new Date(this._end); }
+  get start(): Date {
+    return new Date(this._start);
+  }
+  get end(): Date {
+    return new Date(this._end);
+  }
 
-  get durationMs(): number { return this._end.getTime() - this._start.getTime(); }
-  get durationDays(): number { return this.durationMs / (1000 * 60 * 60 * 24); }
-  get durationHours(): number { return this.durationMs / (1000 * 60 * 60); }
+  get durationMs(): number {
+    return this._end.getTime() - this._start.getTime();
+  }
+  get durationDays(): number {
+    return this.durationMs / (1000 * 60 * 60 * 24);
+  }
+  get durationHours(): number {
+    return this.durationMs / (1000 * 60 * 60);
+  }
 
   contains(date: Date): boolean {
     return date >= this._start && date <= this._end;
@@ -243,11 +294,12 @@ export class DateRange {
   }
 
   equals(other: DateRange): boolean {
-    return this._start.getTime() === other._start.getTime()
-      && this._end.getTime() === other._end.getTime();
+    return (
+      this._start.getTime() === other._start.getTime() &&
+      this._end.getTime() === other._end.getTime()
+    );
   }
 }
-
 
 /**
  * PERCENTAGE — Yuzde
@@ -268,8 +320,12 @@ export class Percentage {
     return new Percentage(value * 100); // 0.18 = %18
   }
 
-  get value(): number { return this._value; }
-  get decimal(): number { return this._value / 100; }
+  get value(): number {
+    return this._value;
+  }
+  get decimal(): number {
+    return this._value / 100;
+  }
 
   applyTo(money: Money): Money {
     return money.multiply(this._value / 100);
@@ -283,9 +339,10 @@ export class Percentage {
     return this._value === other._value;
   }
 
-  toString(): string { return `%${this._value}`; }
+  toString(): string {
+    return `%${this._value}`;
+  }
 }
-
 
 // ══════════════════════════════════════════════════════════════
 // 2. E-TICARET
@@ -307,19 +364,26 @@ export class Quantity {
     return new Quantity(value);
   }
 
-  get value(): number { return this._value; }
+  get value(): number {
+    return this._value;
+  }
 
-  add(other: Quantity): Quantity { return new Quantity(this._value + other._value); }
+  add(other: Quantity): Quantity {
+    return new Quantity(this._value + other._value);
+  }
 
   subtract(other: Quantity): Quantity {
     if (this._value - other._value < 1) throw new Error('Miktar 0 altina dusmez');
     return new Quantity(this._value - other._value);
   }
 
-  equals(other: Quantity): boolean { return this._value === other._value; }
-  toString(): string { return `${this._value} adet`; }
+  equals(other: Quantity): boolean {
+    return this._value === other._value;
+  }
+  toString(): string {
+    return `${this._value} adet`;
+  }
 }
-
 
 /**
  * SKU — Stok Birimi Kodu
@@ -339,11 +403,16 @@ export class SKU {
     return new SKU(value.trim().toUpperCase().replace(/\s+/g, '-'));
   }
 
-  get value(): string { return this._value; }
-  equals(other: SKU): boolean { return this._value === other._value; }
-  toString(): string { return this._value; }
+  get value(): string {
+    return this._value;
+  }
+  equals(other: SKU): boolean {
+    return this._value === other._value;
+  }
+  toString(): string {
+    return this._value;
+  }
 }
-
 
 /**
  * WEIGHT — Agirlik
@@ -358,20 +427,39 @@ export class Weight {
     if (_grams < 0) throw new Error(`Negatif agirlik: ${_grams}`);
   }
 
-  static fromGrams(g: number): Weight { return new Weight(g); }
-  static fromKg(kg: number): Weight { return new Weight(kg * 1000); }
-  static fromPounds(lb: number): Weight { return new Weight(Math.round(lb * 453.592)); }
+  static fromGrams(g: number): Weight {
+    return new Weight(g);
+  }
+  static fromKg(kg: number): Weight {
+    return new Weight(kg * 1000);
+  }
+  static fromPounds(lb: number): Weight {
+    return new Weight(Math.round(lb * 453.592));
+  }
 
-  get grams(): number { return this._grams; }
-  get kg(): number { return this._grams / 1000; }
-  get pounds(): number { return this._grams / 453.592; }
+  get grams(): number {
+    return this._grams;
+  }
+  get kg(): number {
+    return this._grams / 1000;
+  }
+  get pounds(): number {
+    return this._grams / 453.592;
+  }
 
-  add(other: Weight): Weight { return new Weight(this._grams + other._grams); }
-  isHeavier(other: Weight): boolean { return this._grams > other._grams; }
-  equals(other: Weight): boolean { return this._grams === other._grams; }
-  toString(): string { return this._grams >= 1000 ? `${this.kg} kg` : `${this._grams} g`; }
+  add(other: Weight): Weight {
+    return new Weight(this._grams + other._grams);
+  }
+  isHeavier(other: Weight): boolean {
+    return this._grams > other._grams;
+  }
+  equals(other: Weight): boolean {
+    return this._grams === other._grams;
+  }
+  toString(): string {
+    return this._grams >= 1000 ? `${this.kg} kg` : `${this._grams} g`;
+  }
 }
-
 
 /**
  * DIMENSIONS — Boyutlar (en x boy x yukseklik)
@@ -392,26 +480,39 @@ export class Dimensions {
     return new Dimensions(widthCm, heightCm, depthCm);
   }
 
-  get widthCm(): number { return this._widthCm; }
-  get heightCm(): number { return this._heightCm; }
-  get depthCm(): number { return this._depthCm; }
-  get volumeCm3(): number { return this._widthCm * this._heightCm * this._depthCm; }
-  get volumeLiters(): number { return this.volumeCm3 / 1000; }
+  get widthCm(): number {
+    return this._widthCm;
+  }
+  get heightCm(): number {
+    return this._heightCm;
+  }
+  get depthCm(): number {
+    return this._depthCm;
+  }
+  get volumeCm3(): number {
+    return this._widthCm * this._heightCm * this._depthCm;
+  }
+  get volumeLiters(): number {
+    return this.volumeCm3 / 1000;
+  }
 
   fitsInside(container: Dimensions): boolean {
     // herhangi bir yonelimde sigiyorsa
     const dims = [this._widthCm, this._heightCm, this._depthCm].sort((a, b) => a - b);
-    const cont = [container._widthCm, container._heightCm, container._depthCm].sort((a, b) => a - b);
+    const cont = [container._widthCm, container._heightCm, container._depthCm].sort(
+      (a, b) => a - b,
+    );
     return dims[0] <= cont[0] && dims[1] <= cont[1] && dims[2] <= cont[2];
   }
 
   equals(other: Dimensions): boolean {
-    return this._widthCm === other._widthCm
-      && this._heightCm === other._heightCm
-      && this._depthCm === other._depthCm;
+    return (
+      this._widthCm === other._widthCm &&
+      this._heightCm === other._heightCm &&
+      this._depthCm === other._depthCm
+    );
   }
 }
-
 
 // ══════════════════════════════════════════════════════════════
 // 3. FINANS / BANKA
@@ -427,8 +528,7 @@ export class IBAN {
   private constructor(private readonly _value: string) {
     if (!/^TR\d{24}$/.test(_value))
       throw new Error(`Gecersiz TR IBAN: ${_value} (TR + 24 rakam olmali)`);
-    if (!IBAN.validateCheckDigit(_value))
-      throw new Error(`IBAN check digit hatali: ${_value}`);
+    if (!IBAN.validateCheckDigit(_value)) throw new Error(`IBAN check digit hatali: ${_value}`);
   }
 
   static create(iban: string): IBAN {
@@ -438,7 +538,7 @@ export class IBAN {
   private static validateCheckDigit(iban: string): boolean {
     // IBAN mod 97 kontrolu
     const rearranged = iban.slice(4) + iban.slice(0, 4);
-    const numeric = rearranged.replace(/[A-Z]/g, ch => String(ch.charCodeAt(0) - 55));
+    const numeric = rearranged.replace(/[A-Z]/g, (ch) => String(ch.charCodeAt(0) - 55));
     let remainder = '';
     for (const digit of numeric) {
       remainder = String(Number(remainder + digit) % 97);
@@ -446,14 +546,23 @@ export class IBAN {
     return Number(remainder) === 1;
   }
 
-  get value(): string { return this._value; }
-  get bankCode(): string { return this._value.slice(4, 9); }
-  get formatted(): string { return this._value.replace(/(.{4})/g, '$1 ').trim(); }
+  get value(): string {
+    return this._value;
+  }
+  get bankCode(): string {
+    return this._value.slice(4, 9);
+  }
+  get formatted(): string {
+    return this._value.replace(/(.{4})/g, '$1 ').trim();
+  }
 
-  equals(other: IBAN): boolean { return this._value === other._value; }
-  toString(): string { return this.formatted; }
+  equals(other: IBAN): boolean {
+    return this._value === other._value;
+  }
+  toString(): string {
+    return this.formatted;
+  }
 }
-
 
 /**
  * CURRENCY PAIR — Doviz Cifti
@@ -463,8 +572,8 @@ export class IBAN {
  */
 export class CurrencyPair {
   private constructor(
-    private readonly _base: string,   // satin alinan
-    private readonly _quote: string,  // karsiliginda verilen
+    private readonly _base: string, // satin alinan
+    private readonly _quote: string, // karsiliginda verilen
   ) {
     if (!/^[A-Z]{3}$/.test(_base)) throw new Error(`Gecersiz base: ${_base}`);
     if (!/^[A-Z]{3}$/.test(_quote)) throw new Error(`Gecersiz quote: ${_quote}`);
@@ -482,15 +591,26 @@ export class CurrencyPair {
     return new CurrencyPair(clean.slice(0, 3), clean.slice(3));
   }
 
-  get base(): string { return this._base; }
-  get quote(): string { return this._quote; }
-  get symbol(): string { return `${this._base}/${this._quote}`; }
+  get base(): string {
+    return this._base;
+  }
+  get quote(): string {
+    return this._quote;
+  }
+  get symbol(): string {
+    return `${this._base}/${this._quote}`;
+  }
 
-  invert(): CurrencyPair { return new CurrencyPair(this._quote, this._base); }
-  equals(other: CurrencyPair): boolean { return this._base === other._base && this._quote === other._quote; }
-  toString(): string { return this.symbol; }
+  invert(): CurrencyPair {
+    return new CurrencyPair(this._quote, this._base);
+  }
+  equals(other: CurrencyPair): boolean {
+    return this._base === other._base && this._quote === other._quote;
+  }
+  toString(): string {
+    return this.symbol;
+  }
 }
-
 
 /**
  * INTEREST RATE — Faiz Orani
@@ -503,23 +623,40 @@ export class InterestRate {
     private readonly _annualRate: number, // yillik oran (0.18 = %18)
   ) {}
 
-  static fromAnnual(rate: number): InterestRate { return new InterestRate(rate); }
-  static fromMonthly(rate: number): InterestRate { return new InterestRate(rate * 12); }
-  static fromAnnualPercent(percent: number): InterestRate { return new InterestRate(percent / 100); }
+  static fromAnnual(rate: number): InterestRate {
+    return new InterestRate(rate);
+  }
+  static fromMonthly(rate: number): InterestRate {
+    return new InterestRate(rate * 12);
+  }
+  static fromAnnualPercent(percent: number): InterestRate {
+    return new InterestRate(percent / 100);
+  }
 
-  get annual(): number { return this._annualRate; }
-  get monthly(): number { return this._annualRate / 12; }
-  get daily(): number { return this._annualRate / 365; }
-  get annualPercent(): number { return this._annualRate * 100; }
+  get annual(): number {
+    return this._annualRate;
+  }
+  get monthly(): number {
+    return this._annualRate / 12;
+  }
+  get daily(): number {
+    return this._annualRate / 365;
+  }
+  get annualPercent(): number {
+    return this._annualRate * 100;
+  }
 
   calculateInterest(principal: Money, days: number): Money {
     return principal.multiply(this.daily * days);
   }
 
-  equals(other: InterestRate): boolean { return this._annualRate === other._annualRate; }
-  toString(): string { return `%${this.annualPercent.toFixed(2)} yillik`; }
+  equals(other: InterestRate): boolean {
+    return this._annualRate === other._annualRate;
+  }
+  toString(): string {
+    return `%${this.annualPercent.toFixed(2)} yillik`;
+  }
 }
-
 
 // ══════════════════════════════════════════════════════════════
 // 4. SAGLIK
@@ -547,17 +684,24 @@ export class TCKimlikNo {
     const oddSum = digits[0] + digits[2] + digits[4] + digits[6] + digits[8];
     const evenSum = digits[1] + digits[3] + digits[5] + digits[7];
     const check10 = (oddSum * 7 - evenSum) % 10;
-    const check11 = (digits.slice(0, 10).reduce((a, b) => a + b, 0)) % 10;
+    const check11 = digits.slice(0, 10).reduce((a, b) => a + b, 0) % 10;
     return digits[9] === check10 && digits[10] === check11;
   }
 
-  get value(): string { return this._value; }
-  get masked(): string { return `${this._value.slice(0, 3)}****${this._value.slice(7)}`; }
+  get value(): string {
+    return this._value;
+  }
+  get masked(): string {
+    return `${this._value.slice(0, 3)}****${this._value.slice(7)}`;
+  }
 
-  equals(other: TCKimlikNo): boolean { return this._value === other._value; }
-  toString(): string { return this.masked; } // gizlilik icin maskelenmis
+  equals(other: TCKimlikNo): boolean {
+    return this._value === other._value;
+  }
+  toString(): string {
+    return this.masked;
+  } // gizlilik icin maskelenmis
 }
-
 
 /**
  * BLOOD TYPE — Kan Grubu
@@ -577,17 +721,19 @@ export class BloodType {
     return new BloodType(upper);
   }
 
-  get value(): string { return this._value; }
+  get value(): string {
+    return this._value;
+  }
 
   canDonateTo(recipient: BloodType): boolean {
     // O- herkese verebilir, AB+ herkesten alabilir
     const rules: Record<string, string[]> = {
-      'O-':  ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'],
-      'O+':  ['O+', 'A+', 'B+', 'AB+'],
-      'A-':  ['A-', 'A+', 'AB-', 'AB+'],
-      'A+':  ['A+', 'AB+'],
-      'B-':  ['B-', 'B+', 'AB-', 'AB+'],
-      'B+':  ['B+', 'AB+'],
+      'O-': ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'],
+      'O+': ['O+', 'A+', 'B+', 'AB+'],
+      'A-': ['A-', 'A+', 'AB-', 'AB+'],
+      'A+': ['A+', 'AB+'],
+      'B-': ['B-', 'B+', 'AB-', 'AB+'],
+      'B+': ['B+', 'AB+'],
       'AB-': ['AB-', 'AB+'],
       'AB+': ['AB+'],
     };
@@ -598,10 +744,13 @@ export class BloodType {
     return donor.canDonateTo(this);
   }
 
-  equals(other: BloodType): boolean { return this._value === other._value; }
-  toString(): string { return this._value; }
+  equals(other: BloodType): boolean {
+    return this._value === other._value;
+  }
+  toString(): string {
+    return this._value;
+  }
 }
-
 
 /**
  * DOSAGE — Ilac Dozu
@@ -624,8 +773,12 @@ export class Dosage {
     return new Dosage(amount, unit.toLowerCase());
   }
 
-  get amount(): number { return this._amount; }
-  get unit(): string { return this._unit; }
+  get amount(): number {
+    return this._amount;
+  }
+  get unit(): string {
+    return this._unit;
+  }
 
   multiplyDoses(times: number): Dosage {
     return new Dosage(this._amount * times, this._unit);
@@ -635,9 +788,10 @@ export class Dosage {
     return this._amount === other._amount && this._unit === other._unit;
   }
 
-  toString(): string { return `${this._amount} ${this._unit}`; }
+  toString(): string {
+    return `${this._amount} ${this._unit}`;
+  }
 }
-
 
 // ══════════════════════════════════════════════════════════════
 // 5. LOJISTIK / KARGO
@@ -661,14 +815,18 @@ export class TrackingNumber {
     return new TrackingNumber(value.trim().toUpperCase(), carrier.trim().toUpperCase());
   }
 
-  get value(): string { return this._value; }
-  get carrier(): string { return this._carrier; }
+  get value(): string {
+    return this._value;
+  }
+  get carrier(): string {
+    return this._carrier;
+  }
   get trackingUrl(): string {
     const urls: Record<string, string> = {
-      'YURTICI': `https://www.yurticikargo.com/tr/online-servisler/gonderi-sorgula?code=${this._value}`,
-      'ARAS':    `https://www.araskargo.com.tr/taki.aspx?kargo_takip_no=${this._value}`,
-      'MNG':     `https://www.mngkargo.com.tr/gonderi-takip/${this._value}`,
-      'UPS':     `https://www.ups.com/track?tracknum=${this._value}`,
+      YURTICI: `https://www.yurticikargo.com/tr/online-servisler/gonderi-sorgula?code=${this._value}`,
+      ARAS: `https://www.araskargo.com.tr/taki.aspx?kargo_takip_no=${this._value}`,
+      MNG: `https://www.mngkargo.com.tr/gonderi-takip/${this._value}`,
+      UPS: `https://www.ups.com/track?tracknum=${this._value}`,
     };
     return urls[this._carrier] ?? '';
   }
@@ -677,7 +835,6 @@ export class TrackingNumber {
     return this._value === other._value && this._carrier === other._carrier;
   }
 }
-
 
 /**
  * GEO COORDINATE — Cografi Koordinat
@@ -697,17 +854,21 @@ export class GeoCoordinate {
     return new GeoCoordinate(lat, lng);
   }
 
-  get lat(): number { return this._lat; }
-  get lng(): number { return this._lng; }
+  get lat(): number {
+    return this._lat;
+  }
+  get lng(): number {
+    return this._lng;
+  }
 
   distanceTo(other: GeoCoordinate): number {
     // Haversine formulu — iki nokta arasi km
     const R = 6371; // Dunya yaricapi km
     const dLat = this.toRad(other._lat - this._lat);
     const dLng = this.toRad(other._lng - this._lng);
-    const a = Math.sin(dLat / 2) ** 2
-      + Math.cos(this.toRad(this._lat)) * Math.cos(this.toRad(other._lat))
-      * Math.sin(dLng / 2) ** 2;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(this.toRad(this._lat)) * Math.cos(this.toRad(other._lat)) * Math.sin(dLng / 2) ** 2;
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
@@ -715,15 +876,18 @@ export class GeoCoordinate {
     return this.distanceTo(other) <= km;
   }
 
-  private toRad(deg: number): number { return deg * (Math.PI / 180); }
+  private toRad(deg: number): number {
+    return deg * (Math.PI / 180);
+  }
 
   equals(other: GeoCoordinate): boolean {
     return this._lat === other._lat && this._lng === other._lng;
   }
 
-  toString(): string { return `${this._lat}, ${this._lng}`; }
+  toString(): string {
+    return `${this._lat}, ${this._lng}`;
+  }
 }
-
 
 // ══════════════════════════════════════════════════════════════
 // 6. EGITIM
@@ -736,15 +900,16 @@ export class GeoCoordinate {
  */
 export class Grade {
   private constructor(private readonly _value: number) {
-    if (_value < 0 || _value > 100)
-      throw new Error(`Not 0-100 arasi olmali: ${_value}`);
+    if (_value < 0 || _value > 100) throw new Error(`Not 0-100 arasi olmali: ${_value}`);
   }
 
   static create(value: number): Grade {
     return new Grade(Math.round(value * 100) / 100);
   }
 
-  get value(): number { return this._value; }
+  get value(): number {
+    return this._value;
+  }
   get letter(): string {
     if (this._value >= 90) return 'AA';
     if (this._value >= 85) return 'BA';
@@ -759,19 +924,33 @@ export class Grade {
 
   get gpa(): number {
     const map: Record<string, number> = {
-      'AA': 4.0, 'BA': 3.5, 'BB': 3.0, 'CB': 2.5,
-      'CC': 2.0, 'DC': 1.5, 'DD': 1.0, 'FD': 0.5, 'FF': 0.0,
+      AA: 4.0,
+      BA: 3.5,
+      BB: 3.0,
+      CB: 2.5,
+      CC: 2.0,
+      DC: 1.5,
+      DD: 1.0,
+      FD: 0.5,
+      FF: 0.0,
     };
     return map[this.letter];
   }
 
-  isPassing(): boolean { return this._value >= 60; }
-  isHonors(): boolean { return this._value >= 85; }
+  isPassing(): boolean {
+    return this._value >= 60;
+  }
+  isHonors(): boolean {
+    return this._value >= 85;
+  }
 
-  equals(other: Grade): boolean { return this._value === other._value; }
-  toString(): string { return `${this._value} (${this.letter})`; }
+  equals(other: Grade): boolean {
+    return this._value === other._value;
+  }
+  toString(): string {
+    return `${this._value} (${this.letter})`;
+  }
 }
-
 
 // ══════════════════════════════════════════════════════════════
 // 7. INSAN KAYNAKLARI
@@ -797,9 +976,15 @@ export class Salary {
     return new Salary(monthlyAmount, 'NET');
   }
 
-  get monthly(): Money { return this._grossMonthly; }
-  get yearly(): Money { return this._grossMonthly.multiply(12); }
-  get type(): string { return this._type; }
+  get monthly(): Money {
+    return this._grossMonthly;
+  }
+  get yearly(): Money {
+    return this._grossMonthly.multiply(12);
+  }
+  get type(): string {
+    return this._type;
+  }
 
   isHigherThan(other: Salary): boolean {
     return this._grossMonthly.isGreaterThan(other._grossMonthly);
@@ -809,9 +994,10 @@ export class Salary {
     return this._grossMonthly.equals(other._grossMonthly) && this._type === other._type;
   }
 
-  toString(): string { return `${this._grossMonthly.toDisplayString()}/ay (${this._type})`; }
+  toString(): string {
+    return `${this._grossMonthly.toDisplayString()}/ay (${this._type})`;
+  }
 }
-
 
 /**
  * WORKING HOURS — Calisma Saati
@@ -832,14 +1018,18 @@ export class WorkingHours {
     return new WorkingHours(minutes / 60);
   }
 
-  get hours(): number { return this._hours; }
-  get minutes(): number { return this._hours * 60; }
+  get hours(): number {
+    return this._hours;
+  }
+  get minutes(): number {
+    return this._hours * 60;
+  }
 
-  isOvertime(standardHours: number = 8): boolean {
+  isOvertime(standardHours = 8): boolean {
     return this._hours > standardHours;
   }
 
-  overtimeHours(standardHours: number = 8): number {
+  overtimeHours(standardHours = 8): number {
     return Math.max(0, this._hours - standardHours);
   }
 
@@ -849,10 +1039,13 @@ export class WorkingHours {
     return new WorkingHours(total);
   }
 
-  equals(other: WorkingHours): boolean { return this._hours === other._hours; }
-  toString(): string { return `${this._hours.toFixed(1)} saat`; }
+  equals(other: WorkingHours): boolean {
+    return this._hours === other._hours;
+  }
+  toString(): string {
+    return `${this._hours.toFixed(1)} saat`;
+  }
 }
-
 
 // ══════════════════════════════════════════════════════════════
 // KULLANIM ORNEKLERI

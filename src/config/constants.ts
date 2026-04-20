@@ -50,7 +50,7 @@ export const QUEUE_NAMES = {
 /** Dynamic pricing thresholds */
 export const PRICING_RULES = {
   /** Kalan koltuk < %20 → 1.3x surge */
-  LOW_AVAILABILITY_THRESHOLD: 0.20,
+  LOW_AVAILABILITY_THRESHOLD: 0.2,
   LOW_AVAILABILITY_MULTIPLIER: 1.3,
   /** Kalan koltuk < %5 → 1.8x surge */
   CRITICAL_AVAILABILITY_THRESHOLD: 0.05,

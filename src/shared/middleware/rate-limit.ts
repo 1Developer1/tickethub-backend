@@ -13,8 +13,8 @@
  * Redis store ile: tüm instance'lar aynı sayacı paylaşır.
  */
 
-import type { FastifyInstance } from 'fastify';
 import rateLimit from '@fastify/rate-limit';
+import type { FastifyInstance } from 'fastify';
 import { redis } from '../redis/redis-client.js';
 
 export async function rateLimitPlugin(app: FastifyInstance): Promise<void> {
@@ -32,8 +32,7 @@ export async function rateLimitPlugin(app: FastifyInstance): Promise<void> {
     }),
     // IP bazlı (X-Forwarded-For header'ı destekle — load balancer arkasında)
     keyGenerator: (request) => {
-      return (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
-        ?? request.ip;
+      return (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ?? request.ip;
     },
   });
 }

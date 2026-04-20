@@ -15,8 +15,8 @@
  * Prefix ile: "event:123", "price:456" → çakışma olmaz.
  */
 
-import { redis } from './redis-client.js';
 import { logger } from '../logger/index.js';
+import { redis } from './redis-client.js';
 
 export const cache = {
   /**

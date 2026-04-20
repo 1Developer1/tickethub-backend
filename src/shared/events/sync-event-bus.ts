@@ -15,8 +15,8 @@
  * Yeni bir listener eklemek = mevcut kodu DEĞİŞTİRMEDEN yeni handler kaydet.
  */
 
-import type { EventMap, EventHandler } from './types.js';
 import { logger } from '../logger/index.js';
+import type { EventHandler, EventMap } from './types.js';
 
 type HandlerMap = {
   [K in keyof EventMap]?: EventHandler<K>[];
@@ -33,7 +33,7 @@ class SyncEventBus {
     if (!this.handlers[event]) {
       this.handlers[event] = [];
     }
-    this.handlers[event]!.push(handler);
+    this.handlers[event]?.push(handler);
     logger.debug({ event }, 'Sync event handler registered');
   }
 

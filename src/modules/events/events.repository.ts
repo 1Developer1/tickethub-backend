@@ -20,10 +20,10 @@
  * ```
  */
 
-import type { Prisma, Event } from '@prisma/client';
+import type { Event, Prisma } from '@prisma/client';
+import { DEFAULT_PAGE_SIZE } from '../../config/constants.js';
 import { prisma } from '../../shared/database/prisma-client.js';
 import { decodeCursor } from '../../shared/utils/pagination.js';
-import { DEFAULT_PAGE_SIZE } from '../../config/constants.js';
 import type { EventQuery } from './events.schema.js';
 
 export const eventRepository = {
@@ -31,7 +31,9 @@ export const eventRepository = {
     return prisma.event.create({ data });
   },
 
-  async findById(id: string): Promise<(Event & { venue: { id: string; name: string; city: string } }) | null> {
+  async findById(
+    id: string,
+  ): Promise<(Event & { venue: { id: string; name: string; city: string } }) | null> {
     return prisma.event.findFirst({
       where: { id, deletedAt: null },
       include: {

@@ -25,43 +25,39 @@ interface HealthStatus {
 }
 
 export async function healthRoutes(app: FastifyInstance): Promise<void> {
-  app.get(
-    '/health',
-    { config: { public: true } },
-    async (_request, reply) => {
-      const checks = {
-        database: 'error' as 'ok' | 'error',
-        redis: 'error' as 'ok' | 'error',
-      };
+  app.get('/health', { config: { public: true } }, async (_request, reply) => {
+    const checks = {
+      database: 'error' as 'ok' | 'error',
+      redis: 'error' as 'ok' | 'error',
+    };
 
-      // PostgreSQL bağlantı kontrolü
-      try {
-        await prisma.$queryRawUnsafe('SELECT 1');
-        checks.database = 'ok';
-      } catch {
-        // DB bağlantısı yok
-      }
+    // PostgreSQL bağlantı kontrolü
+    try {
+      await prisma.$queryRawUnsafe('SELECT 1');
+      checks.database = 'ok';
+    } catch {
+      // DB bağlantısı yok
+    }
 
-      // Redis bağlantı kontrolü
-      try {
-        await redis.ping();
-        checks.redis = 'ok';
-      } catch {
-        // Redis bağlantısı yok
-      }
+    // Redis bağlantı kontrolü
+    try {
+      await redis.ping();
+      checks.redis = 'ok';
+    } catch {
+      // Redis bağlantısı yok
+    }
 
-      const allOk = checks.database === 'ok' && checks.redis === 'ok';
-      const anyOk = checks.database === 'ok' || checks.redis === 'ok';
+    const allOk = checks.database === 'ok' && checks.redis === 'ok';
+    const anyOk = checks.database === 'ok' || checks.redis === 'ok';
 
-      const response: HealthStatus = {
-        status: allOk ? 'healthy' : anyOk ? 'degraded' : 'unhealthy',
-        uptime: process.uptime(),
-        timestamp: new Date().toISOString(),
-        checks,
-      };
+    const response: HealthStatus = {
+      status: allOk ? 'healthy' : anyOk ? 'degraded' : 'unhealthy',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+      checks,
+    };
 
-      const statusCode = allOk ? 200 : 503;
-      reply.status(statusCode).send(response);
-    },
-  );
+    const statusCode = allOk ? 200 : 503;
+    reply.status(statusCode).send(response);
+  });
 }

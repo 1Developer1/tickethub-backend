@@ -10,9 +10,9 @@
  * DİKKAT: Docker çalışıyor olmalı!
  */
 
+import { execSync } from 'node:child_process';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { RedisContainer, type StartedRedisContainer } from '@testcontainers/redis';
-import { execSync } from 'node:child_process';
 
 let pgContainer: StartedPostgreSqlContainer;
 let redisContainer: StartedRedisContainer;

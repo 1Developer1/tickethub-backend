@@ -26,9 +26,9 @@
 
 // @ts-expect-error — redlock ESM exports issue with NodeNext resolution
 import Redlock from 'redlock';
-import { redis } from '../redis/redis-client.js';
-import { logger } from '../logger/index.js';
 import { SeatUnavailableError } from '../errors/http-errors.js';
+import { logger } from '../logger/index.js';
+import { redis } from '../redis/redis-client.js';
 
 export const redlock = new Redlock([redis], {
   retryCount: 3,
@@ -57,9 +57,7 @@ export async function acquireSeatLock(
     logger.debug({ resource, ttlMs }, 'Seat lock acquired');
     return lock;
   } catch {
-    throw new SeatUnavailableError(
-      `${seatKey} (another user is selecting this seat)`,
-    );
+    throw new SeatUnavailableError(`${seatKey} (another user is selecting this seat)`);
   }
 }
 

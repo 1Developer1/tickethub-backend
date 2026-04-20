@@ -2,7 +2,7 @@
  * Venues Module — Unit Tests
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { createVenueSchema, updateVenueSchema } from '../venues.schema.js';
 
 describe('Venues Schema Validation', () => {

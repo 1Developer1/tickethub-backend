@@ -7,8 +7,8 @@
 
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
+import { authorize, requireUser } from '../../shared/middleware/auth.js';
 import { pricingService } from './pricing.service.js';
-import { authorize } from '../../shared/middleware/auth.js';
 
 const setBasePriceSchema = z.object({
   eventId: z.string().uuid(),
@@ -18,15 +18,11 @@ const setBasePriceSchema = z.object({
 
 export async function pricingRoutes(app: FastifyInstance): Promise<void> {
   // ── GET /api/v1/pricing/:eventId ── (Public — güncel fiyatlar)
-  app.get(
-    '/:eventId',
-    { config: { public: true } },
-    async (request, reply) => {
-      const { eventId } = request.params as { eventId: string };
-      const prices = await pricingService.getCurrentPrices(eventId);
-      return reply.send({ data: prices });
-    },
-  );
+  app.get('/:eventId', { config: { public: true } }, async (request, reply) => {
+    const { eventId } = request.params as { eventId: string };
+    const prices = await pricingService.getCurrentPrices(eventId);
+    return reply.send({ data: prices });
+  });
 
   // ── GET /api/v1/pricing/:eventId/history ── (Admin — fiyat geçmişi)
   app.get(
@@ -47,7 +43,7 @@ export async function pricingRoutes(app: FastifyInstance): Promise<void> {
       const input = setBasePriceSchema.parse(request.body);
       await pricingService.setBasePrice({
         ...input,
-        setBy: request.user!.sub,
+        setBy: requireUser(request).sub,
       });
       return reply.status(201).send({ data: { message: 'Base price set' } });
     },

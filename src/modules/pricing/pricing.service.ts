@@ -29,12 +29,12 @@
  * ```
  */
 
+import { PRICING_RULES } from '../../config/constants.js';
+import { NotFoundError } from '../../shared/errors/http-errors.js';
+import { logger } from '../../shared/logger/index.js';
 import { pricingRepository } from './pricing.repository.js';
 import { currentPriceProjection } from './projections/current-price.projection.js';
 import { priceHistoryProjection } from './projections/price-history.projection.js';
-import { NotFoundError } from '../../shared/errors/http-errors.js';
-import { PRICING_RULES } from '../../config/constants.js';
-import { logger } from '../../shared/logger/index.js';
 
 export const pricingService = {
   /**
@@ -83,7 +83,7 @@ export const pricingService = {
     if (!currentPrice) return;
 
     let multiplier = 1.0;
-    let reason: string = '';
+    let reason = '';
 
     // Koltuk bazlı surge
     if (params.availabilityPercent < PRICING_RULES.CRITICAL_AVAILABILITY_THRESHOLD) {
@@ -139,7 +139,9 @@ export const pricingService = {
     if (!currentPrice) return;
 
     const discountPercent = PRICING_RULES.EARLY_BIRD_DISCOUNT * 100; // 15
-    const discount = Math.round(currentPrice.currentPriceInCents * PRICING_RULES.EARLY_BIRD_DISCOUNT);
+    const discount = Math.round(
+      currentPrice.currentPriceInCents * PRICING_RULES.EARLY_BIRD_DISCOUNT,
+    );
     const newPriceInCents = currentPrice.currentPriceInCents - discount;
 
     await pricingRepository.appendEvent({

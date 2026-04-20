@@ -17,21 +17,19 @@
  * ```
  */
 
-import type { PaymentGateway, PaymentResult, RefundResult } from './ports/payment-gateway.port.js';
-import { StripeAdapter } from './adapters/stripe.adapter.js';
-import { MockPaymentAdapter } from './adapters/mock-payment.adapter.js';
-import { CircuitBreaker } from './circuit-breaker.js';
+import { config } from '../../config/index.js';
 import { prisma } from '../../shared/database/prisma-client.js';
 import { PaymentError } from '../../shared/errors/http-errors.js';
 import { logger } from '../../shared/logger/index.js';
+import { MockPaymentAdapter } from './adapters/mock-payment.adapter.js';
+import { StripeAdapter } from './adapters/stripe.adapter.js';
+import { CircuitBreaker } from './circuit-breaker.js';
+import type { PaymentGateway, PaymentResult, RefundResult } from './ports/payment-gateway.port.js';
 
 // Gateway seçimi: environment'a göre
 function createGateway(): PaymentGateway {
-  if (process.env.NODE_ENV === 'production') {
-    return new StripeAdapter(
-      process.env.STRIPE_SECRET_KEY!,
-      process.env.STRIPE_WEBHOOK_SECRET!,
-    );
+  if (config.NODE_ENV === 'production') {
+    return new StripeAdapter(config.STRIPE_SECRET_KEY, config.STRIPE_WEBHOOK_SECRET);
   }
   // Development ve test'te mock kullan
   return new MockPaymentAdapter();
@@ -107,8 +105,9 @@ export const paymentsService = {
       throw new PaymentError('No payment found for this reservation');
     }
 
+    const externalId = payment.externalId;
     const result = await circuitBreaker.execute(() =>
-      gateway.refund(payment.externalId!, params.amountInCents),
+      gateway.refund(externalId, params.amountInCents),
     );
 
     if (result.success) {
@@ -138,7 +137,10 @@ export const paymentsService = {
     }
 
     // Parse webhook event
-    const event = JSON.parse(payload) as { type: string; data: { object: { id: string; status: string; metadata: { reservationId?: string } } } };
+    const event = JSON.parse(payload) as {
+      type: string;
+      data: { object: { id: string; status: string; metadata: { reservationId?: string } } };
+    };
 
     logger.info({ webhookType: event.type }, 'Payment webhook received');
 

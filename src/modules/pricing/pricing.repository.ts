@@ -2,8 +2,8 @@
  * Pricing Repository — Append-Only Events + Projection CRUD
  */
 
-import { prisma } from '../../shared/database/prisma-client.js';
 import type { PricingEventType } from '@prisma/client';
+import { prisma } from '../../shared/database/prisma-client.js';
 
 export const pricingRepository = {
   /**

@@ -95,10 +95,14 @@ export async function createTestVenue(overrides?: { name?: string }) {
 /**
  * Test factory: event oluştur
  */
-export async function createTestEvent(venueId: string, organizerId: string, overrides?: {
-  name?: string;
-  status?: 'DRAFT' | 'PUBLISHED';
-}) {
+export async function createTestEvent(
+  venueId: string,
+  organizerId: string,
+  overrides?: {
+    name?: string;
+    status?: 'DRAFT' | 'PUBLISHED';
+  },
+) {
   const now = new Date();
   const inTwoWeeks = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
 

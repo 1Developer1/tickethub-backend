@@ -56,10 +56,7 @@ export interface PaymentGateway {
   capturePayment(paymentIntentId: string): Promise<PaymentResult>;
 
   /** İade */
-  refund(
-    paymentIntentId: string,
-    amountInCents?: number,
-  ): Promise<RefundResult>;
+  refund(paymentIntentId: string, amountInCents?: number): Promise<RefundResult>;
 
   /** Webhook doğrulama (sahte webhook engelleme) */
   verifyWebhookSignature(payload: string, signature: string): boolean;

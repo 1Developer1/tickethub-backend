@@ -12,13 +12,15 @@
  */
 
 import type { PrismaClient } from '@prisma/client';
-import { prisma } from './prisma-client.js';
 import { logger } from '../logger/index.js';
+import { prisma } from './prisma-client.js';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 100;
 
-type TransactionFn<T> = (tx: Parameters<Parameters<PrismaClient['$transaction']>[0]>[0]) => Promise<T>;
+type TransactionFn<T> = (
+  tx: Parameters<Parameters<PrismaClient['$transaction']>[0]>[0],
+) => Promise<T>;
 
 /**
  * Interactive transaction with automatic retry for serialization failures.
@@ -48,15 +50,10 @@ export async function withTransaction<T>(
       });
     } catch (error) {
       const isSerializationFailure =
-        error instanceof Error &&
-        'code' in error &&
-        (error as { code: string }).code === 'P2034';
+        error instanceof Error && 'code' in error && (error as { code: string }).code === 'P2034';
 
       if (isSerializationFailure && attempt < maxRetries) {
-        logger.warn(
-          { attempt, maxRetries },
-          'Transaction serialization failure, retrying...',
-        );
+        logger.warn({ attempt, maxRetries }, 'Transaction serialization failure, retrying...');
         await delay(RETRY_DELAY_MS * attempt); // Linear backoff
         continue;
       }

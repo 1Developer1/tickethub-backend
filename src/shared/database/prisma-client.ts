@@ -44,10 +44,7 @@ export const prisma =
 if (isDevOrTest) {
   // @ts-expect-error — Prisma event typing is incomplete
   prisma.$on('query', (e: { query: string; params: string; duration: number }) => {
-    logger.debug(
-      { query: e.query, params: e.params, duration: `${e.duration}ms` },
-      'Prisma query',
-    );
+    logger.debug({ query: e.query, params: e.params, duration: `${e.duration}ms` }, 'Prisma query');
   });
 }
 

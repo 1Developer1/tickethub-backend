@@ -2,7 +2,7 @@
  * Events Module — Unit Tests
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { createEventSchema, eventQuerySchema } from '../events.schema.js';
 
 describe('Events Schema Validation', () => {

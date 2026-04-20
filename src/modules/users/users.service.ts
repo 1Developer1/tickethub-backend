@@ -12,13 +12,18 @@
  * - Refresh token DB'de (Redis restart'a dayanıklı)
  */
 
+import { createHash, randomBytes } from 'node:crypto';
 import * as argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
-import { randomBytes, createHash } from 'node:crypto';
+import { config } from '../../config/index.js';
 import { prisma } from '../../shared/database/prisma-client.js';
-import { UnauthorizedError, ConflictError, NotFoundError } from '../../shared/errors/http-errors.js';
+import {
+  ConflictError,
+  NotFoundError,
+  UnauthorizedError,
+} from '../../shared/errors/http-errors.js';
 import { logger } from '../../shared/logger/index.js';
-import type { RegisterInput, LoginInput, UserResponse, AuthResponse } from './users.schema.js';
+import type { AuthResponse, LoginInput, RegisterInput, UserResponse } from './users.schema.js';
 
 /**
  * NEDEN ARGON2ID, BCRYPT DEĞİL?
@@ -48,17 +53,18 @@ function hashRefreshToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
 }
 
-function generateTokenPair(userId: string, role: string): {
+function generateTokenPair(
+  userId: string,
+  role: string,
+): {
   accessToken: string;
   refreshToken: string;
 } {
-  const accessSecret = process.env.JWT_ACCESS_SECRET!;
+  const accessSecret = config.JWT_ACCESS_SECRET;
 
-  const accessToken = jwt.sign(
-    { sub: userId, role },
-    accessSecret,
-    { expiresIn: (process.env.JWT_ACCESS_EXPIRES_IN ?? '15m') as jwt.SignOptions['expiresIn'] },
-  );
+  const accessToken = jwt.sign({ sub: userId, role }, accessSecret, {
+    expiresIn: config.JWT_ACCESS_EXPIRES_IN as jwt.SignOptions['expiresIn'],
+  });
 
   // Refresh token: opaque random string (JWT değil — DB'de hash'i saklanıyor)
   const refreshToken = randomBytes(48).toString('base64url');
@@ -248,7 +254,13 @@ export const usersService = {
   },
 };
 
-function formatUser(user: { id: string; email: string; name: string; role: string; createdAt: Date }): UserResponse {
+function formatUser(user: {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  createdAt: Date;
+}): UserResponse {
   return {
     id: user.id,
     email: user.email,

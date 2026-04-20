@@ -81,7 +81,12 @@ export interface EventMap {
 
   // Notification events
   'notification.send': {
-    type: 'BOOKING_CONFIRMED' | 'BOOKING_CANCELLED' | 'BOOKING_EXPIRED' | 'TICKET_READY' | 'EVENT_REMINDER';
+    type:
+      | 'BOOKING_CONFIRMED'
+      | 'BOOKING_CANCELLED'
+      | 'BOOKING_EXPIRED'
+      | 'TICKET_READY'
+      | 'EVENT_REMINDER';
     recipientId: string;
     recipientEmail: string;
     data: Record<string, unknown>;
@@ -89,6 +94,4 @@ export interface EventMap {
 }
 
 /** Event handler fonksiyonu */
-export type EventHandler<T extends keyof EventMap> = (
-  payload: EventMap[T],
-) => Promise<void>;
+export type EventHandler<T extends keyof EventMap> = (payload: EventMap[T]) => Promise<void>;

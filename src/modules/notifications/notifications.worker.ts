@@ -21,9 +21,9 @@
 
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
-import { createWorker, registerWorker } from '../../shared/queue/bullmq.js';
 import { prisma } from '../../shared/database/prisma-client.js';
 import { logger } from '../../shared/logger/index.js';
+import { createWorker, registerWorker } from '../../shared/queue/bullmq.js';
 
 // ── Email Transporter ──
 function createMailTransporter(): Transporter {
@@ -31,17 +31,19 @@ function createMailTransporter(): Transporter {
     host: process.env.SMTP_HOST ?? 'localhost',
     port: Number(process.env.SMTP_PORT ?? 1025),
     secure: false,
-    auth:
-      process.env.SMTP_USER
-        ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
-        : undefined,
+    auth: process.env.SMTP_USER
+      ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+      : undefined,
   });
 }
 
 const transporter = createMailTransporter();
 
 // ── Email Templates ──
-const emailTemplates: Record<string, (data: Record<string, unknown>) => { subject: string; html: string }> = {
+const emailTemplates: Record<
+  string,
+  (data: Record<string, unknown>) => { subject: string; html: string }
+> = {
   BOOKING_CONFIRMED: (data) => ({
     subject: 'Your booking is confirmed! 🎫',
     html: `

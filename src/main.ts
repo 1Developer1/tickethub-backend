@@ -20,10 +20,10 @@
 
 import { buildApp } from './app.js';
 import { disconnectDatabase } from './shared/database/prisma-client.js';
-import { disconnectRedis } from './shared/redis/redis-client.js';
-import { shutdownQueues } from './shared/queue/bullmq.js';
 import { asyncEventBus } from './shared/events/async-event-bus.js';
 import { logger } from './shared/logger/index.js';
+import { shutdownQueues } from './shared/queue/bullmq.js';
+import { disconnectRedis } from './shared/redis/redis-client.js';
 
 async function main(): Promise<void> {
   const app = await buildApp();
