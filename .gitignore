@@ -11,3 +11,4 @@ Thumbs.db
 .claude/
 *.pdf
 app.log
+biome-output.txt

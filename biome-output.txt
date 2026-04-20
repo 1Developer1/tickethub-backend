@@ -1,3 +1,0 @@
-[0m[36mChecked [0m[0m[36m74[0m[0m[36m [0m[0m[36mfiles[0m[0m[36m in [0m[0m[36m57[0m[0m[2m[36mms[0m[0m[36m.[0m[0m[36m No fixes applied.[0m[0m
-[0m[0m[31mFound [0m[0m[31m2[0m[0m[31m errors.[0m[0m
-[0m[0m[33mFound [0m[0m[33m4[0m[0m[33m warnings.[0m
