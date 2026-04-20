@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TicketHub — Yasam Dongusu Semasi</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f0f1a;color:#e0e0e0;line-height:1.6}
+
+.hero{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);padding:50px 40px;text-align:center;border-bottom:4px solid #ff9800}
+.hero h1{font-size:2.4rem;color:#fff}
+.hero .sub{color:#a0aec0;font-size:1.1rem;margin-top:8px}
+
+.nav{position:sticky;top:0;z-index:100;background:rgba(15,15,26,0.95);backdrop-filter:blur(10px);border-bottom:1px solid #2a2a4a;display:flex;overflow-x:auto;padding:0 16px}
+.nav a{color:#888;text-decoration:none;padding:12px 16px;font-size:0.82rem;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s}
+.nav a:hover{color:#fff;border-bottom-color:#ff9800}
+
+.section{max-width:1100px;margin:0 auto;padding:50px 24px 60px}
+.section h2{font-size:1.6rem;color:#fff;margin-bottom:8px}
+.section .sub-h{color:#a0aec0;font-size:0.95rem;margin-bottom:28px}
+.divider{border:none;border-top:1px solid #2a2a4a;margin:0}
+
+/* ── STATE MACHINE DIAGRAM ── */
+.sm-container{background:#161622;border:1px solid #2a2a4a;border-radius:14px;padding:32px 28px;margin-bottom:32px;position:relative;overflow:hidden}
+.sm-title{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.sm-title h3{font-size:1.2rem;color:#fff}
+.sm-title .sm-badge{padding:3px 12px;border-radius:12px;font-size:0.7rem;font-weight:700;text-transform:uppercase}
+.sm-title .sm-file{font-family:monospace;font-size:0.75rem;color:#888;margin-left:auto}
+
+/* State nodes */
+.sm-canvas{position:relative;min-height:200px}
+.state-node{
+  position:absolute;padding:12px 22px;border-radius:10px;font-weight:700;font-size:0.88rem;
+  text-align:center;min-width:110px;cursor:default;transition:transform 0.2s,box-shadow 0.2s;
+  border:2px solid;
+}
+.state-node:hover{transform:scale(1.08);z-index:10}
+.state-node .state-sub{font-size:0.68rem;font-weight:400;margin-top:3px;opacity:0.8}
+
+/* State colors */
+.state-initial{background:rgba(66,165,245,0.15);border-color:#42a5f5;color:#90caf9}
+.state-success{background:rgba(76,175,80,0.15);border-color:#4caf50;color:#a5d6a7}
+.state-danger{background:rgba(239,83,80,0.15);border-color:#ef5350;color:#ef9a9a}
+.state-warning{background:rgba(255,152,0,0.15);border-color:#ff9800;color:#ffcc80}
+.state-neutral{background:rgba(158,158,158,0.15);border-color:#9e9e9e;color:#ccc}
+.state-special{background:rgba(171,71,188,0.15);border-color:#ab47bc;color:#ce93d8}
+
+/* Transition arrows (SVG overlay) */
+.sm-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+.sm-svg line,.sm-svg path{stroke-width:2;fill:none}
+.sm-svg text{font-family:'Segoe UI',sans-serif;font-size:10px;font-weight:600}
+.sm-svg .arrow-ok{stroke:#4caf50}
+.sm-svg .arrow-fail{stroke:#ef5350}
+.sm-svg .arrow-auto{stroke:#ab47bc;stroke-dasharray:6,4}
+.sm-svg .arrow-user{stroke:#42a5f5}
+.sm-svg .arrow-neutral{stroke:#9e9e9e}
+.sm-svg .label-ok{fill:#81c784}
+.sm-svg .label-fail{fill:#ef9a9a}
+.sm-svg .label-auto{fill:#ce93d8}
+.sm-svg .label-user{fill:#90caf9}
+.sm-svg .label-neutral{fill:#bbb}
+
+/* Guard badges on arrows */
+.guard-badge{
+  position:absolute;background:#1a1a2e;border:1px solid #444;border-radius:6px;
+  padding:3px 8px;font-size:0.65rem;color:#ffcc80;font-weight:600;white-space:nowrap;
+}
+
+/* Legend */
+.legend-row{display:flex;gap:20px;flex-wrap:wrap;margin:20px 0;padding:16px 20px;background:rgba(255,255,255,0.03);border-radius:10px}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#aaa}
+.legend-line{width:30px;height:3px;border-radius:2px}
+.legend-line.l-ok{background:#4caf50}
+.legend-line.l-fail{background:#ef5350}
+.legend-line.l-auto{background:repeating-linear-gradient(90deg,#ab47bc 0px,#ab47bc 5px,transparent 5px,transparent 8px)}
+.legend-line.l-user{background:#42a5f5}
+
+/* Interaction table */
+.interaction-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-top:20px}
+.inter-card{background:rgba(255,255,255,0.03);border:1px solid #2a2a4a;border-radius:10px;padding:16px 20px}
+.inter-card h4{color:#fff;font-size:0.95rem;margin-bottom:8px}
+.inter-card .inter-row{display:flex;align-items:center;gap:6px;margin:6px 0;font-size:0.82rem}
+.inter-node{padding:3px 10px;border-radius:6px;font-weight:600;font-size:0.78rem;white-space:nowrap}
+
+/* Full timeline */
+.timeline-full{position:relative;padding-left:40px;margin:30px 0}
+.tl-line{position:absolute;left:18px;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#42a5f5,#4caf50,#ff9800,#ab47bc,#ef5350,#66bb6a);border-radius:2px}
+.tl-step{position:relative;padding:16px 0 16px 28px;min-height:60px}
+.tl-dot{position:absolute;left:-29px;top:20px;width:14px;height:14px;border-radius:50%;border:3px solid #1a1a2e}
+.tl-step .tl-title{font-weight:700;color:#fff;font-size:0.95rem}
+.tl-step .tl-states{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.tl-state{padding:4px 12px;border-radius:6px;font-size:0.75rem;font-weight:600;border:1px solid}
+.tl-step .tl-desc{font-size:0.82rem;color:#888;margin-top:6px}
+.tl-step .tl-trigger{font-size:0.72rem;color:#ab47bc;margin-top:4px;font-style:italic}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>TicketHub — Yasam Dongusu Semasi</h1>
+  <div class="sub">Her modulun durum gecisleri, birbirleriyle etkilesimleri, ve tam proje akisi</div>
+</div>
+
+<nav class="nav">
+  <a href="#overview">Tam Akis</a>
+  <a href="#reservation">Reservation</a>
+  <a href="#seathold">SeatHold</a>
+  <a href="#payment">Payment</a>
+  <a href="#event">Event</a>
+  <a href="#ticket">Ticket</a>
+  <a href="#notification">Notification</a>
+  <a href="#interactions">Etkilesimler</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════
+     TAM PROJE AKISI
+     ═══════════════════════════════════════════════════ -->
+<div class="section" id="overview">
+  <h2>Tam Proje Akisi — Bastan Sona</h2>
+  <div class="sub-h">Bir biletin yolculugu: kullanici kayit → koltuk sec → ode → bilet al → kapida gir. Her adimda hangi moduldeki hangi state degisiyor.</div>
+
+  <div class="timeline-full">
+    <div class="tl-line"></div>
+
+    <div class="tl-step">
+      <div class="tl-dot" style="background:#42a5f5"></div>
+      <div class="tl-title">1. Kullanici Kayit Olur</div>
+      <div class="tl-states">
+        <span class="tl-state" style="border-color:#42a5f5;color:#90caf9;background:rgba(66,165,245,0.1)">User.role = USER</span>
+      </div>
+      <div class="tl-desc">argon2id hash + JWT access (15dk) + refresh (7gun) token uretilir</div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-dot" style="background:#4caf50"></div>
+      <div class="tl-title">2. Organizator Etkinlik Olusturur</div>
+      <div class="tl-states">
+        <span class="tl-state" style="border-color:#ff9800;color:#ffcc80;background:rgba(255,152,0,0.1)">Event.status = DRAFT</span>
+      </div>
+      <div class="tl-desc">Mekan secilir, tarih belirlenir, koltuk fiyatlari set edilir</div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-dot" style="background:#4caf50"></div>
+      <div class="tl-title">3. Etkinlik Yayinlanir</div>
+      <div class="tl-states">
+        <span class="tl-state" style="border-color:#4caf50;color:#a5d6a7;background:rgba(76,175,80,0.1)">Event.status = PUBLISHED</span>
+      </div>
+      <div class="tl-desc">Arama sonuclarinda gorunur, bilet satisa acilir</div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-dot" style="background:#ff9800"></div>
+      <div class="tl-title">4. Musteri Koltuk Secer</div>
+      <div class="tl-states">
+        <span class="tl-state" style="border-color:#42a5f5;color:#90caf9;background:rgba(66,165,245,0.1)">Reservation.status = PENDING</span>
+        <span class="tl-state" style="border-color:#ff9800;color:#ffcc80;background:rgba(255,152,0,0.1)">SeatHold.status = HELD</span>
+      </div>
+      <div class="tl-desc">Redis distributed lock → DB kontrol → entity olustur → DB kaydet</div>
+      <div class="tl-trigger">&#9889; Policy: 10dk sonra expire BullMQ job'u kuruldu</div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-dot" style="background:#4caf50"></div>
+      <div class="tl-title">5. Musteri Odeme Yapar</div>
+      <div class="tl-states">
+        <span class="tl-state" style="border-color:#ff9800;color:#ffcc80;background:rgba(255,152,0,0.1)">Payment.status = PENDING</span>
+        <span class="tl-state" style="border-color:#4caf50;color:#a5d6a7;background:rgba(76,175,80,0.1)">Payment.status = SUCCEEDED</span>
+      </div>
+      <div class="tl-desc">Idempotency-Key kontrol → circuit breaker → Stripe adapter → DB kaydet</div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-dot" style="background:#4caf50"></div>
+      <div class="tl-title">6. Rezervasyon Onaylanir</div>
+      <div class="tl-states">
+        <span class="tl-state" style="border-color:#4caf50;color:#a5d6a7;background:rgba(76,175,80,0.1)">Reservation.status = CONFIRMED</span>
+        <span class="tl-state" style="border-color:#4caf50;color:#a5d6a7;background:rgba(76,175,80,0.1)">SeatHold.status = CONFIRMED</span>
+      </div>
+      <div class="tl-desc">Entity guard: PENDING mi? Hold expired mi? → state transition → version++</div>
+      <div class="tl-trigger">&#9889; Policy: QR uret + email gonder + fiyat recalculate (3 async job)</div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-dot" style="background:#ab47bc"></div>
+      <div class="tl-title">7. QR Bilet Uretilir (arka plan)</div>
+      <div class="tl-states">
+        <span class="tl-state" style="border-color:#4caf50;color:#a5d6a7;background:rgba(76,175,80,0.1)">Ticket.status = VALID</span>
+        <span class="tl-state" style="border-color:#4caf50;color:#a5d6a7;background:rgba(76,175,80,0.1)">Notification.status = SENT</span>
+      </div>
+      <div class="tl-desc">HMAC-SHA256 imzali QR kod + onay emaili (BullMQ worker)</div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-dot" style="background:#66bb6a"></div>
+      <div class="tl-title">8. Etkinlik Gunu — Kapida QR Okutulur</div>
+      <div class="tl-states">
+        <span class="tl-state" style="border-color:#ab47bc;color:#ce93d8;background:rgba(171,71,188,0.1)">Ticket.status = USED</span>
+      </div>
+      <div class="tl-desc">HMAC dogrula → DB kontrol → ilk kullanim → USED yap → "Hosgeldiniz!"</div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-dot" style="background:#9e9e9e"></div>
+      <div class="tl-title">9. Etkinlik Tamamlanir</div>
+      <div class="tl-states">
+        <span class="tl-state" style="border-color:#9e9e9e;color:#ccc;background:rgba(158,158,158,0.1)">Event.status = COMPLETED</span>
+      </div>
+      <div class="tl-desc">Etkinlik bitti — artik bilet satilmaz, yeni rezervasyon yapilamaz</div>
+    </div>
+  </div>
+
+  <!-- Alternatif yollar -->
+  <h3 style="color:#ef5350;margin:30px 0 16px;">Alternatif Yollar (mutsuz senaryolar)</h3>
+  <div class="timeline-full">
+    <div class="tl-line" style="background:linear-gradient(180deg,#ef5350,#ff9800,#ef5350)"></div>
+
+    <div class="tl-step">
+      <div class="tl-dot" style="background:#ef5350"></div>
+      <div class="tl-title">4b. 10 Dakika Doldu — Odeme Yapilmadi</div>
+      <div class="tl-states">
+        <span class="tl-state" style="border-color:#ef5350;color:#ef9a9a;background:rgba(239,83,80,0.1)">Reservation.status = EXPIRED</span>
+        <span class="tl-state" style="border-color:#9e9e9e;color:#ccc;background:rgba(158,158,158,0.1)">SeatHold.status = RELEASED</span>
+      </div>
+      <div class="tl-desc">BullMQ delayed job → entity.expire() → koltuklar serbest → baskasi alabilir</div>
+      <div class="tl-trigger">&#9889; expire() sessiz donus — zaten CONFIRMED ise hicbir sey yapmaz (race condition guvenli)</div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-dot" style="background:#ff9800"></div>
+      <div class="tl-title">6b. Musteri Iptal Etti (48+ saat once)</div>
+      <div class="tl-states">
+        <span class="tl-state" style="border-color:#ef5350;color:#ef9a9a;background:rgba(239,83,80,0.1)">Reservation.status = CANCELLED</span>
+        <span class="tl-state" style="border-color:#9e9e9e;color:#ccc;background:rgba(158,158,158,0.1)">SeatHold.status = RELEASED</span>
+        <span class="tl-state" style="border-color:#ab47bc;color:#ce93d8;background:rgba(171,71,188,0.1)">Payment.status = REFUNDED</span>
+      </div>
+      <div class="tl-desc">entity.cancel() → 48h guard → koltuk serbest → odeme iade</div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-dot" style="background:#ef5350"></div>
+      <div class="tl-title">5b. Odeme Basarisiz</div>
+      <div class="tl-states">
+        <span class="tl-state" style="border-color:#ef5350;color:#ef9a9a;background:rgba(239,83,80,0.1)">Payment.status = FAILED</span>
+      </div>
+      <div class="tl-desc">Reservation hala PENDING — kullanici tekrar deneyebilir (hold devam ediyor)</div>
+    </div>
+
+    <div class="tl-step">
+      <div class="tl-dot" style="background:#ef5350"></div>
+      <div class="tl-title">7b. Email Gonderilemedi</div>
+      <div class="tl-states">
+        <span class="tl-state" style="border-color:#ef5350;color:#ef9a9a;background:rgba(239,83,80,0.1)">Notification.status = FAILED</span>
+      </div>
+      <div class="tl-desc">3 retry sonra dead letter queue → bilet GECERLI, email sorunu ayri</div>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════════
+     RESERVATION STATE MACHINE
+     ═══════════════════════════════════════════════════ -->
+<div class="section" id="reservation">
+  <h2>Reservation — State Machine</h2>
+  <div class="sub-h">Projenin kalbi. Entity command metotlari ile korunuyor — disaridan status degistirilemez.</div>
+
+  <div class="sm-container" style="min-height:320px">
+    <div class="sm-title">
+      <h3>ReservationStatus</h3>
+      <span class="sm-badge" style="background:#e94560;color:#fff">Entity Korumali</span>
+      <span class="sm-file">reservation.entity.ts</span>
+    </div>
+    <div class="sm-canvas" style="height:280px">
+      <svg class="sm-svg" viewBox="0 0 800 280" preserveAspectRatio="xMidYMid meet">
+        <!-- PENDING → CONFIRMED -->
+        <line x1="200" y1="80" x2="440" y2="80" class="arrow-ok" marker-end="url(#ah-ok)"/>
+        <text x="290" y="68" class="label-ok">confirmPayment()</text>
+        <!-- PENDING → EXPIRED -->
+        <line x1="130" y1="110" x2="130" y2="200" class="arrow-auto" marker-end="url(#ah-auto)"/>
+        <text x="140" y="165" class="label-auto">expire()</text>
+        <!-- PENDING → CANCELLED -->
+        <path d="M 200 100 Q 350 180 440 230" class="arrow-user" fill="none" marker-end="url(#ah-user)"/>
+        <text x="280" y="180" class="label-user">cancel()</text>
+        <!-- CONFIRMED → CANCELLED -->
+        <line x1="540" y1="110" x2="540" y2="200" class="arrow-user" marker-end="url(#ah-user)"/>
+        <text x="550" y="162" class="label-user">cancel()</text>
+        <text x="550" y="175" class="label-neutral" style="font-size:8px">48h guard</text>
+        <!-- Arrow markers -->
+        <defs>
+          <marker id="ah-ok" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#4caf50"/></marker>
+          <marker id="ah-auto" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#ab47bc"/></marker>
+          <marker id="ah-user" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#42a5f5"/></marker>
+          <marker id="ah-fail" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#ef5350"/></marker>
+        </defs>
+      </svg>
+      <!-- State nodes -->
+      <div class="state-node state-initial" style="left:60px;top:60px">PENDING<div class="state-sub">hold edildi, odeme bekleniyor</div></div>
+      <div class="state-node state-success" style="left:440px;top:60px">CONFIRMED<div class="state-sub">odeme yapildi ✓</div></div>
+      <div class="state-node state-danger" style="left:60px;top:210px">EXPIRED<div class="state-sub">10dk doldu, koltuk serbest</div></div>
+      <div class="state-node state-warning" style="left:440px;top:210px">CANCELLED<div class="state-sub">kullanici iptal etti</div></div>
+      <!-- Guard badges -->
+      <div class="guard-badge" style="left:220px;top:80px">guard: status===PENDING && !expired</div>
+      <div class="guard-badge" style="left:560px;top:155px">guard: hours > 48</div>
+    </div>
+  </div>
+
+  <div class="legend-row">
+    <div class="legend-item"><div class="legend-line l-ok"></div> Basarili gecis (confirmPayment)</div>
+    <div class="legend-item"><div class="legend-line l-auto"></div> Otomatik (expire — BullMQ)</div>
+    <div class="legend-item"><div class="legend-line l-user"></div> Kullanici tetikli (cancel)</div>
+  </div>
+
+  <!-- Yasak gecisler -->
+  <div style="background:rgba(239,83,80,0.08);border:1px solid rgba(239,83,80,0.3);border-radius:10px;padding:18px 22px;margin-top:16px">
+    <div style="color:#ef5350;font-weight:700;margin-bottom:8px">&#10007; Yasak Gecisler (entity THROW eder)</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px;font-size:0.85rem;color:#ef9a9a">
+      <div>EXPIRED → CONFIRMED &#10007; "suresi dolmus, onaylanamaz"</div>
+      <div>CANCELLED → CONFIRMED &#10007; "iptal edilmis, onaylanamaz"</div>
+      <div>CONFIRMED → EXPIRED &#10007; "onaylanmis, expire olmaz"</div>
+      <div>EXPIRED → CANCELLED &#10007; "suresi dolmus, iptal anlamsiz"</div>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ═══ SEATHOLD ═══ -->
+<div class="section" id="seathold">
+  <h2>SeatHold — State Machine</h2>
+  <div class="sub-h">Reservation'a bagli. Repository seviyesinde yonetiliyor.</div>
+  <div class="sm-container" style="min-height:200px">
+    <div class="sm-title"><h3>SeatHoldStatus</h3><span class="sm-badge" style="background:#ff9800;color:#3e2723">Repository Yonetimli</span><span class="sm-file">booking.repository.ts</span></div>
+    <div class="sm-canvas" style="height:160px">
+      <svg class="sm-svg" viewBox="0 0 700 160" preserveAspectRatio="xMidYMid meet">
+        <line x1="180" y1="50" x2="380" y2="50" class="arrow-ok" marker-end="url(#ah-ok)"/>
+        <text x="240" y="38" class="label-ok">confirmSeats()</text>
+        <path d="M 120 80 Q 200 140 380 130" class="arrow-fail" fill="none" marker-end="url(#ah-fail)"/>
+        <text x="200" y="130" class="label-fail">releaseSeats()</text>
+      </svg>
+      <div class="state-node state-initial" style="left:40px;top:30px">HELD<div class="state-sub">koltuk tutuldu</div></div>
+      <div class="state-node state-success" style="left:380px;top:30px">CONFIRMED<div class="state-sub">odeme tamam ✓</div></div>
+      <div class="state-node state-neutral" style="left:380px;top:110px">RELEASED<div class="state-sub">serbest — yeniden satilabilir</div></div>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ═══ PAYMENT ═══ -->
+<div class="section" id="payment">
+  <h2>Payment — State Machine</h2>
+  <div class="sub-h">Dis servis (Stripe) sonucuna gore degisir. Circuit breaker + idempotency koruyor.</div>
+  <div class="sm-container" style="min-height:240px">
+    <div class="sm-title"><h3>PaymentStatus</h3><span class="sm-badge" style="background:#ff9800;color:#3e2723">Service Yonetimli</span><span class="sm-file">payments.service.ts</span></div>
+    <div class="sm-canvas" style="height:200px">
+      <svg class="sm-svg" viewBox="0 0 750 200" preserveAspectRatio="xMidYMid meet">
+        <line x1="180" y1="50" x2="380" y2="50" class="arrow-ok" marker-end="url(#ah-ok)"/>
+        <text x="240" y="38" class="label-ok">Stripe OK</text>
+        <path d="M 120 80 Q 200 160 380 160" class="arrow-fail" fill="none" marker-end="url(#ah-fail)"/>
+        <text x="210" y="140" class="label-fail">Stripe hata</text>
+        <line x1="520" y1="65" x2="620" y2="120" class="arrow-user" marker-end="url(#ah-user)"/>
+        <text x="560" y="86" class="label-user">refund()</text>
+      </svg>
+      <div class="state-node state-initial" style="left:40px;top:30px">PENDING<div class="state-sub">Stripe'a gonderildi</div></div>
+      <div class="state-node state-success" style="left:380px;top:30px">SUCCEEDED<div class="state-sub">odeme alindi ✓</div></div>
+      <div class="state-node state-danger" style="left:380px;top:140px">FAILED<div class="state-sub">Stripe reddetti</div></div>
+      <div class="state-node state-special" style="left:580px;top:110px">REFUNDED<div class="state-sub">iade edildi</div></div>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ═══ EVENT ═══ -->
+<div class="section" id="event">
+  <h2>Event (Etkinlik) — Lifecycle</h2>
+  <div class="sub-h">Basit CRUD — entity koruması yok, service update ile degisir.</div>
+  <div class="sm-container" style="min-height:230px">
+    <div class="sm-title"><h3>EventStatus</h3><span class="sm-badge" style="background:#4caf50;color:#fff">Basit CRUD</span><span class="sm-file">events.service.ts</span></div>
+    <div class="sm-canvas" style="height:190px">
+      <svg class="sm-svg" viewBox="0 0 750 190" preserveAspectRatio="xMidYMid meet">
+        <line x1="170" y1="50" x2="330" y2="50" class="arrow-ok" marker-end="url(#ah-ok)"/>
+        <text x="220" y="38" class="label-ok">yayinla</text>
+        <line x1="470" y1="50" x2="620" y2="50" class="arrow-neutral" marker-end="url(#ah-ok)"/>
+        <text x="510" y="38" class="label-neutral">bitti</text>
+        <path d="M 100 80 Q 200 160 370 160" class="arrow-fail" fill="none" marker-end="url(#ah-fail)"/>
+        <text x="200" y="145" class="label-fail">iptal</text>
+        <path d="M 400 80 Q 470 160 530 160" class="arrow-fail" fill="none" marker-end="url(#ah-fail)"/>
+        <text x="440" y="130" class="label-fail">iptal</text>
+      </svg>
+      <div class="state-node state-warning" style="left:30px;top:30px">DRAFT<div class="state-sub">taslak, gorunmuyor</div></div>
+      <div class="state-node state-success" style="left:320px;top:30px">PUBLISHED<div class="state-sub">satista ✓</div></div>
+      <div class="state-node state-neutral" style="left:600px;top:30px">COMPLETED<div class="state-sub">bitti</div></div>
+      <div class="state-node state-danger" style="left:320px;top:140px">CANCELLED<div class="state-sub">iptal edildi</div></div>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ═══ TICKET ═══ -->
+<div class="section" id="ticket">
+  <h2>Ticket — Lifecycle</h2>
+  <div class="sub-h">QR kod ile kapida dogrulama. Bir kez USED oldu mu geri donus yok.</div>
+  <div class="sm-container" style="min-height:190px">
+    <div class="sm-title"><h3>TicketStatus</h3><span class="sm-badge" style="background:#4caf50;color:#fff">Service Yonetimli</span><span class="sm-file">tickets.service.ts</span></div>
+    <div class="sm-canvas" style="height:150px">
+      <svg class="sm-svg" viewBox="0 0 700 150" preserveAspectRatio="xMidYMid meet">
+        <line x1="160" y1="50" x2="360" y2="50" class="arrow-ok" marker-end="url(#ah-ok)"/>
+        <text x="220" y="38" class="label-ok">QR okutuldu</text>
+        <path d="M 100 80 Q 180 130 360 130" class="arrow-fail" fill="none" marker-end="url(#ah-fail)"/>
+        <text x="200" y="125" class="label-fail">admin iptal</text>
+      </svg>
+      <div class="state-node state-success" style="left:30px;top:30px">VALID<div class="state-sub">gecerli bilet ✓</div></div>
+      <div class="state-node state-special" style="left:360px;top:30px">USED<div class="state-sub">giris yapildi</div></div>
+      <div class="state-node state-danger" style="left:360px;top:110px">REVOKED<div class="state-sub">admin iptal etti</div></div>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ═══ NOTIFICATION ═══ -->
+<div class="section" id="notification">
+  <h2>Notification — Lifecycle</h2>
+  <div class="sub-h">BullMQ worker ile arka planda. 3 retry → dead letter queue.</div>
+  <div class="sm-container" style="min-height:190px">
+    <div class="sm-title"><h3>NotificationStatus</h3><span class="sm-badge" style="background:#4caf50;color:#fff">Worker Yonetimli</span><span class="sm-file">notifications.worker.ts</span></div>
+    <div class="sm-canvas" style="height:150px">
+      <svg class="sm-svg" viewBox="0 0 700 150" preserveAspectRatio="xMidYMid meet">
+        <line x1="160" y1="50" x2="360" y2="50" class="arrow-ok" marker-end="url(#ah-ok)"/>
+        <text x="220" y="38" class="label-ok">gonderildi</text>
+        <path d="M 100 80 Q 180 130 360 130" class="arrow-fail" fill="none" marker-end="url(#ah-fail)"/>
+        <text x="200" y="125" class="label-fail">3 retry failed</text>
+      </svg>
+      <div class="state-node state-initial" style="left:30px;top:30px">PENDING<div class="state-sub">kuyrukta bekliyor</div></div>
+      <div class="state-node state-success" style="left:360px;top:30px">SENT<div class="state-sub">gonderildi ✓</div></div>
+      <div class="state-node state-danger" style="left:360px;top:110px">FAILED<div class="state-sub">dead letter queue</div></div>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════════
+     ETKILESIMLER
+     ═══════════════════════════════════════════════════ -->
+<div class="section" id="interactions">
+  <h2>Modul Etkilesimleri — Bir State Degisince Digerleri Nasil Etkileniyor</h2>
+  <div class="sub-h">Bir modulun state'i degistiginde baska modullerin state'i de degisiyor. Zincir reaksiyon.</div>
+
+  <div class="interaction-grid">
+    <div class="inter-card" style="border-left:3px solid #4caf50">
+      <h4 style="color:#4caf50">Reservation CONFIRMED olunca</h4>
+      <div class="inter-row"><span class="inter-node" style="background:rgba(76,175,80,0.15);color:#a5d6a7">Reservation: CONFIRMED</span><span style="color:#555">→</span></div>
+      <div class="inter-row"><span style="color:#888;font-size:0.78rem;margin-left:16px">ayni anda:</span></div>
+      <div class="inter-row" style="margin-left:16px"><span class="inter-node" style="background:rgba(76,175,80,0.15);color:#a5d6a7">SeatHold: CONFIRMED</span><span style="color:#666;font-size:0.75rem;margin-left:6px">sync — ayni transaction</span></div>
+      <div class="inter-row" style="margin-left:16px"><span class="inter-node" style="background:rgba(76,175,80,0.15);color:#a5d6a7">Ticket: VALID</span><span style="color:#ab47bc;font-size:0.75rem;margin-left:6px">async — BullMQ</span></div>
+      <div class="inter-row" style="margin-left:16px"><span class="inter-node" style="background:rgba(76,175,80,0.15);color:#a5d6a7">Notification: SENT</span><span style="color:#ab47bc;font-size:0.75rem;margin-left:6px">async — BullMQ</span></div>
+      <div class="inter-row" style="margin-left:16px"><span class="inter-node" style="background:rgba(255,152,0,0.15);color:#ffcc80">Pricing: recalculate</span><span style="color:#ab47bc;font-size:0.75rem;margin-left:6px">async — talep degisti</span></div>
+    </div>
+
+    <div class="inter-card" style="border-left:3px solid #ef5350">
+      <h4 style="color:#ef5350">Reservation EXPIRED olunca</h4>
+      <div class="inter-row"><span class="inter-node" style="background:rgba(239,83,80,0.15);color:#ef9a9a">Reservation: EXPIRED</span><span style="color:#555">→</span></div>
+      <div class="inter-row" style="margin-left:16px"><span class="inter-node" style="background:rgba(158,158,158,0.15);color:#ccc">SeatHold: RELEASED</span><span style="color:#666;font-size:0.75rem;margin-left:6px">sync — koltuk serbest</span></div>
+      <div class="inter-row" style="margin-left:16px"><span class="inter-node" style="background:rgba(255,152,0,0.15);color:#ffcc80">Pricing: recalculate</span><span style="color:#ab47bc;font-size:0.75rem;margin-left:6px">async — talep dustu</span></div>
+    </div>
+
+    <div class="inter-card" style="border-left:3px solid #ff9800">
+      <h4 style="color:#ff9800">Reservation CANCELLED olunca</h4>
+      <div class="inter-row"><span class="inter-node" style="background:rgba(255,152,0,0.15);color:#ffcc80">Reservation: CANCELLED</span><span style="color:#555">→</span></div>
+      <div class="inter-row" style="margin-left:16px"><span class="inter-node" style="background:rgba(158,158,158,0.15);color:#ccc">SeatHold: RELEASED</span><span style="color:#666;font-size:0.75rem;margin-left:6px">sync — koltuk serbest</span></div>
+      <div class="inter-row" style="margin-left:16px"><span class="inter-node" style="background:rgba(171,71,188,0.15);color:#ce93d8">Payment: REFUNDED</span><span style="color:#ab47bc;font-size:0.75rem;margin-left:6px">async — iade (eger CONFIRMED'dan geldiyse)</span></div>
+      <div class="inter-row" style="margin-left:16px"><span class="inter-node" style="background:rgba(76,175,80,0.15);color:#a5d6a7">Ticket: REVOKED</span><span style="color:#666;font-size:0.75rem;margin-left:6px">sync — bilet iptal</span></div>
+    </div>
+
+    <div class="inter-card" style="border-left:3px solid #42a5f5">
+      <h4 style="color:#42a5f5">Reservation PENDING olunca (olusturuldu)</h4>
+      <div class="inter-row"><span class="inter-node" style="background:rgba(66,165,245,0.15);color:#90caf9">Reservation: PENDING</span><span style="color:#555">→</span></div>
+      <div class="inter-row" style="margin-left:16px"><span class="inter-node" style="background:rgba(255,152,0,0.15);color:#ffcc80">SeatHold: HELD</span><span style="color:#666;font-size:0.75rem;margin-left:6px">sync — ayni transaction</span></div>
+      <div class="inter-row" style="margin-left:16px"><span class="inter-node" style="background:rgba(171,71,188,0.15);color:#ce93d8">BullMQ: expire job</span><span style="color:#ab47bc;font-size:0.75rem;margin-left:6px">gelecek — 10dk delay</span></div>
+      <div class="inter-row" style="margin-left:16px"><span class="inter-node" style="background:rgba(255,152,0,0.15);color:#ffcc80">Pricing: recalculate</span><span style="color:#ab47bc;font-size:0.75rem;margin-left:6px">async — talep artti</span></div>
+    </div>
+  </div>
+
+  <div style="margin-top:30px;padding:20px 24px;background:rgba(255,152,0,0.08);border:1px solid rgba(255,152,0,0.3);border-radius:10px">
+    <div style="color:#ff9800;font-weight:700;margin-bottom:10px">Zincir Reaksiyon Ozeti</div>
+    <div style="font-size:0.9rem;color:#b0b0c0;line-height:1.8">
+      <strong style="color:#fff">Booking</strong> merkez — tum zincir buradan baslar. Booking'in state'i degistiginde:<br>
+      &nbsp;&nbsp;→ <strong>SeatHold</strong> her zaman <strong>sync</strong> degisir (ayni transaction, tutarlilik garanti)<br>
+      &nbsp;&nbsp;→ <strong>Payment</strong> sadece CANCELLED'dan <strong>async</strong> tetiklenir (iade)<br>
+      &nbsp;&nbsp;→ <strong>Ticket</strong> sadece CONFIRMED'dan <strong>async</strong> olusur (QR uret)<br>
+      &nbsp;&nbsp;→ <strong>Notification</strong> CONFIRMED/CANCELLED/EXPIRED'dan <strong>async</strong> tetiklenir (email)<br>
+      &nbsp;&nbsp;→ <strong>Pricing</strong> her state degisikliginde <strong>async</strong> recalculate (talep degisti)<br>
+      <br>
+      <strong style="color:#42a5f5">sync</strong> = ayni istek icinde, basarisiz olursa tumu geri alinir<br>
+      <strong style="color:#ab47bc">async</strong> = BullMQ ile arka planda, basarisiz olursa retry, ana islem etkilenmez
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center;padding:40px;color:#555;font-size:0.85rem">TicketHub Yasam Dongusu Semasi</div>
+</body>
+</html>

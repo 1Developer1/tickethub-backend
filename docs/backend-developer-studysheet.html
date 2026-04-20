@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backend Developer Kapsamli Calisma Kagidi</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #1a1a2e; color: #e0e0e0; line-height: 1.7;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0f0f1a 0%, #16213e 40%, #0f3460 70%, #533483 100%);
+    padding: 60px 40px; text-align: center; border-bottom: 4px solid #e94560;
+  }
+  .hero h1 { font-size: 2.6rem; color: #fff; margin-bottom: 12px; letter-spacing: -1px; }
+  .hero .subtitle { font-size: 1.15rem; color: #a0aec0; max-width: 700px; margin: 0 auto; }
+  .hero .tags { margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .hero .tag {
+    padding: 5px 14px; border-radius: 20px; font-size: 0.8rem;
+    background: rgba(233,69,96,0.15); border: 1px solid rgba(233,69,96,0.4); color: #e94560;
+  }
+
+  /* ── PART TABS ── */
+  .part-tabs {
+    position: sticky; top: 0; z-index: 200;
+    background: rgba(15,15,26,0.97); backdrop-filter: blur(12px);
+    border-bottom: 1px solid #333;
+    display: flex; overflow-x: auto; padding: 0;
+  }
+  .part-tab {
+    color: #a0aec0; text-decoration: none; padding: 14px 20px;
+    font-size: 0.82rem; white-space: nowrap; transition: all 0.2s;
+    border-bottom: 3px solid transparent; cursor: pointer;
+    background: none; border-top: none; border-left: none; border-right: none;
+    font-family: inherit;
+  }
+  .part-tab:hover { color: #fff; }
+  .part-tab.active { color: #fff; border-bottom-color: var(--accent, #e94560); }
+
+  /* ── SECTION NAV ── */
+  .section-nav {
+    position: sticky; top: 48px; z-index: 190;
+    background: rgba(26,26,46,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid #2a2a4a;
+    display: flex; gap: 0; overflow-x: auto; padding: 0 20px;
+  }
+  .section-nav a {
+    color: #808090; text-decoration: none; padding: 10px 16px;
+    font-size: 0.78rem; white-space: nowrap; transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+  }
+  .section-nav a:hover { color: #fff; border-bottom-color: var(--accent, #e94560); }
+
+  /* ── SECTIONS ── */
+  .part-group { display: none; }
+  .part-group.active { display: block; }
+  .section { max-width: 1100px; margin: 0 auto; padding: 50px 30px; border-bottom: 1px solid #2a2a4a; }
+  .section:last-child { border-bottom: none; }
+  .section-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+  .step-badge {
+    background: var(--accent, #e94560); color: #fff; font-weight: 700;
+    width: 42px; height: 42px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
+  }
+  .section-header h2 { font-size: 1.7rem; color: #fff; }
+  .section-header .eng { color: #a0aec0; font-weight: 400; font-size: 1rem; margin-left: 8px; }
+  .section p, .section li { color: #b0b0c0; max-width: 850px; font-size: 1.02rem; }
+  .section p { margin-bottom: 16px; }
+  .section .hl { color: var(--accent, #e94560); font-weight: 600; }
+
+  /* ── CARDS ── */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin: 20px 0; }
+  .card {
+    background: rgba(255,255,255,0.03); border: 1px solid #2a2a4a;
+    border-left: 4px solid var(--accent, #e94560); border-radius: 8px;
+    padding: 20px; transition: all 0.2s;
+  }
+  .card:hover { background: rgba(255,255,255,0.06); transform: translateY(-2px); }
+  .card h3 { color: #fff; font-size: 1.05rem; margin-bottom: 8px; }
+  .card p { font-size: 0.92rem; margin-bottom: 0; }
+  .card code { background: rgba(233,69,96,0.15); color: #e94560; padding: 1px 6px; border-radius: 3px; font-size: 0.88rem; }
+
+  /* ── CODE BLOCKS ── */
+  pre {
+    background: #0d0d1a; border: 1px solid #2a2a4a; border-radius: 8px;
+    padding: 20px; overflow-x: auto; margin: 16px 0; font-size: 0.9rem;
+    line-height: 1.6; color: #c8d6e5;
+  }
+  pre .comment { color: #6a6a8a; }
+  pre .keyword { color: #c792ea; }
+  pre .string { color: #c3e88d; }
+  pre .type { color: #ffcb6b; }
+  pre .fn { color: #82aaff; }
+  pre .number { color: #f78c6c; }
+  pre .hl-line { background: rgba(233,69,96,0.1); display: block; margin: 0 -20px; padding: 0 20px; }
+
+  /* ── COMPARISON TABLE ── */
+  .cmp-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+  .cmp-table th, .cmp-table td {
+    padding: 12px 16px; text-align: left; border: 1px solid #2a2a4a; font-size: 0.92rem;
+  }
+  .cmp-table th { background: rgba(233,69,96,0.1); color: #fff; font-weight: 600; }
+  .cmp-table td { color: #b0b0c0; }
+  .cmp-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+  /* ── CALLOUT ── */
+  .callout {
+    background: rgba(255,152,0,0.08); border-left: 4px solid #ff9800;
+    border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 20px 0;
+  }
+  .callout.info { background: rgba(66,165,245,0.08); border-left-color: #42a5f5; }
+  .callout.danger { background: rgba(239,83,80,0.08); border-left-color: #ef5350; }
+  .callout.success { background: rgba(102,187,106,0.08); border-left-color: #66bb6a; }
+  .callout h4 { color: #fff; margin-bottom: 6px; font-size: 0.95rem; }
+  .callout p { margin-bottom: 0; font-size: 0.92rem; }
+
+  /* ── REVEAL ── */
+  .reveal { margin: 16px 0; }
+  .reveal-btn {
+    background: rgba(255,255,255,0.05); border: 1px solid #2a2a4a;
+    color: #a0aec0; padding: 10px 18px; border-radius: 6px; cursor: pointer;
+    font-size: 0.9rem; transition: all 0.2s; font-family: inherit;
+  }
+  .reveal-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .reveal-content { display: none; margin-top: 12px; padding: 16px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid #2a2a4a; }
+  .reveal-content.open { display: block; }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow {
+    background: #0d0d1a; border: 1px solid #2a2a4a; border-radius: 8px;
+    padding: 24px; margin: 20px 0; font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 0.85rem; line-height: 1.8; overflow-x: auto; white-space: pre; color: #a0aec0;
+  }
+
+  /* ── LIST STYLES ── */
+  .section ul, .section ol { padding-left: 24px; margin: 12px 0 20px; }
+  .section li { margin-bottom: 8px; }
+  .section ul li::marker { color: var(--accent, #e94560); }
+
+  /* ── KEYWORD PILLS ── */
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+  .pill {
+    background: rgba(233,69,96,0.12); border: 1px solid rgba(233,69,96,0.3);
+    color: #e0e0e0; padding: 4px 12px; border-radius: 16px; font-size: 0.82rem;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 1.8rem; }
+    .section { padding: 30px 16px; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════ HERO ══════════════════════════════════════ -->
+<div class="hero">
+  <h1>Backend Developer Calisma Kagidi</h1>
+  <p class="subtitle">25 konuyu kapsayan kapsamli, interaktif calisma rehberi. Her konunun NE oldugunu, NEDEN onemli oldugunu ve NASIL calistigini ogreten tek sayfa.</p>
+  <div class="tags">
+    <span class="tag">25 Konu</span>
+    <span class="tag">8 Bolum</span>
+    <span class="tag">Interaktif</span>
+    <span class="tag">Kod Ornekleri</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ PART TABS ══════════════════════════════════════ -->
+<div class="part-tabs" id="partTabs">
+  <button class="part-tab active" data-part="1" style="--accent:#42a5f5" onclick="switchPart(1)">Part 1 — Temel Kavramlar</button>
+  <button class="part-tab" data-part="2" style="--accent:#ff9800" onclick="switchPart(2)">Part 2 — Bilgisayar Bilimi</button>
+  <button class="part-tab" data-part="3" style="--accent:#e94560" onclick="switchPart(3)">Part 3 — Yazilim Muhendisligi</button>
+  <button class="part-tab" data-part="4" style="--accent:#66bb6a" onclick="switchPart(4)">Part 4 — Veritabani</button>
+  <button class="part-tab" data-part="5" style="--accent:#ab47bc" onclick="switchPart(5)">Part 5 — C# ve .NET</button>
+  <button class="part-tab" data-part="6" style="--accent:#4ec9b0" onclick="switchPart(6)">Part 6 — Altyapi ve DevOps</button>
+  <button class="part-tab" data-part="7" style="--accent:#ef5350" onclick="switchPart(7)">Part 7 — Guvenlik</button>
+  <button class="part-tab" data-part="8" style="--accent:#ffcc80" onclick="switchPart(8)">Part 8 — Profesyonel Gelisim</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<!--                           PART 1 — TEMEL KAVRAMLAR                                  -->
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<div class="part-group active" id="part1" style="--accent:#42a5f5">
+
+<div class="section-nav">
+  <a href="#s1">Backend Giris</a>
+  <a href="#s2">Dijital Donusum</a>
+  <a href="#s3">Programlama Sistematigi</a>
+</div>
+
+<!-- ── 1. Backend Yazilim Gelistirmeye Giris ── -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="step-badge">1</div>
+    <h2>Backend Yazilim Gelistirmeye Giris <span class="eng">Introduction to Backend Development</span></h2>
+  </div>
+
+  <p>Backend = kullanicinin <span class="hl">goremediği</span> her sey. Tarayicidaki buton frontend, butona basinca olan is mantigi backend.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Frontend vs Backend</h3>
+      <p>Frontend: HTML, CSS, JavaScript — kullanicinin gordugu ekran.<br>
+         Backend: sunucuda calisan kod — is kurallari, DB islemleri, guvenlik.</p>
+    </div>
+    <div class="card">
+      <h3>Backend Ne Yapar?</h3>
+      <p>Istegi al → dogrula → is kuralini calistir → DB'ye yaz/oku → cevap don.<br>
+         Her sey bu dongunun varyasyonu.</p>
+    </div>
+    <div class="card">
+      <h3>Backend Dilleri</h3>
+      <p><code>C#/.NET</code> <code>Java/Spring</code> <code>Node.js</code> <code>Python/Django</code> <code>Go</code> <code>PHP/Laravel</code><br>
+         Dil degisir, mimari ayni kalir.</p>
+    </div>
+    <div class="card">
+      <h3>HTTP Istek-Cevap Dongusu</h3>
+      <p>Client → <code>POST /api/orders</code> → Sunucu isler → <code>201 Created</code> → Client cevabi alir.<br>
+         Her web uygulamasi bu dongude calisir.</p>
+    </div>
+  </div>
+
+  <div class="flow">
+Kullanici (Tarayici/Mobil)
+    |
+    |  HTTP istegi (POST /api/reservations)
+    v
+┌──────────────────────────────────────────────────┐
+│  BACKEND SUNUCU                                  │
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐ │
+│  │   Route    │→ │  Service   │→ │ Repository │ │
+│  │ (giris)    │  │ (is kurali)│  │ (DB erisim)│ │
+│  └────────────┘  └────────────┘  └────────────┘ │
+│                                       |          │
+│                                       v          │
+│                                 ┌──────────┐     │
+│                                 │ Database │     │
+│                                 └──────────┘     │
+└──────────────────────────────────────────────────┘
+    |
+    |  HTTP cevap (201 Created + JSON)
+    v
+Kullanici cevabi gordu</div>
+
+  <div class="callout info">
+    <h4>Neden Backend Onemli?</h4>
+    <p>Frontend guzel gosterir, backend <strong>gercekten calistirir</strong>. Odeme islemi, stok kontrolu, guvenlik — hepsi backend. Frontend olmadan cirkin ama calisan bir sistem olur. Backend olmadan hicbir sey calismaz.</p>
+  </div>
+
+  <p><strong>API nedir?</strong> Application Programming Interface — iki programin konusma protokolu. Backend API yazar, frontend (veya mobil) bu API'yi cagirir.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>REST API</h3>
+      <p><code>GET /users</code> → kullanicilari getir<br>
+         <code>POST /users</code> → yeni kullanici olustur<br>
+         <code>PUT /users/1</code> → guncelle<br>
+         <code>DELETE /users/1</code> → sil<br>
+         HTTP metodlari ile CRUD islemleri.</p>
+    </div>
+    <div class="card">
+      <h3>JSON</h3>
+      <p>Backend ve frontend arasinda veri formati:<br>
+         <code>{ "name": "Ahmet", "age": 25 }</code><br>
+         Hemen her dil JSON okuyup yazabilir.</p>
+    </div>
+  </div>
+
+  <div class="reveal">
+    <button class="reveal-btn" onclick="toggleReveal(this)">Ornek: Basit bir API endpoint nasil calisir?</button>
+    <div class="reveal-content">
+<pre>
+<span class="comment">// C# .NET Core — basit bir endpoint</span>
+[ApiController]
+[Route(<span class="string">"api/[controller]"</span>)]
+<span class="keyword">public class</span> <span class="type">UsersController</span> : ControllerBase
+{
+    <span class="keyword">private readonly</span> <span class="type">UserService</span> _service;
+
+    [HttpGet]
+    <span class="keyword">public async</span> Task&lt;IActionResult&gt; <span class="fn">GetAll</span>()
+    {
+        <span class="keyword">var</span> users = <span class="keyword">await</span> _service.GetAllAsync();
+        <span class="keyword">return</span> Ok(users);
+    }
+
+    [HttpPost]
+    <span class="keyword">public async</span> Task&lt;IActionResult&gt; <span class="fn">Create</span>(CreateUserRequest request)
+    {
+        <span class="keyword">var</span> user = <span class="keyword">await</span> _service.CreateAsync(request);
+        <span class="keyword">return</span> CreatedAtAction(<span class="keyword">nameof</span>(GetAll), user);
+    }
+}
+</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ── 2. Dijital Donusum ── -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="step-badge">2</div>
+    <h2>Dijital Donusum <span class="eng">Digital Transformation</span></h2>
+  </div>
+
+  <p>Geleneksel is sureclerinin teknoloji ile yeniden tasarlanmasi. Kagidi dijitale tasimak degil, <span class="hl">is yapma seklini degistirmek</span>.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Neden Onemli?</h3>
+      <p>Sirketler dijitallesmezse rekabet edemez. Banka subesi → mobil bankacilik. Taksi duragi → Uber. Kitapci → Amazon.</p>
+    </div>
+    <div class="card">
+      <h3>Backend Gelistirici Olarak Senin Rolun</h3>
+      <p>Dijital donusumun <strong>teknik altyapisini</strong> sen yaziyorsun. API'ler, veritabanlari, entegrasyonlar — hepsi backend isi.</p>
+    </div>
+    <div class="card">
+      <h3>Bulut Teknolojileri (Cloud)</h3>
+      <p><code>AWS</code> <code>Azure</code> <code>Google Cloud</code><br>
+         Fiziksel sunucu almak yerine bulutta kirala. Olcekle, ode, kapat.</p>
+    </div>
+    <div class="card">
+      <h3>Anahtar Kavramlar</h3>
+      <p><strong>SaaS:</strong> Yazilim hizmet olarak (Gmail, Slack)<br>
+         <strong>PaaS:</strong> Platform hizmet olarak (Heroku, Azure App Service)<br>
+         <strong>IaaS:</strong> Altyapi hizmet olarak (AWS EC2)</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <h4>Bir Yazilimci Olarak Bilmen Gereken</h4>
+    <p>Dijital donusum bir <strong>is stratejisi</strong>, teknik detaylari degil buyuk resmi bil. "Bu sirketin hangi surecini dijitallestiriyoruz ve bu yazilim bunu nasil cozuyor?" sorusuna cevap verebilmen yeterli.</p>
+  </div>
+</div>
+
+<!-- ── 3. Programlama Sistematigi ve Kaynak Kod Yonetimi ── -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="step-badge">3</div>
+    <h2>Programlama Sistematigi ve Kaynak Kod Yonetimi <span class="eng">Programming Methodology &amp; Source Control</span></h2>
+  </div>
+
+  <p>Kod yazmadan <span class="hl">once nasil dusunursun</span> + yazdigin kodu <span class="hl">nasil yonetirsin</span>.</p>
+
+  <h3 style="color:#fff; margin: 30px 0 16px;">A. Programlama Sistematigi</h3>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Algoritma</h3>
+      <p>Bir problemi adim adim cozme tarifi. Kod yazmadan ONCE Turkce/pseudocode ile plani yaz, sonra kodla.</p>
+    </div>
+    <div class="card">
+      <h3>Veri Tipleri ve Degiskenler</h3>
+      <p><code>int</code> sayi, <code>string</code> yazi, <code>bool</code> dogru/yanlis, <code>float</code> ondalikli.<br>
+         Her dilde var, isimler degisebilir.</p>
+    </div>
+    <div class="card">
+      <h3>Kontrol Yapilari</h3>
+      <p><code>if/else</code> kosullar, <code>for/while</code> donguler, <code>switch</code> coklu dallanma.<br>
+         Programin akisini yonlendiren temel yapilar.</p>
+    </div>
+    <div class="card">
+      <h3>Fonksiyonlar / Metodlar</h3>
+      <p>Tekrar eden kodu bir kez yaz, istedigin kadar cagir. <strong>Moduler kod</strong> yazmanin temeli.<br>
+         Girdi alir → isler → cikti verir.</p>
+    </div>
+    <div class="card">
+      <h3>OOP — Nesne Yonelimli Programlama</h3>
+      <p><strong>Encapsulation:</strong> Veriyi gizle, metod ile eris<br>
+         <strong>Inheritance:</strong> Ortak kodu tekrar yazma, miras al<br>
+         <strong>Polymorphism:</strong> Ayni metod, farkli davranis<br>
+         <strong>Abstraction:</strong> Karmasikligi gizle, basit arayuz sun</p>
+    </div>
+    <div class="card">
+      <h3>SOLID Prensipleri</h3>
+      <p><strong>S:</strong> Tek sorumluluk<br>
+         <strong>O:</strong> Acik/kapali (degistirme, genislet)<br>
+         <strong>L:</strong> Alt sinif, ust sinif yerine gecebilmeli<br>
+         <strong>I:</strong> Gereksiz metodu zorla implement ettirme<br>
+         <strong>D:</strong> Somuta degil soyuta baglan</p>
+    </div>
+  </div>
+
+  <h3 style="color:#fff; margin: 30px 0 16px;">B. Kaynak Kod Yonetimi (Git)</h3>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Git Nedir?</h3>
+      <p>Kodun her degisikligini kaydeden <strong>versiyon kontrol sistemi</strong>. Hata yaptin? Onceki versiyona don. Takim calisiyorsun? Herkes kendi dalinda calisir.</p>
+    </div>
+    <div class="card">
+      <h3>Temel Komutlar</h3>
+      <p><code>git init</code> → baslat<br>
+         <code>git add .</code> → degisiklikleri hazirla<br>
+         <code>git commit -m "mesaj"</code> → kaydet<br>
+         <code>git push</code> → sunucuya gonder<br>
+         <code>git pull</code> → sunucudan cek</p>
+    </div>
+    <div class="card">
+      <h3>Branch (Dal)</h3>
+      <p>Ana kodu bozmadan yeni ozellik gelistir:<br>
+         <code>git branch feature/login</code> → yeni dal<br>
+         <code>git checkout feature/login</code> → o dala gec<br>
+         Bitince → <code>merge</code> ile ana dala birlestir.</p>
+    </div>
+    <div class="card">
+      <h3>Pull Request (PR)</h3>
+      <p>"Bu degisikligi ana koda eklemek istiyorum, kontrol eder misiniz?"<br>
+         Takim arkadasi inceler → onaylarsa → merge edilir.<br>
+         <strong>Kod review sureci</strong> burada yasanir.</p>
+    </div>
+  </div>
+
+  <div class="flow">
+Git Calisma Akisi:
+
+  main ──●──●──●─────────────────●──●──  (ana dal, uretim kodu)
+              \                 /
+  feature/login ●──●──●──●──●──  (ozellik dali)
+                                 ↑
+                           merge (PR onaylandi)
+  </div>
+
+  <div class="callout info">
+    <h4>Merge vs Rebase (Mulakat Sorusu)</h4>
+    <p><strong>Merge:</strong> Iki dali birlestirir, birlesme noktasi gorunur (merge commit).<br>
+       <strong>Rebase:</strong> Degisiklikleri ana dalin ucune tasirir, duz bir gecmis olusur.<br>
+       Takim calismalarinda genelde <strong>merge</strong> tercih edilir — gecmis daha okunakli.</p>
+  </div>
+</div>
+
+</div><!-- /part1 -->
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<!--                       PART 2 — BILGISAYAR BILIMI TEMELLERI                          -->
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<div class="part-group" id="part2" style="--accent:#ff9800">
+
+<div class="section-nav">
+  <a href="#s4">Veri Yapilari</a>
+  <a href="#s5">Isletim Sistemi</a>
+  <a href="#s6">Ag Temelleri</a>
+</div>
+
+<!-- ── 4. Veri Yapilari ve Temel Algoritmalar ── -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="step-badge">4</div>
+    <h2>Veri Yapilari ve Temel Algoritmalar <span class="eng">Data Structures &amp; Algorithms</span></h2>
+  </div>
+
+  <p>Veri yapisi = <span class="hl">veriyi nasil organize edersin</span>. Algoritma = <span class="hl">o veriyle ne yaparsin</span>.</p>
+
+  <h3 style="color:#fff; margin: 20px 0 16px;">Temel Veri Yapilari</h3>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Array (Dizi)</h3>
+      <p>Sabit boyutlu, sirali eleman listesi.<br>
+         Erisim: <code>O(1)</code> — index ile aninda ulas.<br>
+         Ekleme/silme: <code>O(n)</code> — kaydirma gerekir.<br>
+         <code>[10, 20, 30, 40, 50]</code></p>
+    </div>
+    <div class="card">
+      <h3>Linked List (Bagli Liste)</h3>
+      <p>Her eleman bir sonrakini gosterir.<br>
+         Ekleme/silme: <code>O(1)</code> — referans degistir.<br>
+         Erisim: <code>O(n)</code> — bastan say.<br>
+         <code>10 → 20 → 30 → null</code></p>
+    </div>
+    <div class="card">
+      <h3>Stack (Yigin) — LIFO</h3>
+      <p>Son giren ilk cikar. Tabak yigini gibi.<br>
+         <code>push()</code> → uste ekle<br>
+         <code>pop()</code> → ustten al<br>
+         Kullanim: geri al (undo), fonksiyon cagirilari.</p>
+    </div>
+    <div class="card">
+      <h3>Queue (Kuyruk) — FIFO</h3>
+      <p>Ilk giren ilk cikar. Banka sirasi gibi.<br>
+         <code>enqueue()</code> → sona ekle<br>
+         <code>dequeue()</code> → bastan al<br>
+         Kullanim: BullMQ job kuyrugu, istek sirasi.</p>
+    </div>
+    <div class="card">
+      <h3>Hash Map (Sozluk)</h3>
+      <p>Anahtar-deger cifti. Aninda erisim.<br>
+         Erisim: <code>O(1)</code><br>
+         <code>{ "ahmet": 25, "mehmet": 30 }</code><br>
+         Kullanim: cache, EventBus handlers, index.</p>
+    </div>
+    <div class="card">
+      <h3>Tree (Agac)</h3>
+      <p>Hiyerarsik yapi. Her dugumun cocuklari var.<br>
+         <strong>Binary Search Tree:</strong> sol &lt; kok &lt; sag<br>
+         Arama: <code>O(log n)</code><br>
+         Kullanim: DB indexleri (B-Tree), dosya sistemi.</p>
+    </div>
+  </div>
+
+  <h3 style="color:#fff; margin: 30px 0 16px;">Big O — Karmasiklik Analizi</h3>
+
+  <p>Algoritmanin <span class="hl">ne kadar yavas veya hizli</span> oldugunu olcer. Veri buyudukce nasil etkilenir?</p>
+
+  <table class="cmp-table">
+    <tr><th>Notasyon</th><th>Anlami</th><th>Ornek</th><th>1000 eleman</th></tr>
+    <tr><td><code>O(1)</code></td><td>Sabit — veri buyuse de ayni</td><td>Array'den index ile okuma</td><td>1 islem</td></tr>
+    <tr><td><code>O(log n)</code></td><td>Logaritmik — her adimda yari eler</td><td>Binary search</td><td>~10 islem</td></tr>
+    <tr><td><code>O(n)</code></td><td>Dogrusal — her eleman icin 1 islem</td><td>Liste tarama</td><td>1000 islem</td></tr>
+    <tr><td><code>O(n log n)</code></td><td>Etkin siralama</td><td>Merge sort, Quick sort</td><td>~10.000 islem</td></tr>
+    <tr><td><code>O(n²)</code></td><td>Kareli — ic ice dongu</td><td>Bubble sort</td><td>1.000.000 islem</td></tr>
+  </table>
+
+  <h3 style="color:#fff; margin: 30px 0 16px;">Temel Algoritmalar</h3>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Arama — Linear vs Binary</h3>
+      <p><strong>Linear:</strong> Bastan sona tara → <code>O(n)</code><br>
+         <strong>Binary:</strong> Sirali dizide ortadan bol → <code>O(log n)</code><br>
+         1000 elemanda: 1000 vs 10 islem.</p>
+    </div>
+    <div class="card">
+      <h3>Siralama</h3>
+      <p><strong>Bubble Sort:</strong> Yavas <code>O(n²)</code> — sadece ogretim icin<br>
+         <strong>Merge Sort:</strong> Hizli <code>O(n log n)</code> — bol, sirala, birlestir<br>
+         <strong>Quick Sort:</strong> Pratikte en hizli — pivot sec, etrafinda bol</p>
+    </div>
+    <div class="card">
+      <h3>Recursion (Ozyineleme)</h3>
+      <p>Fonksiyonun kendini cagirmasi.<br>
+         <code>factorial(5) = 5 × factorial(4)</code><br>
+         Her recursion'in bir <strong>durma kosulu</strong> olmali, yoksa stack overflow.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <h4>Mulakatlarda Ne Sorulur?</h4>
+    <p>"Bu algoritmanin Big O'su nedir?", "Array mi Linked List mi kullanirsin?", "HashMap nasil calisir?" — bunlar klasik sorular. Ezberden degil <strong>mantikla</strong> cevap ver.</p>
+  </div>
+</div>
+
+<!-- ── 5. Isletim Sisteminin Temelleri ── -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="step-badge">5</div>
+    <h2>Isletim Sisteminin Temelleri <span class="eng">Operating System Fundamentals</span></h2>
+  </div>
+
+  <p>Isletim sistemi (OS) = donanim ile yazilim arasindaki <span class="hl">tercuman</span>. Programlar dogrudan CPU/RAM'e erisemez, OS araciligi ile erisir.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Process (Surec)</h3>
+      <p>Calisan bir program. Her process'in <strong>kendi bellegi</strong> var, birbirine eriseemez.<br>
+         Chrome, Node.js, PostgreSQL → her biri ayri process.</p>
+    </div>
+    <div class="card">
+      <h3>Thread (Is Parcacigi)</h3>
+      <p>Process'in icindeki calisma birimi. Ayni bellegi <strong>paylasir</strong>.<br>
+         Java: istek basina 1 thread.<br>
+         Node.js: tek thread + await.</p>
+    </div>
+    <div class="card">
+      <h3>Process vs Thread</h3>
+      <p><strong>Process:</strong> Izole bellek, biri cokerse digeri etkilenmez, agir.<br>
+         <strong>Thread:</strong> Paylasimli bellek, biri cokerse process coker, hafif.</p>
+    </div>
+    <div class="card">
+      <h3>CPU Scheduling</h3>
+      <p>CPU tek seferde bir is yapar. OS hangi process/thread'in ne zaman calisacagina karar verir. Saniyede binlerce kez degistirir → <strong>coklu gorev yanilsamasi</strong>.</p>
+    </div>
+  </div>
+
+  <h3 style="color:#fff; margin: 30px 0 16px;">Bellek (RAM) Yonetimi</h3>
+
+  <div class="flow">
+Bellek Yapisi:
+┌──────────────────────────┐
+│ Stack                    │ ← fonksiyon cagirilari, yerel degiskenler
+│ (kucuk, hizli, otomatik) │    fonksiyon bitince otomatik temizlenir
+├──────────────────────────┤
+│ Heap                     │ ← nesneler, buyuk veriler
+│ (buyuk, yavas, manuel/GC)│    GC (Garbage Collector) temizler
+└──────────────────────────┘</div>
+
+  <h3 style="color:#fff; margin: 30px 0 16px;">Eskamanlilik Sorunlari</h3>
+
+  <div class="card-grid">
+    <div class="card" style="border-left-color: #ef5350;">
+      <h3>Race Condition</h3>
+      <p>2 thread ayni anda ayni veriye yazinca veri bozulur.<br>
+         Ornek: Bakiye 1000 TL, 2 thread ayni anda 500 TL cekiyor → bakiye 500 gozukuyor, 500 TL kayip.<br>
+         <strong>Node.js'te YOK</strong> — tek thread.</p>
+    </div>
+    <div class="card" style="border-left-color: #ef5350;">
+      <h3>Deadlock</h3>
+      <p>2 thread birbirini sonsuza kadar bekler.<br>
+         A kilit X'i aldi, Y'yi bekliyor. B kilit Y'yi aldi, X'i bekliyor.<br>
+         Ikisi de sonsuza kadar bekler → program dondu.<br>
+         <strong>Node.js'te YOK</strong> — tek thread, kilit yok.</p>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <h4>Backend Gelistirici Icin Ozet</h4>
+    <p><strong>Bilmen gereken:</strong> Process/Thread farki, race condition/deadlock nedir, bellek stack/heap ayrimi.<br>
+       <strong>Bilmene gerek yok:</strong> CPU scheduler nasil yazilir, page fault handling, semaphore implementasyonu. Bunlar OS muhendisinin isi.</p>
+  </div>
+</div>
+
+<!-- ── 6. Ag ve Sistemin Temelleri ── -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="step-badge">6</div>
+    <h2>Ag ve Sistemin Temelleri <span class="eng">Networking &amp; System Fundamentals</span></h2>
+  </div>
+
+  <p>Bilgisayarlarin birbirleriyle <span class="hl">nasil konustugu</span>. Backend gelistirici olarak her gun HTTP, TCP, DNS ile calisiyorsun.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>IP Adresi</h3>
+      <p>Bilgisayarin ag uzerindeki adresi.<br>
+         <code>192.168.1.1</code> (yerel)<br>
+         <code>34.102.136.180</code> (genel)<br>
+         <code>127.0.0.1</code> = localhost (kendisi)</p>
+    </div>
+    <div class="card">
+      <h3>Port</h3>
+      <p>Ayni bilgisayarda hangi program dinliyor?<br>
+         <code>:3000</code> → Node.js<br>
+         <code>:5432</code> → PostgreSQL<br>
+         <code>:6379</code> → Redis<br>
+         <code>:443</code> → HTTPS</p>
+    </div>
+    <div class="card">
+      <h3>DNS</h3>
+      <p>Domain → IP cevrimi. Telefon rehberi gibi.<br>
+         <code>google.com</code> → <code>142.250.187.46</code><br>
+         Tarayici once DNS'e sorar, IP'yi ogrenip baglantiya gecer.</p>
+    </div>
+    <div class="card">
+      <h3>TCP vs UDP</h3>
+      <p><strong>TCP:</strong> Guvenilir, siralii, yavas. Web, API, DB baglantisi.<br>
+         <strong>UDP:</strong> Hizli, sirasiz, kayip olabilir. Video streaming, oyun.<br>
+         Backend'de genelde <strong>TCP</strong> kullanilir.</p>
+    </div>
+  </div>
+
+  <h3 style="color:#fff; margin: 30px 0 16px;">HTTP — Web'in Dili</h3>
+
+  <table class="cmp-table">
+    <tr><th>Metod</th><th>Anlami</th><th>Ornek</th></tr>
+    <tr><td><code>GET</code></td><td>Oku</td><td><code>GET /api/users</code> → kullanicilari getir</td></tr>
+    <tr><td><code>POST</code></td><td>Olustur</td><td><code>POST /api/users</code> → yeni kullanici</td></tr>
+    <tr><td><code>PUT</code></td><td>Tamamen guncelle</td><td><code>PUT /api/users/1</code> → tum alanlari guncelle</td></tr>
+    <tr><td><code>PATCH</code></td><td>Kismi guncelle</td><td><code>PATCH /api/users/1</code> → sadece adi guncelle</td></tr>
+    <tr><td><code>DELETE</code></td><td>Sil</td><td><code>DELETE /api/users/1</code> → kullaniciyi sil</td></tr>
+  </table>
+
+  <h3 style="color:#fff; margin: 30px 0 16px;">HTTP Durum Kodlari</h3>
+
+  <table class="cmp-table">
+    <tr><th>Kod</th><th>Anlami</th><th>Ne Zaman</th></tr>
+    <tr><td><code>200</code></td><td>OK — basarili</td><td>GET basarili</td></tr>
+    <tr><td><code>201</code></td><td>Created — olusturuldu</td><td>POST basarili</td></tr>
+    <tr><td><code>400</code></td><td>Bad Request — hatali istek</td><td>Validation hatasi</td></tr>
+    <tr><td><code>401</code></td><td>Unauthorized — giris yapilmamis</td><td>Token yok/gecersiz</td></tr>
+    <tr><td><code>403</code></td><td>Forbidden — yetkisiz</td><td>Admin degil</td></tr>
+    <tr><td><code>404</code></td><td>Not Found — bulunamadi</td><td>Yanlis URL</td></tr>
+    <tr><td><code>500</code></td><td>Internal Server Error</td><td>Sunucu hatas (bug)</td></tr>
+  </table>
+
+  <div class="flow">
+Bir Web Isteginin Yolculugu:
+
+Tarayici → "tickethub.com/api/events"
+    |
+    ├── 1. DNS → tickethub.com = 34.102.136.180
+    ├── 2. TCP → 34.102.136.180:443 ile baglanti kur
+    ├── 3. TLS → HTTPS sifreleme el sikismasi
+    ├── 4. HTTP → GET /api/events gondAr
+    ├── 5. Sunucu → istek islendi, JSON uretildi
+    ├── 6. HTTP → 200 OK + JSON cevap
+    └── 7. Tarayici → veriyi ekranda gosterdi</div>
+</div>
+
+</div><!-- /part2 -->
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<!--                       PART 3 — YAZILIM MUHENDISLIGI                                 -->
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<div class="part-group" id="part3" style="--accent:#e94560">
+
+<div class="section-nav">
+  <a href="#s7">Analiz ve Tasarim</a>
+  <a href="#s8">Yazilim Mimarileri</a>
+  <a href="#s9">Proje Yonetimi</a>
+</div>
+
+<!-- ── 7. Yazilim Analizi ve Tasarimi ── -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="step-badge">7</div>
+    <h2>Yazilim Analizi ve Tasarimi <span class="eng">Software Analysis &amp; Design</span></h2>
+  </div>
+
+  <p>Kod yazmadan <span class="hl">once</span> sistemi planlama disiplini. Analiz = NE yapilacak. Tasarim = NASIL yapilacak.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Gereksinim Analizi</h3>
+      <p><strong>Fonksiyonel:</strong> "Kullanici bilet satin alabilmeli"<br>
+         <strong>Fonksiyonel olmayan:</strong> "Sayfa 2 saniyede acilmali"<br>
+         Musteriden ne istedigini ogren, dokumante et.</p>
+    </div>
+    <div class="card">
+      <h3>Use Case (Kullanim Senaryosu)</h3>
+      <p>Kullanici sistemle nasil etkilesir:<br>
+         "Kullanici sisteme giris yapar → etkinlikleri gorur → koltuk secer → odeme yapar"<br>
+         Her adim bir use case.</p>
+    </div>
+    <div class="card">
+      <h3>UML Diyagramlari</h3>
+      <p><strong>Class Diagram:</strong> Siniflarin iliskileri<br>
+         <strong>Sequence Diagram:</strong> Mesaj akisi (kim kime ne gonderir)<br>
+         <strong>ER Diagram:</strong> DB tablolari ve iliskileri<br>
+         <strong>Use Case Diagram:</strong> Aktor-sistem etkilesimi</p>
+    </div>
+    <div class="card">
+      <h3>Tasarim Prensipleri</h3>
+      <p><strong>KISS:</strong> Basit tut<br>
+         <strong>DRY:</strong> Kendini tekrarlama<br>
+         <strong>YAGNI:</strong> Ihtiyacin olmayan seyi yazma<br>
+         <strong>Separation of Concerns:</strong> Her katmanin tek isi olsun</p>
+    </div>
+  </div>
+
+  <div class="flow">
+Yazilim Gelistirme Sureci:
+
+  Gereksinim   →   Analiz    →   Tasarim   →    Kod     →   Test    →   Deploy
+  "Ne istiyor?"   "Ne lazim?"   "Nasil?"      "Yapalim"   "Dogru mu?"  "Canli!"
+                                    |
+                            ┌───────┴───────┐
+                            │ Mimari secimi │
+                            │ DB tasarimi   │
+                            │ API tasarimi  │
+                            │ Sinif tasarimi│
+                            └───────────────┘</div>
+
+  <h3 style="color:#fff; margin: 30px 0 16px;">Domain-Driven Design (DDD)</h3>
+
+  <p>Karmasik is kurallarini modellemek icin kullanilan tasarim yaklasimi:</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Value Object</h3>
+      <p>Kimligi yok, degeri ile tanimlanir, degismez.<br>
+         <code>Money(100, "TRY")</code> — 100 TL = 100 TL</p>
+    </div>
+    <div class="card">
+      <h3>Entity</h3>
+      <p>Kimligi var, durumu degisir, takip edilir.<br>
+         <code>User(id: "123", name: "Ahmet")</code></p>
+    </div>
+    <div class="card">
+      <h3>Aggregate Root</h3>
+      <p>Entity kumesinin yoneticisi. Tek giris noktasi.<br>
+         Is kurallarini korur, disaridan dogrudan ic nesnelere erisilmez.</p>
+    </div>
+    <div class="card">
+      <h3>Domain Service</h3>
+      <p>Birden fazla Root'u koordine eden stateless servis.<br>
+         Ornek: Para transferi (2 hesap arasi).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── 8. Yazilim Mimarileri ── -->
+<div class="section" id="s8">
+  <div class="section-header">
+    <div class="step-badge">8</div>
+    <h2>Yazilim Mimarileri <span class="eng">Software Architectures</span></h2>
+  </div>
+
+  <p>Kodun <span class="hl">nasil organize edilecegi</span>. Hangi dosya nerede, kim kimi cagirir, bagimliliklar nasil yonetilir.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Monolith</h3>
+      <p>Tek uygulama, tek deploy. Her sey bir arada.<br>
+         <strong>Avantaj:</strong> Basit, debug kolay<br>
+         <strong>Dezavantaj:</strong> Buyudukce yavaslama, tek hata her seyi cokertirir</p>
+    </div>
+    <div class="card">
+      <h3>Modular Monolith</h3>
+      <p>Tek uygulama ama ic yapi modullere bolunmus. Her modul bagimsiz.<br>
+         <strong>TicketHub bu mimariyi kullaniyor.</strong><br>
+         Monolith'in basitligi + microservice'in organizasyonu.</p>
+    </div>
+    <div class="card">
+      <h3>Microservices</h3>
+      <p>Her modul ayri uygulama, ayri DB, ayri deploy.<br>
+         <strong>Avantaj:</strong> Bagimsiz olcekleme, takim ozerkligi<br>
+         <strong>Dezavantaj:</strong> Agir operasyonel yuk, network hatasi</p>
+    </div>
+    <div class="card">
+      <h3>Katmanli Mimari (Layered)</h3>
+      <p><code>Controller → Service → Repository → DB</code><br>
+         Her katmanin tek isi var. Ust katman alt katmani cagirir, tersi olmaz.</p>
+    </div>
+    <div class="card">
+      <h3>Hexagonal (Ports &amp; Adapters)</h3>
+      <p>Domain merkeze, disaridaki her sey (DB, API, UI) takilabilir adaptor.<br>
+         DB degistirmek = sadece adaptor degistir, domain'e dokunma.</p>
+    </div>
+    <div class="card">
+      <h3>Clean Architecture</h3>
+      <p>Bagimlilk yonu her zaman <strong>iceri</strong> dogru.<br>
+         Dis katman ic katmani bilir, ic katman disi bilmez.<br>
+         Domain → hicbir seye bagimli degil.</p>
+    </div>
+  </div>
+
+  <div class="flow">
+Katmanli Mimari:
+┌─────────────────────────────────────────────┐
+│  Presentation (Controller/Route)            │  ← HTTP istegini al
+│    ↓                                        │
+│  Application (Service)                      │  ← is mantigi orkestrasyon
+│    ↓                                        │
+│  Domain (Entity, VO, Domain Service)        │  ← is kurallari
+│    ↓                                        │
+│  Infrastructure (Repository, External API)  │  ← DB, Redis, SMTP
+└─────────────────────────────────────────────┘</div>
+
+  <table class="cmp-table">
+    <tr><th>Mimari</th><th>Ne Zaman</th><th>Karmasiklik</th><th>Ornek</th></tr>
+    <tr><td>Monolith</td><td>Kucuk proje, MVP, startup</td><td>Dusuk</td><td>Blog, portfolio</td></tr>
+    <tr><td>Modular Monolith</td><td>Orta olcek, buyume potansiyeli</td><td>Orta</td><td>TicketHub, e-ticaret</td></tr>
+    <tr><td>Microservices</td><td>Buyuk takim, yuksek olcek</td><td>Yuksek</td><td>Netflix, Uber</td></tr>
+  </table>
+</div>
+
+<!-- ── 9. Yazilim Proje Yonetimi ── -->
+<div class="section" id="s9">
+  <div class="section-header">
+    <div class="step-badge">9</div>
+    <h2>Yazilim Proje Yonetimi <span class="eng">Software Project Management</span></h2>
+  </div>
+
+  <p>Yazilimi <span class="hl">zamaninda, butcede ve istenen kalitede</span> teslim etmenin yontemi.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Waterfall (Selale)</h3>
+      <p>Siralii asalimalar: Analiz → Tasarim → Kod → Test → Deploy<br>
+         <strong>Geri donus yok</strong> — bir asamai bitince sonrakine gec.<br>
+         Sabit gereksinimler icin uygun (devlet projeleri).</p>
+    </div>
+    <div class="card">
+      <h3>Agile (Cevik)</h3>
+      <p>2-4 haftalik <strong>sprint</strong>'lerle caliss. Her sprint'te calisan urun cikar.<br>
+         Gereksinimler degisebilir — adapte ol.<br>
+         Gunumuzde cogu sirket Agile kullaniyor.</p>
+    </div>
+    <div class="card">
+      <h3>Scrum</h3>
+      <p>Agile'in en yaygin uygulamasi:<br>
+         <strong>Sprint Planning:</strong> Ne yapacagiz?<br>
+         <strong>Daily Standup:</strong> Dun ne yaptim, bugun ne yapacagim?<br>
+         <strong>Sprint Review:</strong> Ne yaptik?<br>
+         <strong>Retrospective:</strong> Nasil daha iyi yapariz?</p>
+    </div>
+    <div class="card">
+      <h3>Kanban</h3>
+      <p>Gorev panousu: <code>To Do → In Progress → Done</code><br>
+         Sprint yok, surekli akis. WIP limiti: ayni anda max N is.<br>
+         Jira, Trello, Linear — hepsi Kanban destekler.</p>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Roller</h3>
+      <p><strong>Product Owner:</strong> Ne yapilacagina karar verir<br>
+         <strong>Scrum Master:</strong> Sureci yonetir, engelleri kaldirir<br>
+         <strong>Developer:</strong> Kodu yazar<br>
+         <strong>QA:</strong> Test eder</p>
+    </div>
+    <div class="card">
+      <h3>Araclar</h3>
+      <p><code>Jira</code> → gorev takibi<br>
+         <code>Confluence</code> → dokuuantasyon<br>
+         <code>Slack</code> → iletisim<br>
+         <code>GitHub/GitLab</code> → kod + CI/CD</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <h4>Mulakatta Ne Sorulur?</h4>
+    <p>"Agile ile Waterfall farkii nedir?", "Scrum'da hangi toplantilar var?", "Sprint ne kadar surer?" — bunlar klasik sorular. Pratikte cogu sirket <strong>Scrum + Kanban karissimi</strong> kullaniyor.</p>
+  </div>
+</div>
+
+</div><!-- /part3 -->
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<!--                              PART 4 — VERITABANI                                    -->
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<div class="part-group" id="part4" style="--accent:#66bb6a">
+
+<div class="section-nav">
+  <a href="#s10">Veritabani Temelleri</a>
+  <a href="#s11">Veritabani Yonetimi</a>
+</div>
+
+<!-- ── 10. Veritabani Kullanimi ve Yonetimi ── -->
+<div class="section" id="s10">
+  <div class="section-header">
+    <div class="step-badge">10</div>
+    <h2>Veritabani Kullanimi ve Yonetimi <span class="eng">Database Usage &amp; Management</span></h2>
+  </div>
+
+  <p>Veri kalici olarak nerede ve nasil saklanir. Backend'in <span class="hl">en kritik bileseni</span> — veri kaybedilirse her sey kaybedilir.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>SQL vs NoSQL</h3>
+      <p><strong>SQL:</strong> Tablolar, iliskiler, sema zorunlu. PostgreSQL, MySQL, SQL Server.<br>
+         <strong>NoSQL:</strong> Esnek yapi, yatay olcekleme. MongoDB, Redis, Cassandra.</p>
+    </div>
+    <div class="card">
+      <h3>Ne Zaman Hangisi?</h3>
+      <p><strong>SQL:</strong> Iliskisel veri, tutarlilik kritik (banka, e-ticaret)<br>
+         <strong>NoSQL:</strong> Esnek sema, yuksek yazma hizi (log, IoT, sosyal medya)</p>
+    </div>
+    <div class="card">
+      <h3>CRUD Islemleri</h3>
+      <p><strong>C</strong>reate → <code>INSERT INTO</code><br>
+         <strong>R</strong>ead → <code>SELECT FROM</code><br>
+         <strong>U</strong>pdate → <code>UPDATE SET</code><br>
+         <strong>D</strong>elete → <code>DELETE FROM</code></p>
+    </div>
+    <div class="card">
+      <h3>ACID</h3>
+      <p><strong>A</strong>tomicity: Ya hepsi ya hicbiri<br>
+         <strong>C</strong>onsistency: Veri her zaman gecerli<br>
+         <strong>I</strong>solation: Islemler birbirini etkilemez<br>
+         <strong>D</strong>urability: Kaydedilen kaybolmaz</p>
+    </div>
+  </div>
+
+  <h3 style="color:#fff; margin: 30px 0 16px;">SQL Temelleri</h3>
+
+<pre>
+<span class="comment">-- Tablo olustur</span>
+<span class="keyword">CREATE TABLE</span> <span class="type">users</span> (
+    id       <span class="type">INT PRIMARY KEY</span>,
+    name     <span class="type">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">NOT NULL</span>,
+    email    <span class="type">VARCHAR</span>(<span class="number">255</span>) <span class="keyword">UNIQUE NOT NULL</span>,
+    age      <span class="type">INT</span>,
+    created_at <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT CURRENT_TIMESTAMP</span>
+);
+
+<span class="comment">-- Veri ekle</span>
+<span class="keyword">INSERT INTO</span> users (name, email, age) <span class="keyword">VALUES</span> (<span class="string">'Ahmet'</span>, <span class="string">'ahmet@mail.com'</span>, <span class="number">25</span>);
+
+<span class="comment">-- Sorgula</span>
+<span class="keyword">SELECT</span> name, email <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> age > <span class="number">18</span> <span class="keyword">ORDER BY</span> name;
+
+<span class="comment">-- Guncelle</span>
+<span class="keyword">UPDATE</span> users <span class="keyword">SET</span> age = <span class="number">26</span> <span class="keyword">WHERE</span> id = <span class="number">1</span>;
+
+<span class="comment">-- Sil</span>
+<span class="keyword">DELETE FROM</span> users <span class="keyword">WHERE</span> id = <span class="number">1</span>;
+</pre>
+
+  <h3 style="color:#fff; margin: 30px 0 16px;">JOIN — Tablolari Birlestirme</h3>
+
+<pre>
+<span class="comment">-- Kullanicinin siparislerini getir (2 tablo birlestir)</span>
+<span class="keyword">SELECT</span> u.name, o.total, o.status
+<span class="keyword">FROM</span> users u
+<span class="keyword">INNER JOIN</span> orders o <span class="keyword">ON</span> u.id = o.user_id
+<span class="keyword">WHERE</span> o.status = <span class="string">'CONFIRMED'</span>;
+
+<span class="comment">-- JOIN turleri:</span>
+<span class="comment">-- INNER JOIN  → iki tabloda da eslesen kayitlar</span>
+<span class="comment">-- LEFT JOIN   → sol tablodaki tum + sag tabloda eslesen</span>
+<span class="comment">-- RIGHT JOIN  → sag tablodaki tum + sol tabloda eslesen</span>
+<span class="comment">-- FULL JOIN   → her iki tablodaki tum kayitlar</span>
+</pre>
+
+  <h3 style="color:#fff; margin: 30px 0 16px;">Index — Sorgulari Hizlandirma</h3>
+
+  <div class="callout info">
+    <h4>Index Nedir?</h4>
+    <p>Kitabin arkasindaki dizin gibi. Index olmadan tum tabloyu tarar (<code>O(n)</code>). Index ile aninda bulur (<code>O(log n)</code>).<br>
+       <code>CREATE INDEX idx_email ON users(email);</code><br>
+       <strong>Dezavantaj:</strong> Yazma yavaslar (her INSERT'te index de guncellenir). Sadece sik sorgulanan alanlara ekle.</p>
+  </div>
+</div>
+
+<!-- ── 11. Veritabani Yonetimi (Ileri) ── -->
+<div class="section" id="s11">
+  <div class="section-header">
+    <div class="step-badge">11</div>
+    <h2>Veritabani Yonetimi <span class="eng">Database Administration</span></h2>
+  </div>
+
+  <p>DB'yi <span class="hl">canlida yonetmek</span>: performans, yedekleme, goc, replikasyon.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Migration (Goc)</h3>
+      <p>DB semasini kod ile versiyonla. Tablo ekle, alan degistir — hepsi kayitli.<br>
+         <code>prisma migrate dev</code> veya <code>dotnet ef migrations add</code><br>
+         Git gibi ama DB icin.</p>
+    </div>
+    <div class="card">
+      <h3>Backup &amp; Recovery</h3>
+      <p>Duzenii yedekleme: <code>pg_dump</code> (PostgreSQL)<br>
+         Point-in-time recovery: belirli bir ana geri don.<br>
+         <strong>Kural:</strong> Yedeklenmeyen veri yoktur.</p>
+    </div>
+    <div class="card">
+      <h3>Replikasyon</h3>
+      <p><strong>Primary → Replica:</strong> Yazma primary'e, okuma replica'dan.<br>
+         Neden? Okuma yogun sistemlerde yuku dagit.<br>
+         Primary cokerse replica devralir (failover).</p>
+    </div>
+    <div class="card">
+      <h3>Connection Pool</h3>
+      <p>Her istek icin yeni DB baglantisi acmak pahali (~5ms). Pool: onceden N baglanti ac, tekrar kullan.<br>
+         <code>pool_size: 20</code> → max 20 eszamanli DB baglantisi.</p>
+    </div>
+    <div class="card">
+      <h3>Normalizasyon</h3>
+      <p>Veri tekrarini onlemek icin tablolari bolme:<br>
+         <strong>1NF:</strong> Tekrarlayan grup yok<br>
+         <strong>2NF:</strong> Kismi bagimlilik yok<br>
+         <strong>3NF:</strong> Gecisli bagimlilik yok<br>
+         Pratikte 3NF yeterli.</p>
+    </div>
+    <div class="card">
+      <h3>Transaction</h3>
+      <p>Birden fazla islemi tek atom haline getir:<br>
+         <code>BEGIN → islem1 → islem2 → COMMIT</code><br>
+         Biri basarisiz → <code>ROLLBACK</code> → hepsi geri alinir.</p>
+    </div>
+  </div>
+
+  <div class="callout danger">
+    <h4>ORM (Prisma, EF Core) SQL'i Gizler — Ama Bilmen Gerekir</h4>
+    <p>ORM kolaylastirma aracii. Altinda SQL calisiyor. Performans sorunu ciktiginda, mulaakatta veya debug sirasinda SQL bilmek ZORUNLU. ORM'e guvenip SQL'i atlama.</p>
+  </div>
+</div>
+
+</div><!-- /part4 -->
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<!--                              PART 5 — C# ve .NET                                    -->
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<div class="part-group" id="part5" style="--accent:#ab47bc">
+
+<div class="section-nav">
+  <a href="#s12">C# Temel</a>
+  <a href="#s13">.NET Core</a>
+  <a href="#s14">API Gelistirme</a>
+  <a href="#s15">Microservices</a>
+</div>
+
+<!-- ── 12. C# Programlama ── -->
+<div class="section" id="s12">
+  <div class="section-header">
+    <div class="step-badge">12</div>
+    <h2>C# Programlama <span class="eng">C# Programming</span></h2>
+  </div>
+
+  <p>Microsoft'un gelistirdigi, <span class="hl">tip guvenli, nesne yonelimli</span> dil. Java'ya benzer soz dizimi, .NET ekosistemi ile birlikte kullanilir.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Degiskenler ve Tipler</h3>
+      <p><code>int</code> <code>string</code> <code>bool</code> <code>double</code> <code>decimal</code><br>
+         <code>var</code> → tip cikarimi (derleyici anlar)<br>
+         <code>int? x = null;</code> → nullable tip</p>
+    </div>
+    <div class="card">
+      <h3>Class ve Object</h3>
+      <p><code>class</code> = sablon, <code>object</code> = o sablondan uretilen nesne.<br>
+         <code>var user = new User("Ahmet");</code><br>
+         Property, Constructor, Method iceriri.</p>
+    </div>
+    <div class="card">
+      <h3>Interface</h3>
+      <p>Sozlesme — "bu metodlari uygulayacaksin" garantisi.<br>
+         <code>interface IUserRepository { User GetById(int id); }</code><br>
+         Dependency Injection'in temeli.</p>
+    </div>
+    <div class="card">
+      <h3>Async/Await</h3>
+      <p><code>async Task&lt;User&gt; GetUserAsync()</code><br>
+         <code>var user = await _db.Users.FindAsync(id);</code><br>
+         I/O islerinde thread'i kilitleme, beklerken baska ise bak.</p>
+    </div>
+    <div class="card">
+      <h3>Generic &lt;T&gt;</h3>
+      <p>Tipi sonradan belirle:<br>
+         <code>List&lt;string&gt;</code> → string listesi<br>
+         <code>List&lt;int&gt;</code> → int listesi<br>
+         Tek class, farkli tipler. Cast sorunu yok.</p>
+    </div>
+    <div class="card">
+      <h3>LINQ</h3>
+      <p>Koleksiyonlari sorgulama dili:<br>
+         <code>users.Where(u => u.Age > 18).OrderBy(u => u.Name)</code><br>
+         SQL benzeri ama C# icinde. Guclu ve okunakli.</p>
+    </div>
+  </div>
+
+<pre>
+<span class="comment">// C# Temel Ornekler</span>
+
+<span class="comment">// Record — degismez veri tipi (Value Object icin ideal)</span>
+<span class="keyword">public record</span> <span class="type">Money</span>(<span class="type">decimal</span> Amount, <span class="type">string</span> Currency);
+
+<span class="comment">// Class — degisen veri (Entity icin)</span>
+<span class="keyword">public class</span> <span class="type">User</span>
+{
+    <span class="keyword">public</span> <span class="type">int</span> Id { <span class="keyword">get</span>; <span class="keyword">set</span>; }
+    <span class="keyword">public</span> <span class="type">string</span> Name { <span class="keyword">get</span>; <span class="keyword">set</span>; }
+    <span class="keyword">public</span> <span class="type">string</span> Email { <span class="keyword">get</span>; <span class="keyword">set</span>; }
+
+    <span class="keyword">public void</span> <span class="fn">ChangeName</span>(<span class="type">string</span> newName)
+    {
+        <span class="keyword">if</span> (<span class="type">string</span>.IsNullOrWhiteSpace(newName))
+            <span class="keyword">throw new</span> <span class="type">ArgumentException</span>(<span class="string">"Ad bos olamaz"</span>);
+        Name = newName;
+    }
+}
+
+<span class="comment">// Interface — sozlesme</span>
+<span class="keyword">public interface</span> <span class="type">IUserRepository</span>
+{
+    Task&lt;<span class="type">User</span>?&gt; <span class="fn">GetByIdAsync</span>(<span class="type">int</span> id);
+    Task <span class="fn">SaveAsync</span>(<span class="type">User</span> user);
+}
+
+<span class="comment">// Generic — her tip icin calisir</span>
+<span class="keyword">public class</span> <span class="type">Result</span>&lt;T&gt;
+{
+    <span class="keyword">public</span> T Value { <span class="keyword">get</span>; }
+    <span class="keyword">public</span> <span class="type">string</span>? Error { <span class="keyword">get</span>; }
+    <span class="keyword">public</span> <span class="type">bool</span> IsSuccess => Error == <span class="keyword">null</span>;
+}
+</pre>
+</div>
+
+<!-- ── 13. Programlama Dili C# .NET Core ── -->
+<div class="section" id="s13">
+  <div class="section-header">
+    <div class="step-badge">13</div>
+    <h2>.NET Core Framework <span class="eng">C# .NET Core Platform</span></h2>
+  </div>
+
+  <p>.NET Core = C# kodunu calistiran <span class="hl">cross-platform framework</span>. Windows, Linux, macOS'ta calisir.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>.NET Core vs .NET Framework</h3>
+      <p><strong>.NET Framework:</strong> Sadece Windows, eski<br>
+         <strong>.NET Core / .NET 6+:</strong> Cross-platform, acik kaynak, modern<br>
+         Yeni projeler icin her zaman .NET Core kullan.</p>
+    </div>
+    <div class="card">
+      <h3>Dependency Injection (DI)</h3>
+      <p>.NET Core'un icine gomulu. Service'lerin bagimliklarini disaridan ver:<br>
+         <code>builder.Services.AddScoped&lt;IUserRepo, UserRepo&gt;();</code><br>
+         Somuta degil soyuta baglan (SOLID-D).</p>
+    </div>
+    <div class="card">
+      <h3>Middleware Pipeline</h3>
+      <p>Istek → Middleware 1 → Middleware 2 → Controller → Cevap<br>
+         Loglama, auth, CORS, error handling → hepsi middleware.<br>
+         Sirayla calisir, her biri istegi isleyip sonrakine iletir.</p>
+    </div>
+    <div class="card">
+      <h3>Entity Framework Core (EF Core)</h3>
+      <p>C#'in ORM'u. C# nesnelerini DB tablolarina esler.<br>
+         <code>await _db.Users.FindAsync(id);</code><br>
+         SQL yazmadan DB isle. Migration destegi var.</p>
+    </div>
+  </div>
+
+<pre>
+<span class="comment">// .NET Core — Program.cs (Minimal API)</span>
+<span class="keyword">var</span> builder = WebApplication.CreateBuilder(args);
+
+<span class="comment">// DI Container — servisleri kaydet</span>
+builder.Services.AddScoped&lt;<span class="type">IUserRepository</span>, <span class="type">UserRepository</span>&gt;();
+builder.Services.AddScoped&lt;<span class="type">UserService</span>&gt;();
+builder.Services.AddDbContext&lt;<span class="type">AppDbContext</span>&gt;();
+
+<span class="keyword">var</span> app = builder.Build();
+
+<span class="comment">// Middleware pipeline</span>
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();
+</pre>
+</div>
+
+<!-- ── 14. API Gelistirme ve Yonetimi ── -->
+<div class="section" id="s14">
+  <div class="section-header">
+    <div class="step-badge">14</div>
+    <h2>API Gelistirme ve Yonetimi <span class="eng">API Development &amp; Management</span></h2>
+  </div>
+
+  <p>Frontend, mobil ve diger servislerle <span class="hl">nasil konusursun</span>. REST API tasarimi, versiyon yonetimi, dokumantasyon.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>REST API Tasarim Kurallari</h3>
+      <p>Kaynak odakli URL'ler: <code>/api/users</code> (cogul, isim)<br>
+         Fiil kullanma: <code>/api/getUsers</code> ❌<br>
+         HTTP metodu fiili belirler: <code>GET /users</code> = getir</p>
+    </div>
+    <div class="card">
+      <h3>Versiyon Yonetimi</h3>
+      <p><code>/api/v1/users</code> → v1<br>
+         <code>/api/v2/users</code> → v2 (breaking change)<br>
+         Eski client'lar v1 kullanmaya devam eder.</p>
+    </div>
+    <div class="card">
+      <h3>Authentication &amp; Authorization</h3>
+      <p><strong>JWT Token:</strong> Giris yap → token al → her istekte gonder<br>
+         <strong>Authentication:</strong> Kim oldugun (giris)<br>
+         <strong>Authorization:</strong> Ne yapabilirsin (yetki)</p>
+    </div>
+    <div class="card">
+      <h3>Swagger / OpenAPI</h3>
+      <p>API dokumantasyonu otomatik olusturma.<br>
+         <code>/swagger</code> → tum endpoint'leri gor, test et.<br>
+         Frontend ekibi burada API'yi kesfeder.</p>
+    </div>
+    <div class="card">
+      <h3>Rate Limiting</h3>
+      <p>Bir client dakikada max 100 istek gonderebilir.<br>
+         Neden? DDoS korunma, kaynak yonetimi.<br>
+         429 Too Many Requests → limit asildi.</p>
+    </div>
+    <div class="card">
+      <h3>Pagination</h3>
+      <p>10.000 kaydi tek seferde gonderme:<br>
+         <code>GET /users?page=2&size=20</code><br>
+         Her sayfa 20 kayit, toplam 500 sayfa.</p>
+    </div>
+  </div>
+
+<pre>
+<span class="comment">// C# .NET Core — Controller ornegi</span>
+[ApiController]
+[Route(<span class="string">"api/v1/[controller]"</span>)]
+<span class="keyword">public class</span> <span class="type">UsersController</span> : ControllerBase
+{
+    <span class="keyword">private readonly</span> <span class="type">UserService</span> _service;
+
+    <span class="keyword">public</span> UsersController(<span class="type">UserService</span> service) => _service = service;
+
+    [HttpGet]
+    <span class="keyword">public async</span> Task&lt;IActionResult&gt; <span class="fn">GetAll</span>([FromQuery] <span class="type">int</span> page = <span class="number">1</span>, [FromQuery] <span class="type">int</span> size = <span class="number">20</span>)
+    {
+        <span class="keyword">var</span> result = <span class="keyword">await</span> _service.GetPagedAsync(page, size);
+        <span class="keyword">return</span> Ok(result);
+    }
+
+    [HttpGet(<span class="string">"{id}"</span>)]
+    <span class="keyword">public async</span> Task&lt;IActionResult&gt; <span class="fn">GetById</span>(<span class="type">int</span> id)
+    {
+        <span class="keyword">var</span> user = <span class="keyword">await</span> _service.GetByIdAsync(id);
+        <span class="keyword">if</span> (user == <span class="keyword">null</span>) <span class="keyword">return</span> NotFound();
+        <span class="keyword">return</span> Ok(user);
+    }
+
+    [HttpPost]
+    [Authorize]  <span class="comment">// JWT token gerekli</span>
+    <span class="keyword">public async</span> Task&lt;IActionResult&gt; <span class="fn">Create</span>([FromBody] <span class="type">CreateUserRequest</span> request)
+    {
+        <span class="keyword">var</span> user = <span class="keyword">await</span> _service.CreateAsync(request);
+        <span class="keyword">return</span> CreatedAtAction(<span class="keyword">nameof</span>(GetById), <span class="keyword">new</span> { id = user.Id }, user);
+    }
+}
+</pre>
+</div>
+
+<!-- ── 15. .NET Core Web API & Microservices ── -->
+<div class="section" id="s15">
+  <div class="section-header">
+    <div class="step-badge">15</div>
+    <h2>.NET Core Web API &amp; Microservices <span class="eng">Microservices with .NET</span></h2>
+  </div>
+
+  <p>Buyuk sistemleri bagimsiz servislere bolme. Her servis kendi DB'si, kendi deploy'u, kendi takimi.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Microservice Nedir?</h3>
+      <p>Tek bir isi yapan, bagimsiz calistirilan kucuk servis.<br>
+         <code>UserService</code> <code>OrderService</code> <code>PaymentService</code><br>
+         Her biri ayri proje, ayri DB, ayri deploy.</p>
+    </div>
+    <div class="card">
+      <h3>Servisler Arasi Iletisim</h3>
+      <p><strong>Sync:</strong> HTTP/gRPC — bir servis digerine istek gonderir, cevap bekler<br>
+         <strong>Async:</strong> Message Queue (RabbitMQ, Kafka) — mesaj birak, dinleyen alir</p>
+    </div>
+    <div class="card">
+      <h3>API Gateway</h3>
+      <p>Tek giris noktasi. Client 10 servisi bilmez, gateway bilir:<br>
+         <code>/api/users</code> → UserService<br>
+         <code>/api/orders</code> → OrderService<br>
+         Auth, rate limiting, routing — hepsi gateway'de.</p>
+    </div>
+    <div class="card">
+      <h3>Docker &amp; Container</h3>
+      <p>Her microservice bir container'da calisir.<br>
+         <code>Dockerfile</code> → nasil paketlenecegini tanimla<br>
+         <code>docker-compose</code> → birden fazla servisi birlikte calistir</p>
+    </div>
+    <div class="card">
+      <h3>Service Discovery</h3>
+      <p>Servisler birbirinin adresini nasil buluyor?<br>
+         <strong>Consul</strong>, <strong>Eureka</strong> veya Kubernetes DNS.<br>
+         "OrderService nerede?" → "192.168.1.5:5002"</p>
+    </div>
+    <div class="card">
+      <h3>Saga Pattern</h3>
+      <p>Dagiitik transaction. Birden fazla servisi kapsayan islem:<br>
+         Siparis → Odeme → Stok → Kargo<br>
+         Biri basarisiz → telafi islemleri (compensating actions).</p>
+    </div>
+  </div>
+
+  <div class="flow">
+Microservice Mimarisi:
+
+Client (Web/Mobil)
+    |
+    v
+┌─────────────┐
+│ API Gateway │  ← tek giris noktasi
+└──────┬──────┘
+       |
+  ┌────┼────┬────────┐
+  v    v    v        v
+┌────┐┌────┐┌──────┐┌───────┐
+│User││Order││Payment││Notif. │  ← her biri bagimsiz servis
+└─┬──┘└─┬──┘└──┬───┘└──┬────┘
+  v     v      v       v
+ DB1   DB2    DB3   RabbitMQ    ← her birinin kendi DB'si</div>
+</div>
+
+</div><!-- /part5 -->
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<!--                         PART 6 — ALTYAPI ve DEVOPS                                  -->
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<div class="part-group" id="part6" style="--accent:#4ec9b0">
+
+<div class="section-nav">
+  <a href="#s16">DevOps</a>
+  <a href="#s17">Sunucu Altyapisi</a>
+  <a href="#s18">Web/Mobil Temelleri</a>
+</div>
+
+<!-- ── 16. DevOps ── -->
+<div class="section" id="s16">
+  <div class="section-header">
+    <div class="step-badge">16</div>
+    <h2>DevOps <span class="eng">Development + Operations</span></h2>
+  </div>
+
+  <p>Gelistirme (Dev) ve operasyon (Ops) ekiplerinin <span class="hl">birlikte calismasi</span>. Kodu yaz, test et, deploy et — otomatik, surekli, guvenilir.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>CI — Continuous Integration</h3>
+      <p>Her commit'te otomatik test calistir.<br>
+         <code>git push</code> → GitHub Actions → test calistir → basarili/basarisiz<br>
+         Hatali kod ana dala girmez.</p>
+    </div>
+    <div class="card">
+      <h3>CD — Continuous Delivery/Deployment</h3>
+      <p><strong>Delivery:</strong> Her basarili build deploy'a hazir<br>
+         <strong>Deployment:</strong> Otomatik canli ortama cikar<br>
+         Manuel deploy yok, insan hatasi yok.</p>
+    </div>
+    <div class="card">
+      <h3>Docker</h3>
+      <p>Uygulamayi <strong>container</strong> icinde paketle.<br>
+         "Benim bilgisayarimda calisiyor" sorunu biter.<br>
+         Her yerde ayni calisir — dev, test, prod.</p>
+    </div>
+    <div class="card">
+      <h3>Kubernetes (K8s)</h3>
+      <p>Container'lari <strong>orkestre</strong> et. 100 container'i yonet:<br>
+         Olcekle, yeniden baslat, yukyu dagit, saglik kontrolu.<br>
+         Buyuk olcekli sistemler icin zorunlu.</p>
+    </div>
+    <div class="card">
+      <h3>Infrastructure as Code (IaC)</h3>
+      <p>Sunucu ayarlarini <strong>kodla</strong> tanimla:<br>
+         <code>Terraform</code> → bulut kaynakları olustur<br>
+         <code>Ansible</code> → sunuculari yapilandir<br>
+         Elle kurmak yerine kodla, versiyon kontrol et.</p>
+    </div>
+    <div class="card">
+      <h3>Monitoring &amp; Logging</h3>
+      <p><strong>Loglama:</strong> Ne oldu? (ELK Stack, Seq)<br>
+         <strong>Monitoring:</strong> Saglikli mi? (Grafana, Prometheus)<br>
+         <strong>Alerting:</strong> Sorun var mi? (PagerDuty, Slack alert)</p>
+    </div>
+  </div>
+
+  <div class="flow">
+CI/CD Pipeline:
+
+  git push → GitHub Actions / Jenkins / GitLab CI
+                |
+                ├── Build (derle)
+                ├── Test (unit + integration)
+                ├── Lint (kod kalitesi)
+                ├── Docker Image olustur
+                ├── Staging'e deploy et
+                ├── Acceptance test
+                └── Production'a deploy et ✅</div>
+</div>
+
+<!-- ── 17. Sunucu Altyapisi ── -->
+<div class="section" id="s17">
+  <div class="section-header">
+    <div class="step-badge">17</div>
+    <h2>Sunucu Altyapisi <span class="eng">Server Infrastructure</span></h2>
+  </div>
+
+  <p>Uygulamani <span class="hl">nerede ve nasil calistirirsin</span>. Fiziksel sunucu, sanal makine, container, bulut.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Linux Temelleri</h3>
+      <p>Sunucularin cogu Linux calistirir.<br>
+         <code>ls, cd, mkdir, cp, mv, rm</code> → dosya islemleri<br>
+         <code>ps, top, kill</code> → process yonetimi<br>
+         <code>chmod, chown</code> → izinler<br>
+         <code>systemctl</code> → servis yonetimi</p>
+    </div>
+    <div class="card">
+      <h3>Web Sunucu</h3>
+      <p><strong>Nginx:</strong> Reverse proxy, load balancer, statik dosya<br>
+         <strong>Apache:</strong> Eski ama yaygin<br>
+         Client → Nginx → Node.js/C# uygulamasi</p>
+    </div>
+    <div class="card">
+      <h3>Load Balancer</h3>
+      <p>Yuku birden fazla sunucuya dagit:<br>
+         Sunucu 1 ← %33 trafik<br>
+         Sunucu 2 ← %33 trafik<br>
+         Sunucu 3 ← %33 trafik<br>
+         Biri cokerse digerlerine yonlendir.</p>
+    </div>
+    <div class="card">
+      <h3>SSL/TLS (HTTPS)</h3>
+      <p>Client ile sunucu arasindaki trafigi sifrele.<br>
+         <code>http://</code> → sifresiz, okunabilir ❌<br>
+         <code>https://</code> → sifreli, guvenli ✅<br>
+         Let's Encrypt → ucretsiz sertifika.</p>
+    </div>
+  </div>
+
+  <div class="flow">
+Tipik Sunucu Mimarisi:
+
+Internet → DNS → Load Balancer (Nginx)
+                       |
+              ┌────────┼────────┐
+              v        v        v
+          Sunucu 1  Sunucu 2  Sunucu 3   ← uygulama sunuculari
+              |        |        |
+              └────────┼────────┘
+                       v
+                  PostgreSQL (Primary)
+                       |
+                  PostgreSQL (Replica)    ← yedek, okuma icin</div>
+</div>
+
+<!-- ── 18. Web ve Mobil Yazilim Gelistirmenin Temelleri ── -->
+<div class="section" id="s18">
+  <div class="section-header">
+    <div class="step-badge">18</div>
+    <h2>Web ve Mobil Yazilim Gelistirmenin Temelleri <span class="eng">Web &amp; Mobile Development Basics</span></h2>
+  </div>
+
+  <p>Backend gelistirici olarak frontend/mobil dunyasini <span class="hl">tanimak</span>. Derinlemesine bilmek degil, iletisim kurabilmek.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Web Frontend</h3>
+      <p><strong>HTML:</strong> Yapi (iskelet)<br>
+         <strong>CSS:</strong> Gorunum (stil)<br>
+         <strong>JavaScript:</strong> Davranis (etkilesim)<br>
+         Framework: React, Angular, Vue</p>
+    </div>
+    <div class="card">
+      <h3>Mobil Gelistirme</h3>
+      <p><strong>Native:</strong> Swift (iOS), Kotlin (Android)<br>
+         <strong>Cross-platform:</strong> React Native, Flutter, MAUI<br>
+         Hepsi backend API'ni cagirir — backend ayni.</p>
+    </div>
+    <div class="card">
+      <h3>SPA vs SSR vs SSG</h3>
+      <p><strong>SPA:</strong> Tek sayfa, JS ile guncellenir (React)<br>
+         <strong>SSR:</strong> Sunucuda HTML uretilir (Next.js)<br>
+         <strong>SSG:</strong> Build'de HTML uretilir (blog, dokumantasyon)</p>
+    </div>
+    <div class="card">
+      <h3>Backend Gelistirici Olarak Senin Isin</h3>
+      <p>API'yi tasarla ve dokumante et.<br>
+         CORS ayarlarini yap.<br>
+         WebSocket gerekirse implement et.<br>
+         Frontend'in ihtiyac duydugu veriyi sorgula ve don.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /part6 -->
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<!--                              PART 7 — GUVENLIK                                      -->
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<div class="part-group" id="part7" style="--accent:#ef5350">
+
+<div class="section-nav">
+  <a href="#s19">Guvenli Yazilim</a>
+  <a href="#s20">Web Guvenlik</a>
+  <a href="#s21">Siber Guvenlik</a>
+</div>
+
+<!-- ── 19. Guvenli Yazilim Gelistirmenin Temelleri ── -->
+<div class="section" id="s19">
+  <div class="section-header">
+    <div class="step-badge">19</div>
+    <h2>Guvenli Yazilim Gelistirmenin Temelleri <span class="eng">Secure Software Development</span></h2>
+  </div>
+
+  <p>Guvenlik sonradan eklenen bir ozellik degil, <span class="hl">tasarimdan itibaren</span> dusunulmesi gereken temel prensip.</p>
+
+  <div class="card-grid">
+    <div class="card" style="border-left-color: #ef5350;">
+      <h3>SQL Injection</h3>
+      <p>Kullanici girdisi SQL'e dogrudan eklenir:<br>
+         <code>WHERE name = '" + input + "'</code> ❌<br>
+         Input: <code>' OR 1=1 --</code> → tum verileri getirir<br>
+         <strong>Cozum:</strong> Parameterized query kullan.</p>
+    </div>
+    <div class="card" style="border-left-color: #ef5350;">
+      <h3>XSS (Cross-Site Scripting)</h3>
+      <p>Kullanicinin girdigi JS kodu sayfada calisir:<br>
+         Yorum: <code>&lt;script&gt;steal(cookie)&lt;/script&gt;</code><br>
+         <strong>Cozum:</strong> HTML encode, Content-Security-Policy.</p>
+    </div>
+    <div class="card" style="border-left-color: #ef5350;">
+      <h3>CSRF (Cross-Site Request Forgery)</h3>
+      <p>Kullanicinin oturumunu kullanarak istek gonderme.<br>
+         Baska sitedeki link: <code>POST /transfer?amount=1000</code><br>
+         <strong>Cozum:</strong> CSRF token, SameSite cookie.</p>
+    </div>
+    <div class="card">
+      <h3>Input Validation</h3>
+      <p>Kullanicidan gelen HER veriyi dogrula:<br>
+         Tip kontrolu, uzunluk limiti, format kontrolu.<br>
+         <strong>Kural:</strong> Kullanici girdisine ASLA guvenmee.</p>
+    </div>
+    <div class="card">
+      <h3>Sifre Yonetimi</h3>
+      <p>Sifreyi <strong>asla duz metin</strong> saklama.<br>
+         <code>bcrypt</code> veya <code>Argon2</code> ile hashle.<br>
+         Minimum 12 karakter, karmasiklik zorunlu.</p>
+    </div>
+    <div class="card">
+      <h3>OWASP Top 10</h3>
+      <p>En yaygin 10 web guvenlik acigi listesi. Her backend gelistirici bilmeli:<br>
+         Injection, Broken Auth, XSS, CSRF, Security Misconfiguration...</p>
+    </div>
+  </div>
+
+<pre>
+<span class="comment">// ❌ SQL Injection — TEHLIKELI</span>
+<span class="keyword">var</span> sql = <span class="string">$"SELECT * FROM users WHERE name = '{input}'"</span>;
+<span class="comment">// input = "' OR 1=1 --" → tum kullanicilar doner</span>
+
+<span class="comment">// ✅ Parameterized Query — GUVENLI</span>
+<span class="keyword">var</span> sql = <span class="string">"SELECT * FROM users WHERE name = @name"</span>;
+command.Parameters.AddWithValue(<span class="string">"@name"</span>, input);
+<span class="comment">// input ne olursa olsun sadece DEGER olarak islenir</span>
+</pre>
+</div>
+
+<!-- ── 20. Web Performans ve Guvenligi ── -->
+<div class="section" id="s20">
+  <div class="section-header">
+    <div class="step-badge">20</div>
+    <h2>Web Performans ve Guvenligi <span class="eng">Web Performance &amp; Security</span></h2>
+  </div>
+
+  <p>Hizli ve guvenli bir web uygulamasi icin <span class="hl">hem performans hem guvenlik</span> bir arada dusunulmeli.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Caching (Onbellekleme)</h3>
+      <p><strong>Redis:</strong> DB'ye sormadan onbellekten oku (~0.1ms vs ~5ms)<br>
+         <strong>CDN:</strong> Statik dosyalari dunyaya dagit<br>
+         <strong>HTTP Cache:</strong> Tarayici onbellegi (Cache-Control header)</p>
+    </div>
+    <div class="card">
+      <h3>Compression</h3>
+      <p>Response'u sikistir: <code>gzip</code> veya <code>brotli</code><br>
+         100KB JSON → 15KB sikistirilmis.<br>
+         Nginx veya middleware ile otomatik.</p>
+    </div>
+    <div class="card">
+      <h3>Rate Limiting &amp; Throttling</h3>
+      <p>DDoS ve brute-force korunma:<br>
+         IP basina dakikada max 100 istek.<br>
+         Login'de max 5 deneme → 15 dk bekle.</p>
+    </div>
+    <div class="card">
+      <h3>CORS</h3>
+      <p>Baska domain'den gelen istekleri kontrol et:<br>
+         <code>Access-Control-Allow-Origin: https://myapp.com</code><br>
+         <code>*</code> kullanma — sadece bilinen domain'lere izin ver.</p>
+    </div>
+    <div class="card">
+      <h3>HTTPS Everywhere</h3>
+      <p>Tum trafik sifreli olmali. HTTP → HTTPS yonlendir.<br>
+         <code>HSTS</code> header: "Bu siteye her zaman HTTPS ile baglan".</p>
+    </div>
+    <div class="card">
+      <h3>Security Headers</h3>
+      <p><code>X-Content-Type-Options: nosniff</code><br>
+         <code>X-Frame-Options: DENY</code><br>
+         <code>Strict-Transport-Security</code><br>
+         Tarayiciya guvenlik talimatlari.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── 21. Siber Guvenlik Farkindaligi ── -->
+<div class="section" id="s21">
+  <div class="section-header">
+    <div class="step-badge">21</div>
+    <h2>Siber Guvenlik Farkindaligi <span class="eng">Cybersecurity Awareness</span></h2>
+  </div>
+
+  <p>Teknik degil, <span class="hl">davranissal</span> guvenlik. En zayif halka her zaman insan.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Phishing (Oltalama)</h3>
+      <p>Sahte email/site ile bilgi calma.<br>
+         "Bankaniz hesabinizi dogrulayin" → sahte site<br>
+         <strong>Kural:</strong> Link'e tiklamadan URL'yi kontrol et.</p>
+    </div>
+    <div class="card">
+      <h3>Social Engineering</h3>
+      <p>Insanlari manipule ederek bilgi edinme.<br>
+         "IT'den ariyorum, sifrenizi soyler misiniz?"<br>
+         <strong>Kural:</strong> Sifre telefonda/email'de paylaSILMAZ.</p>
+    </div>
+    <div class="card">
+      <h3>Sifre Guvenligi</h3>
+      <p>Her site icin farkli sifre. Password manager kullan.<br>
+         2FA (Two-Factor Authentication) aktif et.<br>
+         SMS yerine Authenticator uygulamasi tercih et.</p>
+    </div>
+    <div class="card">
+      <h3>Gelistirici Icin Kurallar</h3>
+      <p><code>.env</code> dosyasini Git'e COMMIT etme.<br>
+         API key'leri koda GOMMEE.<br>
+         <code>.gitignore</code> dosyasini dogru ayarla.<br>
+         Secret management araci kullan (Vault, Azure Key Vault).</p>
+    </div>
+  </div>
+
+  <div class="callout danger">
+    <h4>Gercek Olay</h4>
+    <p>2017'de Uber'in 57 milyon kullanicisinin verisi sizdi. Sebebi: Bir gelistirici AWS anahtarlarini GitHub'a yanlislikla push'ladi. <strong>.env ve secret'lari ASLA commit etme.</strong></p>
+  </div>
+</div>
+
+</div><!-- /part7 -->
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<!--                       PART 8 — PROFESYONEL GELISIM                                  -->
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<div class="part-group" id="part8" style="--accent:#ffcc80">
+
+<div class="section-nav">
+  <a href="#s22">IT Standartlari</a>
+  <a href="#s23">Is Etigi</a>
+  <a href="#s24">Kariyer Planlama</a>
+  <a href="#s25">Yazilim Projesi</a>
+</div>
+
+<!-- ── 22. Uluslararasi IT Standartlari ── -->
+<div class="section" id="s22">
+  <div class="section-header">
+    <div class="step-badge">22</div>
+    <h2>Uluslararasi IT Standartlari <span class="eng">International IT Standards</span></h2>
+  </div>
+
+  <p>Yazilim gelistirmenin <span class="hl">kurallari ve cerceveleri</span>. Kalite, guvenlik ve surec standartlari.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>ISO 27001</h3>
+      <p>Bilgi guvenligi yonetim sistemi standardi.<br>
+         "Verileri nasil koruyorsunuz?" sorusunun cevabi.<br>
+         Sirketlerin guvenlik sertifikasi icin alir.</p>
+    </div>
+    <div class="card">
+      <h3>ISO 9001</h3>
+      <p>Kalite yonetim sistemi.<br>
+         Urun/hizmet kalitesini surdurulebilir kilma.<br>
+         "Surecleriniz tanimli ve olculebilir mi?"</p>
+    </div>
+    <div class="card">
+      <h3>KVKK / GDPR</h3>
+      <p><strong>KVKK:</strong> Turkiye kisisel verilerin korunmasi kanunu<br>
+         <strong>GDPR:</strong> AB veri koruma yonetmeligi<br>
+         Kullanici verisi nasil toplanir, saklanir, silinir — yasal zorunluluk.</p>
+    </div>
+    <div class="card">
+      <h3>ITIL</h3>
+      <p>IT hizmet yonetimi cercevesi.<br>
+         Incident management, change management, problem management.<br>
+         "Sistem coktu — kim ne yapar?" sureclerini tanimlar.</p>
+    </div>
+    <div class="card">
+      <h3>IEEE / W3C</h3>
+      <p><strong>IEEE:</strong> Yazilim muhendisligi standartlari<br>
+         <strong>W3C:</strong> Web standartlari (HTML, CSS, HTTP)<br>
+         Standartlara uymak = herkesin anlayacagi kod.</p>
+    </div>
+    <div class="card">
+      <h3>Semantic Versioning</h3>
+      <p><code>MAJOR.MINOR.PATCH</code> → <code>2.4.1</code><br>
+         <strong>MAJOR:</strong> Uyumsuz degisiklik (breaking)<br>
+         <strong>MINOR:</strong> Yeni ozellik (backward compatible)<br>
+         <strong>PATCH:</strong> Hata duzeltme</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── 23. Is Etigi ve Calisma Kulturu ── -->
+<div class="section" id="s23">
+  <div class="section-header">
+    <div class="step-badge">23</div>
+    <h2>Is Etigi ve Calisma Kulturu <span class="eng">Work Ethics &amp; Culture</span></h2>
+  </div>
+
+  <p>Teknik beceri yetmez. <span class="hl">Nasil calistigin</span> da onemli.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Kod Inceleme Kulturu</h3>
+      <p>PR review = kisisel saldiri degil, kalite kontrolu.<br>
+         Yapici geri bildirim ver: "Burasi soyle olsa daha iyi olur" ✅<br>
+         "Bu ne bicim kod" ❌</p>
+    </div>
+    <div class="card">
+      <h3>Dokumantasyon</h3>
+      <p>Kod yaz, sonra dokumante et. Gelecekteki sen (veya baskasi) tesekkur edecek.<br>
+         README, API dokumanasyonu, mimari karar kayitlari (ADR).</p>
+    </div>
+    <div class="card">
+      <h3>Zaman Yonetimi</h3>
+      <p>Tahmin verirken gercekci ol. "1 gunluk is" cogu zaman 2-3 gun surer.<br>
+         Engel cikarsa erken bildir, son gune birakmaa.</p>
+    </div>
+    <div class="card">
+      <h3>Surekli Ogrenme</h3>
+      <p>Teknoloji hizla degisiyor. Haftada birkaç saat yeni sey ogren.<br>
+         Blog oku, side project yap, conference talk izle.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── 24. Bilisim Sektorunde Kariyer Planlama ── -->
+<div class="section" id="s24">
+  <div class="section-header">
+    <div class="step-badge">24</div>
+    <h2>Bilisim Sektorunde Kariyer Planlama <span class="eng">IT Career Planning</span></h2>
+  </div>
+
+  <p>Teknik bilgi + <span class="hl">kariyer stratejisi</span> = basari.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Kariyer Yolu</h3>
+      <p><strong>Junior → Mid → Senior → Lead → Architect</strong><br>
+         Junior: Gorev al, ogren.<br>
+         Mid: Bagimsiz calis, karar ver.<br>
+         Senior: Takimi yonlendir, mimari tasarla.</p>
+    </div>
+    <div class="card">
+      <h3>Portfolio</h3>
+      <p>GitHub hesabi, kisisel projeler, blog yazilari.<br>
+         "Ne biliyorsun?" sorusunun canlii kaniti.<br>
+         Tek bir iyi proje, 10 basit projeden degerli.</p>
+    </div>
+    <div class="card">
+      <h3>Mulakat Hazirligi</h3>
+      <p><strong>Teknik:</strong> Veri yapilari, SQL, OOP, sistem tasarimi<br>
+         <strong>Davranissal:</strong> "Zor bir sorunla nasil basetttin?" STAR metodu<br>
+         <strong>Proje:</strong> "Bu projeyi anlat" — mimari kararlarini acikla.</p>
+    </div>
+    <div class="card">
+      <h3>Network</h3>
+      <p>LinkedIn profili guncel tut.<br>
+         Meetup ve konferanslara katil.<br>
+         Acik kaynak projelere katki yap.<br>
+         Taninirlik → firsat.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── 25. Yazilim Projesi ── -->
+<div class="section" id="s25">
+  <div class="section-header">
+    <div class="step-badge">25</div>
+    <h2>Yazilim Projesi <span class="eng">Capstone Project</span></h2>
+  </div>
+
+  <p>Tum ogrenilenlerin <span class="hl">tek bir projede uygulanmasi</span>. Teori → pratik.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Proje Sureci</h3>
+      <p>1. Gereksinim analizi yap<br>
+         2. DB tasarla (ER diagram)<br>
+         3. API endpoint'lerini planla<br>
+         4. Katmanli mimari ile kodla<br>
+         5. Test yaz<br>
+         6. Docker ile paketle<br>
+         7. CI/CD ile deploy et</p>
+    </div>
+    <div class="card">
+      <h3>Ornek Proje Fikirleri</h3>
+      <p><strong>E-ticaret API:</strong> Urun, sepet, siparis, odeme<br>
+         <strong>Bilet sistemi:</strong> Etkinlik, koltuk, rezervasyon (TicketHub gibi)<br>
+         <strong>Blog platformu:</strong> Yazi, yorum, kullanici, etiket<br>
+         <strong>Task yonetimi:</strong> Proje, gorev, atama, durum takibi</p>
+    </div>
+    <div class="card">
+      <h3>Degerlendirme Kriterleri</h3>
+      <p>✅ Temiz mimari (katmanli yapi)<br>
+         ✅ CRUD + is kurallari<br>
+         ✅ Auth (JWT)<br>
+         ✅ Validation<br>
+         ✅ Error handling<br>
+         ✅ Docker<br>
+         ✅ Test (en az unit test)<br>
+         ✅ API dokumantasyonu (Swagger)</p>
+    </div>
+  </div>
+
+  <div class="callout success">
+    <h4>Son Soz</h4>
+    <p>Bu 25 konuyu bilmek seni <strong>hazir bir backend gelistirici</strong> yapar. Ama onemli olan konulari ezberlemek degil, <strong>neden boyle yapildigini anlamak</strong>. "Nasil?" sorusu degisir, "Neden?" sorusu kalici.</p>
+  </div>
+</div>
+
+</div><!-- /part8 -->
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<!--                              JAVASCRIPT                                              -->
+<!-- ══════════════════════════════════════════════════════════════════════════════════════ -->
+<script>
+function switchPart(partNum) {
+  // Hide all parts
+  document.querySelectorAll('.part-group').forEach(g => g.classList.remove('active'));
+  // Show selected part
+  document.getElementById('part' + partNum).classList.add('active');
+  // Update tabs
+  document.querySelectorAll('.part-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`[data-part="${partNum}"]`).classList.add('active');
+  // Update CSS variable for accent color
+  const accent = document.querySelector(`[data-part="${partNum}"]`).style.getPropertyValue('--accent');
+  document.querySelectorAll('.step-badge').forEach(b => {
+    if (b.closest('#part' + partNum)) b.style.background = accent;
+  });
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleReveal(btn) {
+  const content = btn.nextElementSibling;
+  content.classList.toggle('open');
+  btn.textContent = content.classList.contains('open')
+    ? btn.textContent.replace('▶', '▼').replace('Goster', 'Gizle')
+    : btn.textContent.replace('▼', '▶').replace('Gizle', 'Goster');
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') {
+    const current = document.querySelector('.part-tab.active');
+    const next = current.nextElementSibling;
+    if (next && next.classList.contains('part-tab')) {
+      switchPart(parseInt(next.dataset.part));
+    }
+  }
+  if (e.key === 'ArrowLeft') {
+    const current = document.querySelector('.part-tab.active');
+    const prev = current.previousElementSibling;
+    if (prev && prev.classList.contains('part-tab')) {
+      switchPart(parseInt(prev.dataset.part));
+    }
+  }
+});
+</script>
+
+</body>
+</html>

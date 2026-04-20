@@ -1,0 +1,356 @@
+// TicketHub Prisma Schema — Tüm 8 Modülün Veritabanı Modeli
+//
+// NEDEN TEK SCHEMA DOSYASI?
+// Prisma multi-file schema'yı native desteklemiyor (preview feature'da).
+// Tüm tablolar burada — modüler monolith'te sorun değil, tek DB zaten.
+//
+// GENEL KARARLAR:
+// - UUID: Distributed ortamda çakışma olmaz, URL'de tahmin edilemez (güvenlik),
+//   auto-increment gibi sıralı değil → ID'den kayıt sayısı tahmin edilemez.
+// - Money → Int (kuruş/cent): Float/Decimal DEĞİL. 0.1 + 0.2 ≠ 0.3 floating point hatası.
+//   15000 cent = 150.00 TL. Gösterimde amount / 100 çevir.
+// - Soft delete (deletedAt): Hard delete yerine. Veri kurtarma, audit trail, FK bozulmasın.
+// - createdAt/updatedAt: Her tabloda. Debugging + audit için zorunlu.
+// - Enum: DB seviyesinde PostgreSQL enum (tip güvenliği + performans).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ────────────────────────────────────────
+// USERS MODULE
+// ────────────────────────────────────────
+
+enum UserRole {
+  USER
+  ORGANIZER
+  ADMIN
+}
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  name         String
+  role         UserRole  @default(USER)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  // Relations
+  refreshTokens RefreshToken[]
+  reservations  Reservation[]
+  tickets       Ticket[]
+
+  // Organizer'ın oluşturduğu etkinlikler
+  organizedEvents Event[] @relation("organizer")
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tokenHash])
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ────────────────────────────────────────
+// VENUES MODULE
+// ────────────────────────────────────────
+
+model Venue {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String
+  address   String
+  city      String
+  capacity  Int
+  // JSONB ile koltuk düzeni: { "VIP": { rows: 5, seatsPerRow: 20 }, "Balkon": { ... } }
+  // Neden ayrı tablo değil? Koltuk düzeni bir BÜTÜN olarak değişiyor, normalization gereksiz.
+  seatLayout Json     @map("seat_layout") @db.JsonB
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+
+  events Event[]
+
+  @@map("venues")
+}
+
+// ────────────────────────────────────────
+// EVENTS MODULE
+// ────────────────────────────────────────
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
+  SOLD_OUT
+}
+
+enum EventCategory {
+  CONCERT
+  THEATER
+  SPORTS
+  FESTIVAL
+  COMEDY
+  CONFERENCE
+  OTHER
+}
+
+model Event {
+  id          String        @id @default(uuid()) @db.Uuid
+  venueId     String        @map("venue_id") @db.Uuid
+  organizerId String        @map("organizer_id") @db.Uuid
+  name        String
+  description String        @db.Text
+  category    EventCategory @default(OTHER)
+  status      EventStatus   @default(DRAFT)
+  startsAt    DateTime      @map("starts_at")
+  endsAt      DateTime      @map("ends_at")
+  // Satış başlangıç/bitiş tarihi (etkinlik tarihinden farklı olabilir)
+  salesStartAt DateTime     @map("sales_start_at")
+  salesEndAt   DateTime     @map("sales_end_at")
+  posterUrl   String?       @map("poster_url")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  deletedAt   DateTime?     @map("deleted_at")
+
+  venue       Venue @relation(fields: [venueId], references: [id])
+  organizer   User  @relation("organizer", fields: [organizerId], references: [id])
+
+  // Relations
+  pricingEvents PricingEvent[]
+  currentPrices CurrentPrice[]
+  seatHolds     SeatHold[]
+  reservations  Reservation[]
+
+  // Composite index: şehir + tarih + status filtreleme sorgusunda kullanılır
+  // Neden? "İstanbul'daki önümüzdeki hafta yayındaki konserler" sorgusu sık çalışır
+  @@index([status, startsAt])
+  @@map("events")
+}
+
+// ────────────────────────────────────────
+// PRICING MODULE (Event Sourcing Lite)
+// ────────────────────────────────────────
+
+enum PricingEventType {
+  BASE_PRICE_SET
+  SURGE_APPLIED
+  DISCOUNT_APPLIED
+  PRICE_ADJUSTED
+  EARLY_BIRD_APPLIED
+  LAST_MINUTE_APPLIED
+}
+
+// Append-only event tablosu — INSERT var, UPDATE/DELETE YOK
+// Neden? "Bu fiyat neden bu?" sorusuna cevap verebilmek için tüm değişiklik geçmişi tutulmalı.
+// Event sourcing prensibi: geçmişi DEĞİŞTİRME, yeni event EKLE.
+model PricingEvent {
+  id          String           @id @default(uuid()) @db.Uuid
+  eventId     String           @map("event_id") @db.Uuid
+  sectionName String           @map("section_name")
+  type        PricingEventType
+  // Event verisi: { priceInCents, multiplier, reason, ... }
+  payload     Json             @db.JsonB
+  createdAt   DateTime         @default(now()) @map("created_at")
+  // NOT: updatedAt ve deletedAt YOK — append-only, değiştirilemez
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@index([eventId, sectionName, createdAt])
+  @@map("pricing_events")
+}
+
+// Projeksiyon tablosu — event'lerden hesaplanmış güncel fiyat
+// Her zaman pricing_events'ten yeniden oluşturulabilir (rebuild).
+model CurrentPrice {
+  id           String   @id @default(uuid()) @db.Uuid
+  eventId      String   @map("event_id") @db.Uuid
+  sectionName  String   @map("section_name")
+  basePriceInCents  Int @map("base_price_in_cents")
+  currentPriceInCents Int @map("current_price_in_cents")
+  multiplier   Float    @default(1.0)
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@unique([eventId, sectionName])
+  @@map("current_prices")
+}
+
+// ────────────────────────────────────────
+// BOOKING MODULE
+// ────────────────────────────────────────
+
+enum ReservationStatus {
+  PENDING    // Hold edildi, ödeme bekleniyor
+  CONFIRMED  // Ödeme yapıldı
+  EXPIRED    // Hold süresi doldu
+  CANCELLED  // Kullanıcı iptal etti
+}
+
+model Reservation {
+  id                String            @id @default(uuid()) @db.Uuid
+  userId            String            @map("user_id") @db.Uuid
+  eventId           String            @map("event_id") @db.Uuid
+  status            ReservationStatus @default(PENDING)
+  totalPriceInCents Int               @map("total_price_in_cents")
+  // Optimistic concurrency: her güncelleme version'ı artırır.
+  // UPDATE ... WHERE version = :expected → uyuşmazlıkta reddeder.
+  // Neden? İki process aynı reservation'ı aynı anda güncellerse biri reddedilir
+  // → çift ödeme veya çift iptal ÖNLENIR.
+  version           Int               @default(1)
+  expiresAt         DateTime          @map("expires_at")
+  confirmedAt       DateTime?         @map("confirmed_at")
+  cancelledAt       DateTime?         @map("cancelled_at")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  user      User      @relation(fields: [userId], references: [id])
+  event     Event     @relation(fields: [eventId], references: [id])
+  seatHolds SeatHold[]
+  payment   Payment?
+  tickets   Ticket[]
+
+  @@index([userId, eventId])
+  @@index([status, expiresAt])
+  @@map("reservations")
+}
+
+enum SeatHoldStatus {
+  HELD
+  CONFIRMED
+  RELEASED
+}
+
+model SeatHold {
+  id            String         @id @default(uuid()) @db.Uuid
+  reservationId String         @map("reservation_id") @db.Uuid
+  eventId       String         @map("event_id") @db.Uuid  // Denormalized — unique index için
+  sectionName   String         @map("section_name")
+  row           Int
+  seat          Int
+  priceInCents  Int            @map("price_in_cents")
+  status        SeatHoldStatus @default(HELD)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  reservation Reservation @relation(fields: [reservationId], references: [id])
+  event       Event       @relation(fields: [eventId], references: [id])
+  ticket      Ticket?
+
+  // Aynı koltuk aynı etkinlikte sadece BİR aktif hold olabilir
+  // Partial unique index (sadece HELD ve CONFIRMED durumlar için)
+  // Prisma native partial index desteklemez → custom migration SQL'i ile eklenecek
+  @@unique([eventId, sectionName, row, seat])
+  @@map("seat_holds")
+}
+
+// ────────────────────────────────────────
+// PAYMENTS MODULE
+// ────────────────────────────────────────
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+model Payment {
+  id              String        @id @default(uuid()) @db.Uuid
+  reservationId   String        @unique @map("reservation_id") @db.Uuid
+  externalId      String?       @map("external_id") // Stripe payment intent ID
+  amountInCents   Int           @map("amount_in_cents")
+  currency        String        @default("TRY")
+  status          PaymentStatus @default(PENDING)
+  idempotencyKey  String?       @unique @map("idempotency_key")
+  refundedAmountInCents Int     @default(0) @map("refunded_amount_in_cents")
+  metadata        Json?         @db.JsonB
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  reservation Reservation @relation(fields: [reservationId], references: [id])
+
+  @@map("payments")
+}
+
+// ────────────────────────────────────────
+// TICKETS MODULE
+// ────────────────────────────────────────
+
+enum TicketStatus {
+  VALID
+  USED
+  REVOKED
+}
+
+model Ticket {
+  id            String       @id @default(uuid()) @db.Uuid
+  reservationId String       @map("reservation_id") @db.Uuid
+  seatHoldId    String       @unique @map("seat_hold_id") @db.Uuid
+  userId        String       @map("user_id") @db.Uuid
+  qrPayload     String       @map("qr_payload") @db.Text
+  status        TicketStatus @default(VALID)
+  usedAt        DateTime?    @map("used_at")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  reservation Reservation @relation(fields: [reservationId], references: [id])
+  seatHold    SeatHold    @relation(fields: [seatHoldId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
+
+  @@map("tickets")
+}
+
+// ────────────────────────────────────────
+// NOTIFICATIONS MODULE
+// ────────────────────────────────────────
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model Notification {
+  id          String              @id @default(uuid()) @db.Uuid
+  recipientId String              @map("recipient_id") @db.Uuid
+  channel     NotificationChannel
+  type        String              // BOOKING_CONFIRMED, TICKET_READY, EVENT_REMINDER, etc.
+  subject     String?
+  body        String              @db.Text
+  status      NotificationStatus  @default(PENDING)
+  attempts    Int                 @default(0)
+  lastError   String?             @map("last_error") @db.Text
+  sentAt      DateTime?           @map("sent_at")
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
+
+  @@index([recipientId, createdAt])
+  @@index([status])
+  @@map("notifications")
+}

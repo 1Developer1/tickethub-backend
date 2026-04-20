@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post-it → Kod Haritasi — TicketHub</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f0f1a; color: #e0e0e0; line-height: 1.6; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    padding: 50px 40px; text-align: center; border-bottom: 4px solid #ff9800;
+  }
+  .hero h1 { font-size: 2.4rem; color: #fff; }
+  .hero h1 .arrow-icon { color: #ff9800; }
+  .hero .sub { color: #a0aec0; font-size: 1.1rem; margin-top: 8px; }
+
+  /* ── NAV ── */
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(15,15,26,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid #2a2a4a;
+    display: flex; overflow-x: auto; padding: 0 16px;
+  }
+  .nav a {
+    color: #888; text-decoration: none; padding: 12px 16px;
+    font-size: 0.82rem; white-space: nowrap; transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+  }
+  .nav a:hover, .nav a.active { color: #fff; border-bottom-color: #ff9800; }
+
+  /* ── SECTION ── */
+  .section { max-width: 1100px; margin: 0 auto; padding: 50px 24px 60px; }
+  .ctx-header {
+    display: flex; align-items: center; gap: 16px; margin-bottom: 10px;
+  }
+  .ctx-icon { font-size: 2rem; }
+  .ctx-header h2 { font-size: 1.7rem; color: #fff; }
+  .ctx-header .ctx-badge-simple { background: #4caf50; color: #fff; padding: 3px 12px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+  .ctx-header .ctx-badge-medium { background: #ff9800; color: #3e2723; padding: 3px 12px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+  .ctx-header .ctx-badge-complex { background: #e94560; color: #fff; padding: 3px 12px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+  .ctx-desc { color: #888; font-size: 0.95rem; margin-bottom: 30px; max-width: 700px; }
+  .divider { border: none; border-top: 1px solid #2a2a4a; margin: 0; }
+
+  /* ── EVOLUTION CARD ── */
+  .evo-card {
+    display: grid; grid-template-columns: 200px 48px 1fr;
+    gap: 0; margin-bottom: 28px; align-items: stretch;
+    background: rgba(255,255,255,0.02); border-radius: 14px;
+    overflow: hidden; border: 1px solid #2a2a4a;
+    transition: border-color 0.2s;
+  }
+  .evo-card:hover { border-color: #ff9800; }
+
+  /* Sol: Post-it */
+  .evo-postit {
+    padding: 20px 16px; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; text-align: center;
+  }
+  .evo-postit .mini-postit {
+    padding: 12px 14px; border-radius: 3px; min-width: 140px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.4); font-size: 0.82rem;
+    transform: rotate(-1deg);
+  }
+  .evo-postit .mini-postit .mp-label {
+    font-size: 0.58rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; margin-bottom: 4px;
+  }
+  .evo-postit .mini-postit .mp-title { font-weight: 700; font-size: 0.88rem; line-height: 1.3; }
+  .mini-postit.event { background: #ff9800; color: #3e2723; }
+  .mini-postit.command { background: #42a5f5; color: #0d2137; }
+  .mini-postit.policy { background: #ab47bc; color: #fff; }
+  .mini-postit.hotspot { background: #ef5350; color: #fff; }
+  .mini-postit.read { background: #66bb6a; color: #1b3a1b; }
+  .mini-postit.external { background: #f48fb1; color: #3e1929; }
+  .mini-postit.actor { background: #ffee58; color: #3e2723; }
+
+  /* Orta: Ok */
+  .evo-arrow {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(255,152,0,0.06); position: relative;
+  }
+  .evo-arrow .shaft {
+    width: 3px; height: 30px; background: #ff9800; border-radius: 2px;
+  }
+  .evo-arrow .head {
+    width: 0; height: 0;
+    border-left: 7px solid transparent; border-right: 7px solid transparent;
+    border-top: 10px solid #ff9800;
+    margin-top: -1px;
+  }
+  .evo-arrow .evo-label {
+    writing-mode: vertical-rl; text-orientation: mixed;
+    font-size: 0.58rem; color: #ff9800; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase;
+    position: absolute; right: -2px; top: 50%; transform: translateY(-50%) rotate(180deg);
+  }
+
+  /* Sag: Kod */
+  .evo-code-side {
+    padding: 20px 24px; display: flex; flex-direction: column; justify-content: center;
+  }
+  .evo-code-side .file-path {
+    font-size: 0.72rem; color: #666; font-family: monospace;
+    margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+  }
+  .evo-code-side .file-path .file-icon { color: #ff9800; }
+  .evo-code-side .code-block {
+    background: #1e1e2e; border: 1px solid #333; border-radius: 8px;
+    padding: 14px 16px; overflow-x: auto; font-size: 0.8rem;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    line-height: 1.5; color: #d4d4d4;
+  }
+  .evo-code-side .explain {
+    font-size: 0.82rem; color: #999; margin-top: 10px; line-height: 1.5;
+  }
+  .evo-code-side .explain strong { color: #e0e0e0; }
+
+  /* Syntax colors */
+  .kw { color: #c586c0; }  /* keyword: export, class, if, throw */
+  .fn { color: #dcdcaa; }  /* function name */
+  .str { color: #ce9178; } /* string */
+  .cm { color: #6a9955; }  /* comment */
+  .tp { color: #4ec9b0; }  /* type */
+  .num { color: #b5cea8; } /* number */
+  .op { color: #d4d4d4; }  /* operator */
+  .pr { color: #9cdcfe; }  /* property/variable */
+  .dc { color: #569cd6; }  /* declaration: const, let */
+
+  /* ── PATTERN TAG ── */
+  .pattern-tag {
+    display: inline-block; padding: 2px 10px; border-radius: 10px;
+    font-size: 0.7rem; font-weight: 600; margin-left: 8px;
+    vertical-align: middle;
+  }
+  .pattern-tag.entity { background: rgba(233,69,96,0.2); color: #e94560; }
+  .pattern-tag.vo { background: rgba(66,165,245,0.2); color: #42a5f5; }
+  .pattern-tag.event-s { background: rgba(171,71,188,0.2); color: #ce93d8; }
+  .pattern-tag.adapter { background: rgba(244,143,177,0.2); color: #f48fb1; }
+  .pattern-tag.service { background: rgba(76,175,80,0.2); color: #66bb6a; }
+  .pattern-tag.infra { background: rgba(255,152,0,0.2); color: #ff9800; }
+  .pattern-tag.middleware { background: rgba(255,238,88,0.2); color: #ffee58; }
+
+  /* ── MULTI-POSTIT row ── */
+  .evo-card.multi .evo-postit { gap: 8px; }
+  .evo-card.multi .evo-postit .mini-postit { min-width: 120px; font-size: 0.78rem; }
+  .evo-card.multi .evo-postit .mini-postit .mp-title { font-size: 0.82rem; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Post-it <span class="arrow-icon">&#10132;</span> Kod Haritasi</h1>
+  <div class="sub">Event Storming'deki her post-it, projede hangi koda donustu?</div>
+</div>
+
+<nav class="nav">
+  <a href="#booking">Booking (Core)</a>
+  <a href="#pricing">Pricing</a>
+  <a href="#payment">Payment</a>
+  <a href="#ticketing">Ticketing</a>
+  <a href="#events">Event Catalog</a>
+  <a href="#identity">Identity</a>
+  <a href="#notification">Notification</a>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════════
+     BOOKING — CORE DOMAIN
+     ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="booking">
+  <div class="ctx-header">
+    <div class="ctx-icon">&#11088;</div>
+    <h2>Booking</h2>
+    <span class="ctx-badge-complex">Core Domain</span>
+  </div>
+  <div class="ctx-desc">En karmasik context. 6 post-it → Entity, Value Object, Distributed Lock, BullMQ Worker, Domain Event kodu oldu.</div>
+
+  <!-- 1. Koltuk Secildi → acquireSeatLock -->
+  <div class="evo-card">
+    <div class="evo-postit">
+      <div class="mini-postit hotspot">
+        <div class="mp-label">&#9889; Hot Spot</div>
+        <div class="mp-title">Ayni koltuğa 500 kisi ayni anda?</div>
+      </div>
+    </div>
+    <div class="evo-arrow"><div class="shaft"></div><div class="head"></div><div class="evo-label">evrildi</div></div>
+    <div class="evo-code-side">
+      <div class="file-path"><span class="file-icon">&#128196;</span> shared/lock/redlock.ts <span class="pattern-tag infra">Distributed Lock</span></div>
+      <div class="code-block"><span class="kw">export async function</span> <span class="fn">acquireSeatLock</span>(
+  <span class="pr">eventId</span>: <span class="tp">string</span>, <span class="pr">seatKey</span>: <span class="tp">string</span>, <span class="pr">ttlMs</span> = <span class="num">30_000</span>
+) {
+  <span class="dc">const</span> <span class="pr">resource</span> = <span class="str">`lock:seat:${eventId}:${seatKey}`</span>;
+  <span class="kw">try</span> {
+    <span class="dc">const</span> <span class="pr">lock</span> = <span class="kw">await</span> <span class="pr">redlock</span>.<span class="fn">acquire</span>([<span class="pr">resource</span>], <span class="pr">ttlMs</span>);
+    <span class="kw">return</span> <span class="pr">lock</span>;
+  } <span class="kw">catch</span> {
+    <span class="kw">throw new</span> <span class="tp">SeatUnavailableError</span>(<span class="str">`${seatKey} (another user...)`</span>);
+  }
+}</div>
+      <div class="explain"><strong>Kirmizi post-it</strong> "500 kisi ayni anda tiklarsa?" → Redis distributed lock (Redlock) ile cozuldu. Ilk gelen kilidi alir, digerleri <code>SeatUnavailableError</code> alir.</div>
+    </div>
+  </div>
+
+  <!-- 2. Rezervasyon Olusturuldu → Reservation.create() -->
+  <div class="evo-card">
+    <div class="evo-postit">
+      <div class="mini-postit event">
+        <div class="mp-label">Event</div>
+        <div class="mp-title">Rezervasyon Olusturuldu (PENDING)</div>
+      </div>
+    </div>
+    <div class="evo-arrow"><div class="shaft"></div><div class="head"></div><div class="evo-label">evrildi</div></div>
+    <div class="evo-code-side">
+      <div class="file-path"><span class="file-icon">&#128196;</span> booking/domain/reservation.entity.ts <span class="pattern-tag entity">Entity</span></div>
+      <div class="code-block"><span class="kw">static</span> <span class="fn">create</span>(<span class="pr">params</span>): <span class="tp">Reservation</span> {
+  <span class="dc">const</span> <span class="pr">reservation</span> = <span class="kw">new</span> <span class="tp">Reservation</span>({
+    ...<span class="pr">params</span>,
+    <span class="pr">status</span>: <span class="str">'PENDING'</span>,    <span class="cm">// ← post-it'teki "(PENDING)" buradan</span>
+    <span class="pr">version</span>: <span class="num">1</span>,
+    <span class="pr">createdAt</span>: <span class="kw">new</span> <span class="tp">Date</span>(),
+  });
+
+  <span class="cm">// Domain event uret — post-it'teki turuncu "Rezervasyon Olusturuldu"</span>
+  <span class="pr">reservation</span>.<span class="pr">_domainEvents</span>.<span class="fn">push</span>({
+    <span class="pr">type</span>: <span class="str">'reservation.created'</span>,
+    ...<span class="pr">payload</span>
+  });
+
+  <span class="kw">return</span> <span class="pr">reservation</span>;
+}</div>
+      <div class="explain"><strong>Turuncu post-it</strong> "Rezervasyon Olusturuldu" → Entity factory method oldu. <code>private constructor</code> + <code>static create()</code> pattern'i ile sadece bu kapidan olusturulabilir. Status, version, domain event hepsi burada kontrol ediliyor.</div>
+    </div>
+  </div>
+
+  <!-- 3. Rezervasyon Onaylandi → confirmPayment() -->
+  <div class="evo-card">
+    <div class="evo-postit">
+      <div class="mini-postit event">
+        <div class="mp-label">Event</div>
+        <div class="mp-title">Rezervasyon Onaylandi (CONFIRMED)</div>
+      </div>
+    </div>
+    <div class="evo-arrow"><div class="shaft"></div><div class="head"></div><div class="evo-label">evrildi</div></div>
+    <div class="evo-code-side">
+      <div class="file-path"><span class="file-icon">&#128196;</span> booking/domain/reservation.entity.ts <span class="pattern-tag entity">Command Method</span></div>
+      <div class="code-block"><span class="fn">confirmPayment</span>(<span class="pr">paymentId</span>: <span class="tp">string</span>): <span class="tp">void</span> {
+  <span class="cm">// Guard: sadece PENDING onaylanabilir</span>
+  <span class="kw">if</span> (<span class="kw">this</span>.<span class="pr">props</span>.<span class="pr">status</span> !== <span class="str">'PENDING'</span>)
+    <span class="kw">throw new</span> <span class="tp">Error</span>(<span class="str">`Cannot confirm in '${this.props.status}'`</span>);
+
+  <span class="cm">// Guard: hold suresi dolmamis olmali</span>
+  <span class="kw">if</span> (<span class="kw">this</span>.<span class="fn">isHoldExpired</span>())
+    <span class="kw">throw new</span> <span class="tp">Error</span>(<span class="str">'Hold has expired'</span>);
+
+  <span class="cm">// State degisikligi</span>
+  <span class="kw">this</span>.<span class="pr">props</span>.<span class="pr">status</span> = <span class="str">'CONFIRMED'</span>;
+  <span class="kw">this</span>.<span class="pr">props</span>.<span class="pr">version</span> += <span class="num">1</span>;
+
+  <span class="cm">// Domain event → diger moduller tepki verecek</span>
+  <span class="kw">this</span>.<span class="pr">_domainEvents</span>.<span class="fn">push</span>({ <span class="pr">type</span>: <span class="str">'reservation.confirmed'</span> });
+}</div>
+      <div class="explain"><strong>Turuncu post-it</strong> "Onaylandi" → Entity'nin command method'u oldu. Guard clause'lar (status + expiry) workshop'taki <strong>kirmizi hot spot</strong> "10dk doldu ama odeme tam o anda?" sorusunun cozumu.</div>
+    </div>
+  </div>
+
+  <!-- 4. Policy: 10dk zamanlayici → BullMQ delayed job -->
+  <div class="evo-card">
+    <div class="evo-postit">
+      <div class="mini-postit policy">
+        <div class="mp-label">Policy</div>
+        <div class="mp-title">10dk dolunca → expire et</div>
+      </div>
+    </div>
+    <div class="evo-arrow"><div class="shaft"></div><div class="head"></div><div class="evo-label">evrildi</div></div>
+    <div class="evo-code-side">
+      <div class="file-path"><span class="file-icon">&#128196;</span> booking/booking.service.ts <span class="pattern-tag infra">BullMQ Delayed Job</span></div>
+      <div class="code-block"><span class="cm">// Reservation olusturulduktan hemen sonra:</span>
+<span class="kw">await</span> <span class="pr">asyncEventBus</span>.<span class="fn">emit</span>(
+  <span class="str">'reservation.expired'</span>,
+  { <span class="pr">reservationId</span>: <span class="pr">reservation</span>.<span class="pr">id</span> },
+  { <span class="pr">delay</span>: <span class="num">600_000</span> }  <span class="cm">// ← 10 dakika = 600.000ms</span>
+);
+<span class="cm">// Redis'e yaziliyor: "10dk sonra bu job'u calistir"</span>
+<span class="cm">// Kullanici BEKLEMIYOR — istek hemen doner</span>
+
+<span class="cm">// 10dk sonra BullMQ worker calisir:</span>
+<span class="pr">reservation</span>.<span class="fn">expire</span>();   <span class="cm">// PENDING → EXPIRED</span>
+<span class="pr">bookingRepository</span>.<span class="fn">releaseSeats</span>();  <span class="cm">// koltuklar serbest</span></div>
+      <div class="explain"><strong>Mor post-it</strong> "10dk dolunca expire et" → BullMQ delayed job oldu. <code>delay: 600_000</code> ile Redis'e "10dk sonra calistir" talimati veriliyor. Insan mudahalesi yok — tamamen otomatik.</div>
+    </div>
+  </div>
+
+  <!-- 5. Money value object -->
+  <div class="evo-card">
+    <div class="evo-postit">
+      <div class="mini-postit hotspot">
+        <div class="mp-label">&#9889; Hot Spot</div>
+        <div class="mp-title">Float ile para hesaplama hatasi</div>
+      </div>
+    </div>
+    <div class="evo-arrow"><div class="shaft"></div><div class="head"></div><div class="evo-label">evrildi</div></div>
+    <div class="evo-code-side">
+      <div class="file-path"><span class="file-icon">&#128196;</span> booking/domain/money.value-object.ts <span class="pattern-tag vo">Value Object</span></div>
+      <div class="code-block"><span class="kw">export class</span> <span class="tp">Money</span> {
+  <span class="kw">private constructor</span>(
+    <span class="kw">private readonly</span> <span class="pr">_amountInCents</span>: <span class="tp">number</span>,
+    <span class="kw">private readonly</span> <span class="pr">_currency</span>: <span class="tp">string</span> = <span class="str">'TRY'</span>
+  ) {
+    <span class="kw">if</span> (<span class="pr">_amountInCents</span> < <span class="num">0</span>)
+      <span class="kw">throw new</span> <span class="tp">Error</span>(<span class="str">'cannot be negative'</span>);
+    <span class="kw">if</span> (!<span class="tp">Number</span>.<span class="fn">isInteger</span>(<span class="pr">_amountInCents</span>))
+      <span class="kw">throw new</span> <span class="tp">Error</span>(<span class="str">'must be integer'</span>);
+  }
+
+  <span class="cm">// Immutable: her islem YENI Money doner</span>
+  <span class="fn">add</span>(<span class="pr">other</span>: <span class="tp">Money</span>): <span class="tp">Money</span> {
+    <span class="kw">this</span>.<span class="fn">assertSameCurrency</span>(<span class="pr">other</span>);
+    <span class="kw">return new</span> <span class="tp">Money</span>(<span class="kw">this</span>.<span class="pr">_amountInCents</span> + <span class="pr">other</span>.<span class="pr">_amountInCents</span>);
+  }
+}</div>
+      <div class="explain">Workshop'ta "para nasil saklanacak?" sorusu → Integer cents (15000 = 150.00 TL). <code>0.1 + 0.2 ≠ 0.3</code> float hatasini imkansiz kiliyor. Immutable: <code>add()</code> eski nesneyi degistirmez, yeni doner.</div>
+    </div>
+  </div>
+
+  <!-- 6. Scalping kontrolu -->
+  <div class="evo-card">
+    <div class="evo-postit">
+      <div class="mini-postit hotspot">
+        <div class="mp-label">&#9889; Hot Spot</div>
+        <div class="mp-title">Karaborsaci 100 bilet alirsa?</div>
+      </div>
+    </div>
+    <div class="evo-arrow"><div class="shaft"></div><div class="head"></div><div class="evo-label">evrildi</div></div>
+    <div class="evo-code-side">
+      <div class="file-path"><span class="file-icon">&#128196;</span> booking/booking.service.ts <span class="pattern-tag service">Business Rule</span></div>
+      <div class="code-block"><span class="dc">const</span> <span class="pr">existingCount</span> = <span class="kw">await</span> <span class="pr">bookingRepository</span>
+  .<span class="fn">getUserSeatCount</span>(<span class="pr">userId</span>, <span class="pr">eventId</span>);
+
+<span class="kw">if</span> (<span class="pr">existingCount</span> + <span class="pr">seats</span>.<span class="pr">length</span> > <span class="num">6</span>) {
+  <span class="kw">throw new</span> <span class="tp">ValidationError</span>(
+    <span class="str">`Maximum 6 seats per event.`</span>
+  );
+}</div>
+      <div class="explain"><strong>Kirmizi post-it</strong> → Application service'te basit bir DB count sorgusu + if kontrolu. Domain model icinde degil cunku DB erisimine ihtiyac var.</div>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════════
+     PRICING
+     ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="pricing">
+  <div class="ctx-header">
+    <div class="ctx-icon">&#128200;</div>
+    <h2>Pricing</h2>
+    <span class="ctx-badge-medium">Orta</span>
+  </div>
+  <div class="ctx-desc">Yesil post-it "Fiyat neden bu?" sorusu → Event Sourcing Lite pattern'ini doğurdu.</div>
+
+  <div class="evo-card">
+    <div class="evo-postit">
+      <div class="mini-postit read">
+        <div class="mp-label">Read Model</div>
+        <div class="mp-title">"Fiyat neden 750 TL?"</div>
+      </div>
+    </div>
+    <div class="evo-arrow"><div class="shaft"></div><div class="head"></div><div class="evo-label">evrildi</div></div>
+    <div class="evo-code-side">
+      <div class="file-path"><span class="file-icon">&#128196;</span> pricing/domain/pricing.events.ts <span class="pattern-tag event-s">Event Sourcing Lite</span></div>
+      <div class="code-block"><span class="kw">export function</span> <span class="fn">replayPricingEvents</span>(<span class="pr">events</span>: <span class="tp">PricingDomainEvent</span>[]) {
+  <span class="dc">let</span> <span class="pr">currentPriceInCents</span> = <span class="num">0</span>;
+
+  <span class="kw">for</span> (<span class="dc">const</span> <span class="pr">event</span> <span class="kw">of</span> <span class="pr">events</span>) {
+    <span class="kw">switch</span> (<span class="pr">event</span>.<span class="pr">type</span>) {
+      <span class="kw">case</span> <span class="str">'BASE_PRICE_SET'</span>:
+        <span class="pr">currentPriceInCents</span> = <span class="pr">event</span>.<span class="pr">priceInCents</span>;
+        <span class="kw">break</span>;
+      <span class="kw">case</span> <span class="str">'SURGE_APPLIED'</span>:
+        <span class="pr">currentPriceInCents</span> = <span class="pr">event</span>.<span class="pr">newPriceInCents</span>;
+        <span class="kw">break</span>;
+    }
+  }
+  <span class="cm">// Tum event'ler kronolojik replay → guncel fiyat</span>
+  <span class="kw">return</span> { <span class="pr">currentPriceInCents</span> };
+}</div>
+      <div class="explain"><strong>Yesil post-it</strong> "Fiyat neden bu?" → Append-only event tablosu + replay fonksiyonu. Her fiyat degisikligi kronolojik kaydediliyor, UPDATE/DELETE yok. Admin gecmisi sorgulayabilir.</div>
+    </div>
+  </div>
+
+  <div class="evo-card">
+    <div class="evo-postit">
+      <div class="mini-postit policy">
+        <div class="mp-label">Policy</div>
+        <div class="mp-title">Koltuk &lt;%20 → fiyat 1.3x</div>
+      </div>
+    </div>
+    <div class="evo-arrow"><div class="shaft"></div><div class="head"></div><div class="evo-label">evrildi</div></div>
+    <div class="evo-code-side">
+      <div class="file-path"><span class="file-icon">&#128196;</span> config/constants.ts <span class="pattern-tag service">Config Constant</span></div>
+      <div class="code-block"><span class="kw">export const</span> <span class="pr">PRICING_RULES</span> = {
+  <span class="pr">LOW_AVAILABILITY_THRESHOLD</span>: <span class="num">0.20</span>,    <span class="cm">// %20'den az koltuk</span>
+  <span class="pr">LOW_AVAILABILITY_MULTIPLIER</span>: <span class="num">1.3</span>,    <span class="cm">// → fiyat x1.3</span>
+  <span class="pr">CRITICAL_AVAILABILITY_THRESHOLD</span>: <span class="num">0.05</span>,<span class="cm">// %5'ten az</span>
+  <span class="pr">CRITICAL_AVAILABILITY_MULTIPLIER</span>: <span class="num">1.8</span>,<span class="cm">// → fiyat x1.8</span>
+  <span class="pr">LAST_MINUTE_DAYS</span>: <span class="num">7</span>,               <span class="cm">// 7 gunden az</span>
+  <span class="pr">LAST_MINUTE_MULTIPLIER</span>: <span class="num">1.2</span>,        <span class="cm">// → fiyat x1.2</span>
+  <span class="pr">EARLY_BIRD_HOURS</span>: <span class="num">48</span>,              <span class="cm">// ilk 48 saat</span>
+  <span class="pr">EARLY_BIRD_DISCOUNT</span>: <span class="num">0.15</span>,          <span class="cm">// → %15 indirim</span>
+};</div>
+      <div class="explain"><strong>Mor post-it</strong>'teki otomatik kurallar → config sabitine donustu. Degistirmek icin tek yer. Policy'nin "ne zaman" kismi event handler'da, "ne kadar" kismi burada.</div>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════════
+     PAYMENT
+     ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="payment">
+  <div class="ctx-header">
+    <div class="ctx-icon">&#128179;</div>
+    <h2>Payment</h2>
+    <span class="ctx-badge-medium">Orta</span>
+  </div>
+  <div class="ctx-desc">Kirmizi hot spot'lar "Stripe cokerse?" ve "cift odeme?" → Circuit Breaker + Idempotency + Adapter pattern oldu.</div>
+
+  <div class="evo-card">
+    <div class="evo-postit">
+      <div class="mini-postit external">
+        <div class="mp-label">External</div>
+        <div class="mp-title">Stripe (yarin iyzico olabilir)</div>
+      </div>
+    </div>
+    <div class="evo-arrow"><div class="shaft"></div><div class="head"></div><div class="evo-label">evrildi</div></div>
+    <div class="evo-code-side">
+      <div class="file-path"><span class="file-icon">&#128196;</span> payments/ports/payment-gateway.port.ts <span class="pattern-tag adapter">Port/Adapter</span></div>
+      <div class="code-block"><span class="kw">export interface</span> <span class="tp">PaymentGateway</span> {
+  <span class="fn">createPaymentIntent</span>(<span class="pr">amount</span>, <span class="pr">currency</span>, <span class="pr">metadata</span>): <span class="tp">Promise</span>;
+  <span class="fn">capturePayment</span>(<span class="pr">intentId</span>): <span class="tp">Promise</span>;
+  <span class="fn">refund</span>(<span class="pr">intentId</span>, <span class="pr">amount</span>?): <span class="tp">Promise</span>;
+  <span class="fn">verifyWebhookSignature</span>(<span class="pr">payload</span>, <span class="pr">sig</span>): <span class="tp">boolean</span>;
+}
+
+<span class="cm">// adapters/stripe.adapter.ts  → Stripe SDK</span>
+<span class="cm">// adapters/mock.adapter.ts    → Test/dev icin</span></div>
+      <div class="explain"><strong>Pembe post-it</strong> "Stripe (dis servis)" → Interface (port) + 2 adapter oldu. Yarin Stripe'dan iyzico'ya gecsen sadece yeni adapter yaz, service koduna dokunma.</div>
+    </div>
+  </div>
+
+  <div class="evo-card">
+    <div class="evo-postit">
+      <div class="mini-postit hotspot">
+        <div class="mp-label">&#9889; Hot Spot</div>
+        <div class="mp-title">Stripe cokerse 1000 istek 30sn bekler?</div>
+      </div>
+    </div>
+    <div class="evo-arrow"><div class="shaft"></div><div class="head"></div><div class="evo-label">evrildi</div></div>
+    <div class="evo-code-side">
+      <div class="file-path"><span class="file-icon">&#128196;</span> payments/circuit-breaker.ts <span class="pattern-tag infra">Circuit Breaker</span></div>
+      <div class="code-block"><span class="kw">async</span> <span class="fn">execute</span>&lt;<span class="tp">T</span>&gt;(<span class="pr">fn</span>: () => <span class="tp">Promise</span>&lt;<span class="tp">T</span>&gt;): <span class="tp">Promise</span>&lt;<span class="tp">T</span>&gt; {
+  <span class="kw">if</span> (<span class="kw">this</span>.<span class="pr">state</span> === <span class="str">'OPEN'</span>) {
+    <span class="kw">if</span> (<span class="tp">Date</span>.<span class="fn">now</span>() - <span class="kw">this</span>.<span class="pr">lastFailureTime</span> > <span class="kw">this</span>.<span class="pr">cooldownMs</span>)
+      <span class="kw">this</span>.<span class="pr">state</span> = <span class="str">'HALF_OPEN'</span>;
+    <span class="kw">else throw new</span> <span class="tp">ExternalServiceError</span>();  <span class="cm">// fail fast!</span>
+  }
+  <span class="kw">try</span> {
+    <span class="dc">const</span> <span class="pr">result</span> = <span class="kw">await</span> <span class="fn">fn</span>();
+    <span class="kw">this</span>.<span class="fn">onSuccess</span>();  <span class="cm">// → CLOSED</span>
+    <span class="kw">return</span> <span class="pr">result</span>;
+  } <span class="kw">catch</span> (<span class="pr">e</span>) {
+    <span class="kw">this</span>.<span class="fn">onFailure</span>();  <span class="cm">// 5 hata → OPEN</span>
+    <span class="kw">throw</span> <span class="pr">e</span>;
+  }
+}</div>
+      <div class="explain"><strong>Kirmizi post-it</strong> "Stripe cokerse?" → 60 satirlik circuit breaker. CLOSED → 5 hata → OPEN (30sn) → HALF_OPEN → 1 deneme → basarili? CLOSED : OPEN.</div>
+    </div>
+  </div>
+
+  <div class="evo-card">
+    <div class="evo-postit">
+      <div class="mini-postit hotspot">
+        <div class="mp-label">&#9889; Hot Spot</div>
+        <div class="mp-title">Ayni odeme 2 kez gelirse? (cift odeme)</div>
+      </div>
+    </div>
+    <div class="evo-arrow"><div class="shaft"></div><div class="head"></div><div class="evo-label">evrildi</div></div>
+    <div class="evo-code-side">
+      <div class="file-path"><span class="file-icon">&#128196;</span> shared/middleware/idempotency.ts <span class="pattern-tag middleware">Middleware</span></div>
+      <div class="code-block"><span class="kw">export async function</span> <span class="fn">idempotencyGuard</span>(<span class="pr">request</span>, <span class="pr">reply</span>) {
+  <span class="dc">const</span> <span class="pr">key</span> = <span class="pr">request</span>.<span class="pr">headers</span>[<span class="str">'idempotency-key'</span>];
+  <span class="dc">const</span> <span class="pr">existing</span> = <span class="kw">await</span> <span class="pr">redis</span>.<span class="fn">get</span>(<span class="str">`idempotency:${key}`</span>);
+
+  <span class="kw">if</span> (<span class="pr">existing</span>) {
+    <span class="cm">// Daha once gorulmus → cached response don</span>
+    <span class="cm">// Istek TEKRAR ISLENMEZ → cift odeme ONLENDI</span>
+    <span class="pr">reply</span>.<span class="fn">status</span>(<span class="pr">cached</span>.<span class="pr">statusCode</span>).<span class="fn">send</span>(<span class="pr">cached</span>.<span class="pr">body</span>);
+    <span class="kw">return</span>;
+  }
+  <span class="cm">// Yeni istek → "processing" kaydet → devam et</span>
+  <span class="kw">await</span> <span class="pr">redis</span>.<span class="fn">setex</span>(<span class="pr">cacheKey</span>, <span class="num">86400</span>, <span class="str">'processing'</span>);
+}</div>
+      <div class="explain"><strong>Kirmizi post-it</strong> "Cift odeme?" → Idempotency-Key header + Redis cache. Ayni key 2. kez gelirse → onceki sonucu don, Stripe'a TEKRAR isteme.</div>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════════
+     TICKETING
+     ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="ticketing">
+  <div class="ctx-header">
+    <div class="ctx-icon">&#127915;</div>
+    <h2>Ticketing</h2>
+    <span class="ctx-badge-simple">Basit</span>
+  </div>
+
+  <div class="evo-card">
+    <div class="evo-postit">
+      <div class="mini-postit hotspot">
+        <div class="mp-label">&#9889; Hot Spot</div>
+        <div class="mp-title">Sahte QR bilet?</div>
+      </div>
+    </div>
+    <div class="evo-arrow"><div class="shaft"></div><div class="head"></div><div class="evo-label">evrildi</div></div>
+    <div class="evo-code-side">
+      <div class="file-path"><span class="file-icon">&#128196;</span> tickets/qr-generator.ts <span class="pattern-tag infra">HMAC Crypto</span></div>
+      <div class="code-block"><span class="kw">export function</span> <span class="fn">generateQRPayload</span>(<span class="pr">data</span>: <span class="tp">QRPayloadData</span>): <span class="tp">string</span> {
+  <span class="dc">const</span> <span class="pr">payloadBase64</span> = <span class="tp">Buffer</span>.<span class="fn">from</span>(<span class="tp">JSON</span>.<span class="fn">stringify</span>(<span class="pr">data</span>))
+    .<span class="fn">toString</span>(<span class="str">'base64url'</span>);
+
+  <span class="dc">const</span> <span class="pr">signature</span> = <span class="fn">createHmac</span>(<span class="str">'sha256'</span>, <span class="fn">getSecret</span>())
+    .<span class="fn">update</span>(<span class="pr">payloadBase64</span>)
+    .<span class="fn">digest</span>(<span class="str">'base64url'</span>);
+
+  <span class="kw">return</span> <span class="str">`${payloadBase64}.${signature}`</span>;
+  <span class="cm">// QR: "eyJ0aWNr...Zd0.hmac_sig_here"</span>
+  <span class="cm">// Sahtekar payload degistirirse → sig uyusmaz → RED</span>
+}</div>
+      <div class="explain"><strong>Kirmizi post-it</strong> "Sahte bilet?" → HMAC-SHA256 imza. QR icerigi: <code>payload.signature</code>. Kapida: signature yeniden hesapla, eslesiyorsa gercek bilet. <code>timingSafeEqual</code> ile timing attack onlemi.</div>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════════
+     EVENT CATALOG
+     ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="events">
+  <div class="ctx-header">
+    <div class="ctx-icon">&#127926;</div>
+    <h2>Event Catalog</h2>
+    <span class="ctx-badge-simple">Basit</span>
+  </div>
+  <div class="ctx-desc">Domain model yok — basit CRUD + cache. Post-it'ler dogrudan service fonksiyonu oldu.</div>
+
+  <div class="evo-card">
+    <div class="evo-postit">
+      <div class="mini-postit event">
+        <div class="mp-label">Event</div>
+        <div class="mp-title">Etkinlik Olusturuldu</div>
+      </div>
+    </div>
+    <div class="evo-arrow"><div class="shaft"></div><div class="head"></div><div class="evo-label">evrildi</div></div>
+    <div class="evo-code-side">
+      <div class="file-path"><span class="file-icon">&#128196;</span> events/events.service.ts <span class="pattern-tag service">Basit CRUD</span></div>
+      <div class="code-block"><span class="kw">async</span> <span class="fn">findById</span>(<span class="pr">id</span>: <span class="tp">string</span>) {
+  <span class="cm">// Cache-aside: once Redis'e bak</span>
+  <span class="kw">return</span> <span class="pr">cache</span>.<span class="fn">getOrSet</span>(
+    <span class="str">`event:${id}`</span>,
+    <span class="kw">async</span> () => {
+      <span class="dc">const</span> <span class="pr">event</span> = <span class="kw">await</span> <span class="pr">eventRepository</span>.<span class="fn">findById</span>(<span class="pr">id</span>);
+      <span class="kw">if</span> (!<span class="pr">event</span>) <span class="kw">throw new</span> <span class="tp">NotFoundError</span>(<span class="str">'Event'</span>);
+      <span class="kw">return</span> <span class="pr">event</span>;
+    },
+    <span class="num">300</span>  <span class="cm">// 5 dakika TTL</span>
+  );
+}
+<span class="cm">// Entity YOK, domain model YOK — sadece cache + DB</span></div>
+      <div class="explain">Basit context → basit kod. <strong>Turuncu post-it</strong> dogrudan service fonksiyonuna donustu. Domain model yok cunku is kurali yok. Cache var cunku 100.000 kisi ayni etkinlige bakiyor.</div>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════════
+     IDENTITY
+     ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="identity">
+  <div class="ctx-header">
+    <div class="ctx-icon">&#128274;</div>
+    <h2>Identity &amp; Access</h2>
+    <span class="ctx-badge-simple">Basit</span>
+  </div>
+
+  <div class="evo-card">
+    <div class="evo-postit">
+      <div class="mini-postit actor">
+        <div class="mp-label">Actor</div>
+        <div class="mp-title">Musteri / Organizator / Admin</div>
+      </div>
+    </div>
+    <div class="evo-arrow"><div class="shaft"></div><div class="head"></div><div class="evo-label">evrildi</div></div>
+    <div class="evo-code-side">
+      <div class="file-path"><span class="file-icon">&#128196;</span> shared/middleware/auth.ts <span class="pattern-tag middleware">JWT Middleware</span></div>
+      <div class="code-block"><span class="kw">export function</span> <span class="fn">authorize</span>(
+  ...<span class="pr">roles</span>: <span class="tp">Array</span>&lt;<span class="str">'USER'</span> | <span class="str">'ORGANIZER'</span> | <span class="str">'ADMIN'</span>&gt;
+) {
+  <span class="kw">return async</span> (<span class="pr">request</span>) => {
+    <span class="kw">if</span> (!<span class="pr">roles</span>.<span class="fn">includes</span>(<span class="pr">request</span>.<span class="pr">user</span>.<span class="pr">role</span>))
+      <span class="kw">throw new</span> <span class="tp">ForbiddenError</span>(<span class="str">'Insufficient permissions'</span>);
+  };
+}
+
+<span class="cm">// Route'ta kullanim:</span>
+<span class="pr">app</span>.<span class="fn">post</span>(<span class="str">'/events'</span>, {
+  <span class="pr">preHandler</span>: [<span class="fn">authorize</span>(<span class="str">'ORGANIZER'</span>, <span class="str">'ADMIN'</span>)]
+}, <span class="pr">handler</span>);</div>
+      <div class="explain"><strong>Sari post-it</strong>'teki actor'lar (Musteri, Organizator, Admin) → JWT role claim + authorize middleware oldu. Her route hangi rollerin erisebilecegini belirtiyor.</div>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════════
+     NOTIFICATION
+     ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="notification">
+  <div class="ctx-header">
+    <div class="ctx-icon">&#128236;</div>
+    <h2>Notification</h2>
+    <span class="ctx-badge-simple">Basit</span>
+  </div>
+
+  <div class="evo-card">
+    <div class="evo-postit">
+      <div class="mini-postit policy">
+        <div class="mp-label">Policy</div>
+        <div class="mp-title">Rezervasyon onaylaninca → email gonder</div>
+      </div>
+    </div>
+    <div class="evo-arrow"><div class="shaft"></div><div class="head"></div><div class="evo-label">evrildi</div></div>
+    <div class="evo-code-side">
+      <div class="file-path"><span class="file-icon">&#128196;</span> notifications/notifications.worker.ts <span class="pattern-tag infra">BullMQ Worker</span></div>
+      <div class="code-block"><span class="cm">// Booking service'ten (confirm aninda):</span>
+<span class="kw">await</span> <span class="pr">asyncEventBus</span>.<span class="fn">emit</span>(<span class="str">'notification.send'</span>, {
+  <span class="pr">type</span>: <span class="str">'BOOKING_CONFIRMED'</span>,
+  <span class="pr">recipientId</span>: <span class="pr">userId</span>,
+  <span class="pr">data</span>: { <span class="pr">reservationId</span>, <span class="pr">paymentId</span> }
+});
+
+<span class="cm">// Worker (arka planda, kullanici BEKLEMIYOR):</span>
+<span class="dc">const</span> <span class="pr">emailWorker</span> = <span class="fn">createWorker</span>(<span class="str">'notification.send'</span>,
+  <span class="kw">async</span> (<span class="pr">job</span>) => {
+    <span class="kw">await</span> <span class="pr">transporter</span>.<span class="fn">sendMail</span>({ <span class="pr">to</span>, <span class="pr">subject</span>, <span class="pr">html</span> });
+  }
+);
+<span class="cm">// 3 basarisiz deneme → dead letter queue → admin bilgilendir</span></div>
+      <div class="explain"><strong>Mor post-it</strong> "onaylaninca email gonder" → BullMQ async worker. Fire-and-forget: email basarisiz olsa bile rezervasyon gecerli. 3 denemede de basarisiz → dead letter queue.</div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center; padding: 50px 20px; color:#555; font-size:0.85rem;">
+  TicketHub — Post-it'ten Koda Donusum Haritasi
+</div>
+
+</body>
+</html>

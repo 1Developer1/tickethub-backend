@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DDIA Interactive — Designing Data-Intensive Applications</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:110px}
+body{background:#0a0a18;color:#d8d8e8;font-family:'Segoe UI',system-ui,sans-serif;line-height:1.75}
+:root{
+  --p1:#42a5f5;--p2:#e94560;--p3:#66bb6a;
+  --c1:#42a5f5;--c2:#ab47bc;--c3:#ff9800;--c4:#4ec9b0;
+  --c5:#e94560;--c6:#f48fb1;--c7:#ffb74d;--c8:#ef5350;--c9:#ce93d8;
+  --c10:#81c784;--c11:#64b5f6;--c12:#e0e0e0;
+  --bg:#0a0a18;--card:rgba(255,255,255,0.025);--border:#1e1e3a;
+  --muted:#8892b0;--faint:#5a5f7a;--r:10px;
+  --mono:'Cascadia Code','Fira Code',Consolas,monospace;
+}
+::-webkit-scrollbar{width:7px}::-webkit-scrollbar-track{background:#0e0e20}::-webkit-scrollbar-thumb{background:#2a2a4a;border-radius:4px}
+
+/* ═══ NAV ═══ */
+#progress{position:fixed;top:0;left:0;height:3px;z-index:1001;background:linear-gradient(90deg,var(--p1),var(--p2),var(--p3));width:0;transition:width .15s}
+nav{position:sticky;top:0;z-index:1000;background:rgba(10,10,24,.94);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.04)}
+.pnav{display:flex;justify-content:center;border-bottom:1px solid rgba(255,255,255,.03)}
+.ptab{padding:11px 26px;cursor:pointer;font-size:13px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;border:none;border-bottom:3px solid transparent;background:none;color:var(--muted);transition:.2s}
+.ptab:hover{color:#fff}.ptab.on{color:var(--ac);border-bottom-color:var(--ac)}
+.cnav{display:flex;gap:4px;padding:7px 12px;overflow-x:auto;justify-content:center;scrollbar-width:none}
+.cnav::-webkit-scrollbar{display:none}
+.ctab{padding:5px 14px;border-radius:18px;cursor:pointer;font-size:12px;white-space:nowrap;border:1px solid transparent;background:rgba(255,255,255,.03);color:var(--muted);transition:.2s}
+.ctab:hover{background:rgba(255,255,255,.07);color:#fff}.ctab.on{border-color:var(--ac);color:var(--ac);background:rgba(255,255,255,.05)}
+
+/* ═══ HERO ═══ */
+.hero{text-align:center;padding:70px 20px 50px;background:radial-gradient(ellipse at 50% 30%,rgba(66,165,245,.06),transparent 65%)}
+.hero h1{font-size:2.6rem;font-weight:300;color:#fff}.hero h1 b{font-weight:700}
+.hero .sub{font-size:1.05rem;color:var(--muted);margin:6px 0 20px}
+.hero .auth{font-size:.9rem;color:var(--faint)}
+.pmap{display:flex;justify-content:center;gap:20px;margin-top:36px;flex-wrap:wrap}
+.pcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px 22px;min-width:210px;cursor:pointer;transition:.25s;text-align:left}
+.pcard:hover{transform:translateY(-3px);border-color:var(--ac);box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.pcard h3{font-size:13px;color:var(--ac);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.pcard ul{list-style:none;font-size:12px;color:var(--muted)}.pcard li{padding:2px 0}
+.pcard li::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--ac);margin-right:7px;opacity:.5}
+
+/* ═══ CHAPTER ═══ */
+.ch{max-width:1060px;margin:0 auto;padding:50px 22px 70px;display:none}.ch.on{display:block}
+.chh{margin-bottom:36px;padding-bottom:20px;border-bottom:2px solid var(--ac)}
+.chh .cn{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--ac)}
+.chh h2{font-size:1.9rem;color:#fff;font-weight:300;margin:2px 0 6px}.chh h2 b{font-weight:700}
+.chh .why{font-size:.98rem;color:var(--muted);font-style:italic;max-width:680px}
+.toc{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:32px}
+.toc a{padding:4px 13px;border-radius:14px;font-size:11px;background:rgba(255,255,255,.03);color:var(--muted);text-decoration:none;border:1px solid transparent;transition:.2s}
+.toc a:hover{border-color:var(--ac);color:var(--ac)}
+
+/* ═══ ELEMENTS ═══ */
+.st{font-size:1.35rem;font-weight:600;color:#fff;margin:44px 0 16px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sst{font-size:1.05rem;font-weight:600;color:#e0e0e0;margin:28px 0 10px}
+.ch p{margin:8px 0;font-size:.93rem;color:var(--muted)}.ch strong{color:#e0e0e0}.ch em{color:#c8c8e0}
+.ch ul,.ch ol{margin:8px 0 8px 18px;font-size:.92rem;color:var(--muted)}.ch li{margin:3px 0}
+.cc{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--ac);border-radius:var(--r);padding:16px 20px;margin:14px 0;transition:.2s}
+.cc:hover{background:rgba(255,255,255,.035)}.cc h4{font-size:.95rem;color:#fff;margin-bottom:6px}.cc p{color:var(--muted);font-size:.9rem}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.info{background:rgba(66,165,245,.05);border:1px solid rgba(66,165,245,.15);border-radius:var(--r);padding:14px 18px;margin:14px 0}
+.info.warn{background:rgba(255,152,0,.05);border-color:rgba(255,152,0,.15)}
+.info .it{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--p1);margin-bottom:4px}
+.info.warn .it{color:#ff9800}.info p{font-size:.9rem;color:var(--muted)}
+.anl{background:rgba(255,183,77,.04);border:1px solid rgba(255,183,77,.12);border-radius:var(--r);padding:14px 18px 14px 44px;margin:14px 0;position:relative}
+.anl::before{content:'💡';position:absolute;left:14px;top:14px;font-size:18px}
+.anl .at{font-size:12px;font-weight:700;color:#ffb74d;margin-bottom:3px}.anl p{font-size:.9rem;color:var(--muted)}
+.cmp{width:100%;border-collapse:collapse;margin:16px 0;background:var(--card);border-radius:var(--r);overflow:hidden}
+.cmp th{background:rgba(255,255,255,.05);padding:10px 14px;text-align:left;font-size:12px;font-weight:700;color:var(--ac);text-transform:uppercase;letter-spacing:.4px}
+.cmp td{padding:9px 14px;border-top:1px solid rgba(255,255,255,.03);font-size:.88rem;color:var(--muted)}
+.cmp tr:hover td{background:rgba(255,255,255,.015)}
+.cb{background:#08081a;border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:10px 0;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:#d4d4d4}
+.kw{color:#c586c0}.fn{color:#dcdcaa}.str{color:#ce9178}.cm{color:#6a9955}.tp{color:#4ec9b0}.nm{color:#b5cea8}
+.sc{display:inline-block;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:600;margin:1px 3px;background:rgba(255,255,255,.05);color:var(--muted);border:1px solid rgba(255,255,255,.06)}
+.badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;color:#000;margin-right:3px;vertical-align:middle}
+.xref{text-decoration:none;color:#e0e0e0;border-bottom:1px dashed var(--faint);cursor:pointer;transition:.2s}
+.xref:hover{color:#fff;border-bottom-color:var(--ac)}
+
+/* ═══ DIAGRAM ═══ */
+.dia{background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin:18px 0;text-align:center;overflow-x:auto}
+.dia svg{max-width:100%;height:auto}
+.ctrl{display:flex;align-items:center;gap:8px;padding:10px 0;flex-wrap:wrap}
+.btn{padding:5px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;border:1px solid var(--border);color:#e0e0e0;background:rgba(255,255,255,.04);transition:.2s}
+.btn:hover{background:rgba(255,255,255,.09)}.btn.pri{background:var(--ac);color:#000;border-color:var(--ac)}.btn.pri:hover{opacity:.85}
+.sinf{font-size:12px;color:var(--muted);margin-left:auto}
+
+/* ═══ TABS ═══ */
+.tabs{margin:16px 0}.tbar{display:flex;gap:0;border-bottom:1px solid var(--border)}
+.tbtn{padding:8px 18px;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);background:none;border:none;border-bottom:2px solid transparent;transition:.2s}
+.tbtn:hover{color:#e0e0e0}.tbtn.on{color:var(--ac);border-bottom-color:var(--ac)}
+.tpan{display:none;padding:16px 0}.tpan.on{display:block}
+
+/* ═══ STAT ═══ */
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center}
+.stat .sv{font-size:1.8rem;font-weight:700;color:var(--ac);font-family:var(--mono)}
+.stat .sl{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.8px}
+
+/* ═══ SLIDER ═══ */
+.sld label{display:block;font-size:12px;color:var(--muted);margin-bottom:3px}
+.sld input[type=range]{width:100%;accent-color:var(--ac);cursor:pointer}
+.sv2{display:inline-block;padding:1px 8px;border-radius:4px;background:rgba(255,255,255,.05);font-size:13px;font-weight:600;color:var(--ac);font-family:var(--mono)}
+
+/* ═══ FLOAT BTN ═══ */
+.fmap{position:fixed;bottom:20px;right:20px;z-index:998;width:48px;height:48px;border-radius:50%;cursor:pointer;background:linear-gradient(135deg,var(--p1),var(--p2),var(--p3));border:none;color:#fff;font-size:18px;box-shadow:0 4px 18px rgba(0,0,0,.35);transition:.2s;display:flex;align-items:center;justify-content:center}
+.fmap:hover{transform:scale(1.1)}
+
+/* ═══ HISTOGRAM ═══ */
+.histo{display:flex;align-items:flex-end;gap:2px;height:110px;margin:14px 0}
+.hbar{flex:1;border-radius:2px 2px 0 0;transition:height .3s;min-width:6px;position:relative}
+
+@media(max-width:768px){
+  .hero h1{font-size:1.7rem}.pmap{flex-direction:column;align-items:center}
+  .ch{padding:30px 14px 50px}.chh h2{font-size:1.4rem}
+  .g2,.g3,.g4{grid-template-columns:1fr}.ptab{padding:9px 14px;font-size:11px}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<nav>
+  <div class="pnav">
+    <button class="ptab on" data-p="1" style="--ac:var(--p1)" onclick="goPart(1)">Part I: Temeller</button>
+    <button class="ptab" data-p="2" style="--ac:var(--p2)" onclick="goPart(2)">Part II: Dagitik Veri</button>
+    <button class="ptab" data-p="3" style="--ac:var(--p3)" onclick="goPart(3)">Part III: Turetilmis Veri</button>
+  </div>
+  <div class="cnav" id="cnav"></div>
+</nav>
+
+<!-- ═══════ HERO ═══════ -->
+<section class="hero" id="hero">
+  <h1>Designing <b>Data-Intensive</b> Applications</h1>
+  <p class="sub">The Big Ideas Behind Reliable, Scalable, and Maintainable Systems</p>
+  <p class="auth">Martin Kleppmann &mdash; Kapsamli Interaktif Rehber</p>
+  <div class="pmap">
+    <div class="pcard" style="--ac:var(--p1)" onclick="go(1)"><h3>Part I &mdash; Temeller</h3><ul><li>Guvenilirlik, Olceklenebilirlik, Bakilabilirlik</li><li>Veri Modelleri ve Sorgu Dilleri</li><li>Depolama ve Erisim</li><li>Kodlama ve Evrim</li></ul></div>
+    <div class="pcard" style="--ac:var(--p2)" onclick="go(5)"><h3>Part II &mdash; Dagitik Veri</h3><ul><li>Replikasyon</li><li>Bolumleme</li><li>Transaction'lar</li><li>Dagitik Sistem Arizalari</li><li>Tutarlilik ve Konsensus</li></ul></div>
+    <div class="pcard" style="--ac:var(--p3)" onclick="go(10)"><h3>Part III &mdash; Turetilmis Veri</h3><ul><li>Toplu Isleme (Batch)</li><li>Akis Isleme (Stream)</li><li>Veri Sistemlerinin Gelecegi</li></ul></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CHAPTER 1
+     ═══════════════════════════════════════════════════════════ -->
+<section class="ch on" id="ch1" data-p="1" style="--ac:var(--c1)">
+<div class="chh"><div class="cn">Bolum 1</div><h2>Guvenilir, Olceklenebilir ve <b>Bakilabilir</b> Uygulamalar</h2><p class="why">Bugunku uygulamalarin sinirlayin etkeni CPU gucu degil &mdash; verinin miktari, karmasikligi ve degisim hizi.</p></div>
+<div class="toc"><a href="#ch1-ds">Veri Sistemleri</a><a href="#ch1-rel">Guvenilirlik</a><a href="#ch1-sca">Olceklenebilirlik</a><a href="#ch1-perc">Percentile Hesaplayici</a><a href="#ch1-mnt">Bakilabilirlik</a></div>
+
+<h3 class="st" id="ch1-ds">Veri Sistemleri Hakkinda Dusunmek</h3>
+<p>Tipik bir <strong>data-intensive</strong> uygulama su yapi taslarindan olusur:</p>
+<div class="g3">
+  <div class="cc"><h4>Veritabani</h4><p>Veriyi saklayip sonra tekrar bulabilmek icin &mdash; uygulamanin kalici hafizasi.</p></div>
+  <div class="cc"><h4>Onbellek (Cache)</h4><p>Pahali islemlerin sonuclarini hatirlayip okumalari hizlandirmak.</p></div>
+  <div class="cc"><h4>Arama Indeksi</h4><p>Anahtar kelime ile veri aramak/filtrelemek.</p></div>
+  <div class="cc"><h4>Stream Processing</h4><p>Mesajlari baska surece asenkron gondermek &mdash; gercek zamanli akis.</p></div>
+  <div class="cc"><h4>Batch Processing</h4><p>Biriken buyuk veri kumelerini periyodik olarak islemek.</p></div>
+</div>
+<div class="anl"><div class="at">Neden Bu Onemli?</div><p>Bu kategorilerin sinirlari bulaniklasti. <strong>Redis</strong> veri deposu ama mesaj kuyrugu olarak da kullanilir. <strong>Kafka</strong> mesaj kuyrugu ama veritabani benzeri dayaniklilik sunar. Birden fazla araci bir API arkasinda birlestirdiginizde artik bir <strong>veri sistemi tasarimcisisiniz</strong>.</p></div>
+
+<p>Kitap boyunca her sistem uc temel endiseye gore degerlendirilir:</p>
+<div class="g3">
+  <div class="stat" style="--ac:var(--c1)"><div class="sv">R</div><div class="sl">Reliability</div><p style="font-size:11px;color:var(--faint);margin-top:6px">Bir seyler ters gitse bile dogru calismaya devam etmek</p></div>
+  <div class="stat" style="--ac:var(--c1)"><div class="sv">S</div><div class="sl">Scalability</div><p style="font-size:11px;color:var(--faint);margin-top:6px">Artan yukle basa cikabilecek yollar sunmak</p></div>
+  <div class="stat" style="--ac:var(--c1)"><div class="sv">M</div><div class="sl">Maintainability</div><p style="font-size:11px;color:var(--faint);margin-top:6px">Farkli insanlarin verimli calisabilmesi</p></div>
+</div>
+
+<h3 class="st" id="ch1-rel">Reliability &mdash; Guvenilirlik</h3>
+<p>"Bir seyler ters gitse bile dogru calismaya devam etmek." Ters gidebilecek seylere <strong>fault</strong> (ariza), sistemi tamamen durdurmaya <strong>failure</strong> (cokme) denir. Amac: fault'lara ragmen failure'i onlemek &mdash; <strong>fault-tolerant</strong> tasarim.</p>
+<div class="info warn"><div class="it">Fault ≠ Failure</div><p><strong>Fault:</strong> Bir bilesen beklenen davranistan saptiginda. <strong>Failure:</strong> Sistem butunuyle hizmet veremez hale gelmesi. Netflix'in <strong>Chaos Monkey</strong>'si production'da kasitli arizalar uretir ki sistem dayanikli olsun.</p></div>
+
+<h4 class="sst">Donanim Arizalari</h4>
+<p>Sabit disklerin ortalama omru 10-50 yil (MTTF). 10.000 diskli kumede <strong>her gun 1 disk arizasi</strong> bekleyin. Geleneksel cozum: RAID, yedek guc, hot-swap. Modern cozum: yazilim duzeyinde tolerans &mdash; bulut platformlari VM'leri uyarisiz kapatabilir.</p>
+
+<h4 class="sst">Yazilim Hatalari</h4>
+<p>Donanim hatalarinin aksine <strong>sistematik</strong> &mdash; bilesik arizalara yol acar. 2012'de leap second Linux kernel bug'i bircok uygulamayi ayni anda cokertmistir. Cascade failure: bir servis yavaslayinca downstream'ler de coker.</p>
+
+<h4 class="sst">Insan Hatalari</h4>
+<p>Buyuk kesintilerin oncu sebebi <strong>operatorler</strong> &mdash; donanim sadece %10-25. Cozumler: hata firsatini azaltan API'ler, sandbox ortamlari, kapsamli test, hizli rollback, telemetri.</p>
+
+<h3 class="st" id="ch1-sca">Scalability &mdash; Olceklenebilirlik</h3>
+<p>Artan yuk ile basa cikma kapasitesi. "X olceklenebilir" demek anlamsiz &mdash; dogru soru: <em>"Sistem buyurse seçeneklerimiz neler?"</em></p>
+
+<div class="anl"><div class="at">Twitter Fan-out Problemi</div>
+<p><strong>Tweet gonderme:</strong> Ortalama 4.6K istek/sn. <strong>Home timeline okuma:</strong> 300K istek/sn.<br><br>
+<strong>Yaklasim 1:</strong> Tweet'i global tabloya yaz, timeline okurken JOIN. 300K/sn'de JOIN pahali.<br>
+<strong>Yaklasim 2 (Fan-out):</strong> Her tweet'i takipcilerin cache kutularina yaz. 75 takipci × 4.6K = 345K yazma/sn. Okuma anlik.<br>
+<strong>Sorun:</strong> Unlulerin 30M+ takipcisi → 1 tweet = 30M yazma! <strong>Hibrit cozum:</strong> Normal kullanicilar icin fan-out, unluler icin okuma aninda birlestir.</p></div>
+
+<!-- Fan-out simulator -->
+<div class="dia">
+<h4 style="color:#fff;margin-bottom:10px">Fan-out Simulatoru</h4>
+<div class="sld"><label>Takipci Sayisi: <span class="sv2" id="fo-v">75</span></label><input type="range" min="1" max="10000" value="75" id="fo-s" oninput="updFo()"></div>
+<div class="g2" style="margin-top:14px;text-align:left">
+  <div class="stat" style="--ac:#42a5f5"><div class="sl">Yaklasim 1: JOIN</div><div class="sv">4,600</div><div class="sl">yazma/sn (sabit)</div></div>
+  <div class="stat" style="--ac:#66bb6a"><div class="sl">Yaklasim 2: Fan-out</div><div class="sv" id="fo-w">345,000</div><div class="sl">yazma/sn (takipci x tweet)</div></div>
+</div></div>
+
+<h4 class="sst">Performansi Tanimlamak</h4>
+<p><strong>Throughput:</strong> Saniyede islenen kayit sayisi (batch). <strong>Response time:</strong> Istegin gonderilip yanitin alinma suresi (online).</p>
+<div class="info"><div class="it">Latency ≠ Response Time</div><p><strong>Latency:</strong> Istegin islenmeyi <em>bekledigi</em> sure (kuyruk). <strong>Response time:</strong> Istemcinin gordugu toplam sure (ag + kuyruk + islem). Response time latency'yi icerir.</p></div>
+<p>Response time'i dagilim olarak dusunun &mdash; <strong>percentile</strong> ile olcun:</p>
+<div class="cc"><h4>Percentile Nedir?</h4><p><strong>p50 (Medyan):</strong> Ortadaki deger &mdash; kullanicilarin yarisi bundan hizli hizmet aliyor.<br><strong>p95:</strong> Her 20 istekten 1'i daha yavas. <strong>p99:</strong> Her 100'den 1'i. <strong>p99.9:</strong> Amazon bu degeri kullanir &mdash; en yavas yanit alan musteriler genellikle en degerli olanlardir (en cok veriye sahip).</p></div>
+<div class="info warn"><div class="it">Tail Latency Amplification</div><p>Bir son kullanici istegi birden fazla backend cagrisina neden olur. Tek yavas cagri tum istegi yavaslatir. 5 paralel backend cagrisinin herhangi biri p99'da ise son kullanicinin yavas istek orani ~%5'e cikar.</p></div>
+
+<!-- Percentile Calculator -->
+<h3 class="st" id="ch1-perc">Percentile Hesaplayici</h3>
+<div class="dia">
+<h4 style="color:#fff;margin-bottom:8px">Response Time Dagilimi</h4>
+<div class="ctrl"><button class="btn pri" onclick="genPerc()">Rastgele Veri Uret</button><span class="sinf" id="pi">1000 istek</span></div>
+<div class="histo" id="hist"></div>
+<div class="g4" style="margin-top:14px">
+  <div class="stat" style="--ac:#42a5f5"><div class="sv" id="vp50">--</div><div class="sl">p50</div></div>
+  <div class="stat" style="--ac:#ff9800"><div class="sv" id="vp95">--</div><div class="sl">p95</div></div>
+  <div class="stat" style="--ac:#ef5350"><div class="sv" id="vp99">--</div><div class="sl">p99</div></div>
+  <div class="stat" style="--ac:#ce93d8"><div class="sv" id="vp999">--</div><div class="sl">p99.9</div></div>
+</div></div>
+
+<h4 class="sst">Yukle Basa Cikma</h4>
+<p><strong>Scale up (dikey):</strong> Daha guclu makine. <strong>Scale out (yatay):</strong> Yuku cok makineye dagit. Pratikte ikisinin karisimi. Bazi sistemler <strong>elastik</strong>tir (otomatik kaynak ekleme), bazilari manueldir.</p>
+
+<h3 class="st" id="ch1-mnt">Maintainability &mdash; Bakilabilirlik</h3>
+<p>Yazilim maliyetinin cogu ilk gelistirmede degil <strong>devam eden bakimda</strong>. Uc ilke:</p>
+<div class="g3">
+  <div class="cc"><h4>Operability</h4><p>Isletim ekiplerinin hayatini kolaylastir: iyi izleme, otomasyon, tek makine bagimliligindan kacma, iyi varsayilanlar.</p></div>
+  <div class="cc"><h4>Simplicity</h4><p>Karmasikligi yonet. "Camur topu" onle. En iyi arac: <strong>soyutlama</strong> &mdash; uygulama detayini gizle, temiz cephe sun.</p></div>
+  <div class="cc"><h4>Evolvability</h4><p>Degisimi kolaylastir. Gereksinimler surekli degisir. Basitlik + iyi soyutlama = kolay evrim.</p></div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CHAPTER 2
+     ═══════════════════════════════════════════════════════════ -->
+<section class="ch" id="ch2" data-p="1" style="--ac:var(--c2)">
+<div class="chh"><div class="cn">Bolum 2</div><h2>Veri Modelleri ve <b>Sorgu Dilleri</b></h2><p class="why">Veri modelleri sadece yazilimi degil dusunce bicimimizi de sekillendiren en onemli tasarim kararlaridir.</p></div>
+<div class="toc"><a href="#ch2-rd">Relational vs Document</a><a href="#ch2-ql">Sorgu Dilleri</a><a href="#ch2-gr">Graph Modeller</a></div>
+
+<h3 class="st" id="ch2-rd">Relational vs Document Model</h3>
+<p><strong>Relational Model (1970, Edgar Codd):</strong> Veriler satirlardan olusan tablolarda. <strong>Document Model:</strong> JSON/XML belgeleri, ic ice yapilar.</p>
+
+<h4 class="sst">NoSQL'in Motivasyonlari</h4>
+<ul>
+<li>Cok yuksek yazma throughput / buyuk veri setleri</li>
+<li>Acik kaynak tercihi</li>
+<li>Ozellestirilmis sorgu islemleri</li>
+<li>Daha dinamik ve ifade edici veri modelleri istegi</li>
+</ul>
+
+<h4 class="sst">Object-Relational Mismatch</h4>
+<div class="anl"><div class="at">Ozgecmis Ornegi</div>
+<p><strong>Relational:</strong> users + positions + education tablolari + FK'lar + JOIN.<br>
+<strong>Document (JSON):</strong> Tum profil tek belge. Bagimli veriler ic ice. JOIN gereksiz, veri yerelligi iyi.</p></div>
+
+<div class="tabs"><div class="tbar">
+  <button class="tbtn on" onclick="stab(this,'t2r')">Relational SQL</button>
+  <button class="tbtn" onclick="stab(this,'t2d')">Document JSON</button>
+</div>
+<div class="tpan on" id="t2r"><div class="cb"><span class="cm">-- 3 tablo, JOIN gerekli</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users u
+  <span class="kw">LEFT JOIN</span> positions p <span class="kw">ON</span> u.id = p.user_id
+  <span class="kw">LEFT JOIN</span> education e <span class="kw">ON</span> u.id = e.user_id
+<span class="kw">WHERE</span> u.id = <span class="nm">1</span>;</div></div>
+<div class="tpan" id="t2d"><div class="cb">{
+  <span class="str">"user_id"</span>: <span class="nm">1</span>,
+  <span class="str">"name"</span>: <span class="str">"Ahmet Yilmaz"</span>,
+  <span class="str">"positions"</span>: [
+    { <span class="str">"company"</span>: <span class="str">"TechCorp"</span>, <span class="str">"title"</span>: <span class="str">"Lead Dev"</span> }
+  ],
+  <span class="str">"education"</span>: [
+    { <span class="str">"school"</span>: <span class="str">"ITU"</span>, <span class="str">"degree"</span>: <span class="str">"CS"</span> }
+  ]
+}</div></div></div>
+
+<table class="cmp"><tr><th>Boyut</th><th>Document</th><th>Relational</th></tr>
+<tr><td><strong>Sema</strong></td><td>Schema-on-read (dinamik)</td><td>Schema-on-write (kati)</td></tr>
+<tr><td><strong>Veri yerelligi</strong></td><td>Iyi &mdash; tek okuma</td><td>JOIN gerekli</td></tr>
+<tr><td><strong>Many-to-many</strong></td><td>Zayif</td><td>Guclu (JOIN + FK)</td></tr>
+<tr><td><strong>1:N iliskiler</strong></td><td>Mukemmel (ic ice)</td><td>Ayri tablo + JOIN</td></tr>
+<tr><td><strong>Sema degisikligi</strong></td><td>Kolay (yeni alan ekle)</td><td>ALTER TABLE (yavas)</td></tr></table>
+
+<h3 class="st" id="ch2-ql">Sorgu Dilleri</h3>
+<p><strong>Imperative:</strong> Nasil yapilacagini adim adim soyle (for, if). <strong>Declarative:</strong> Ne istedigini soyle, DB nasil yapacagina karar versin (SQL). Avantaj: optimizer otomatik iyilestirir, paralel calistirir.</p>
+
+<div class="tabs"><div class="tbar">
+<button class="tbtn on" onclick="stab(this,'ql1')">SQL</button>
+<button class="tbtn" onclick="stab(this,'ql2')">MongoDB</button>
+<button class="tbtn" onclick="stab(this,'ql3')">Cypher</button>
+</div>
+<div class="tpan on" id="ql1"><div class="cb"><span class="kw">SELECT</span> name <span class="kw">FROM</span> people <span class="kw">WHERE</span> country = <span class="str">'US'</span> <span class="kw">ORDER BY</span> name;</div></div>
+<div class="tpan" id="ql2"><div class="cb">db.people.<span class="fn">find</span>({ <span class="str">country</span>: <span class="str">"US"</span> }).sort({ <span class="str">name</span>: <span class="nm">1</span> });</div></div>
+<div class="tpan" id="ql3"><div class="cb"><span class="kw">MATCH</span> (p:Person)-[:LIVES_IN]-&gt;(:Country {name:<span class="str">'US'</span>})
+<span class="kw">RETURN</span> p.name <span class="kw">ORDER BY</span> p.name;</div></div></div>
+
+<h3 class="st" id="ch2-gr">Graph Veri Modelleri</h3>
+<p>Many-to-many cok karmasiklastiginda graph dogal hale gelir.</p>
+<div class="g2">
+<div class="cc"><h4>Property Graph (Neo4j)</h4><p>Vertex: ID + ozellikler + kenarlar. Edge: ID + kaynak + hedef + tur + ozellikler. Herhangi vertex herhangi vertexe baglanabilir.</p></div>
+<div class="cc"><h4>Triple-Store (SPARQL)</h4><p>Tum bilgi (subject, predicate, object) uc'luleri. Ornek: (Lucy, age, 33) veya (Lucy, livesIn, Istanbul).</p></div>
+</div>
+<table class="cmp"><tr><th></th><th>Relational</th><th>Document</th><th>Graph</th></tr>
+<tr><td><strong>En iyi</strong></td><td>Yapilandirilmis, bilinen iliskiler</td><td>Self-contained belgeler</td><td>Karmasik many-to-many</td></tr>
+<tr><td><strong>Ornek</strong></td><td><span class="sc">PostgreSQL</span><span class="sc">MySQL</span></td><td><span class="sc">MongoDB</span><span class="sc">CouchDB</span></td><td><span class="sc">Neo4j</span><span class="sc">Datomic</span></td></tr></table>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CHAPTER 3
+     ═══════════════════════════════════════════════════════════ -->
+<section class="ch" id="ch3" data-p="1" style="--ac:var(--c3)">
+<div class="chh"><div class="cn">Bolum 3</div><h2>Depolama ve <b>Erisim</b></h2><p class="why">Veritabani veriyi nasil sakliyor? Geri istediginde nasil buluyor? Her gelistirici bunu bilmeli.</p></div>
+<div class="toc"><a href="#ch3-log">En Basit DB</a><a href="#ch3-lsm">LSM-Tree</a><a href="#ch3-bt">B-Tree</a><a href="#ch3-cmp">LSM vs B-Tree</a><a href="#ch3-oltp">OLTP vs OLAP</a><a href="#ch3-col">Column Storage</a></div>
+
+<h3 class="st" id="ch3-log">Dunyanin En Basit Veritabani</h3>
+<div class="cb"><span class="fn">db_set</span>() { <span class="kw">echo</span> <span class="str">"$1,$2"</span> &gt;&gt; database; }
+<span class="fn">db_get</span>() { <span class="kw">grep</span> <span class="str">"^$1,"</span> database | <span class="kw">sed</span> <span class="str">"s/^$1,//"</span> | <span class="kw">tail</span> -n 1; }</div>
+<p><strong>db_set</strong> &mdash; dosya sonuna ekle: O(1). <strong>db_get</strong> &mdash; dosyayi tara: O(n). Temel trade-off: <strong>index</strong> okumalari hizlandirir ama her indeks yazmalari yavaslatir.</p>
+
+<h3 class="st" id="ch3-lsm">SSTable ve LSM-Tree</h3>
+<p><strong>SSTable (Sorted String Table):</strong> Anahtarlari <em>sirali</em> tutan log segmenti. Avantaj: merge-sort ile birlestirme O(n), sparse index yeter (tum anahtarlari tutma), range query dogal.</p>
+
+<div class="dia">
+<h4 style="color:#fff;margin-bottom:8px">LSM-Tree Yazma Yolu</h4>
+<div class="ctrl"><button class="btn pri" onclick="lsmN()">Sonraki Adim &rarr;</button><button class="btn" onclick="lsmR()">Sifirla</button><span class="sinf" id="lsi">0/5</span></div>
+<svg viewBox="0 0 760 280" style="max-width:760px">
+<rect x="20" y="15" width="150" height="70" rx="8" fill="rgba(66,165,245,.12)" stroke="#42a5f5" stroke-width="2" id="lm"/>
+<text x="95" y="38" fill="#42a5f5" font-size="12" text-anchor="middle" font-weight="600">Memtable</text>
+<text x="95" y="55" fill="#8892b0" font-size="10" text-anchor="middle">(Bellekte sirali)</text>
+<text x="95" y="72" fill="#fff" font-size="11" text-anchor="middle" font-family="monospace" id="lmd"></text>
+<line x1="170" y1="50" x2="230" y2="50" stroke="#42a5f5" stroke-width="1.5" stroke-dasharray="5,4" id="la1" opacity="0"/>
+<rect x="240" y="15" width="150" height="70" rx="8" fill="rgba(102,187,106,.08)" stroke="#66bb6a" stroke-width="2" id="l0"/>
+<text x="315" y="38" fill="#66bb6a" font-size="12" text-anchor="middle" font-weight="600">SSTable L0</text>
+<text x="315" y="55" fill="#8892b0" font-size="10" text-anchor="middle">(Diskte, immutable)</text>
+<text x="315" y="72" fill="#fff" font-size="11" text-anchor="middle" font-family="monospace" id="l0d"></text>
+<line x1="390" y1="50" x2="450" y2="115" stroke="#66bb6a" stroke-width="1.5" stroke-dasharray="5,4" id="la2" opacity="0"/>
+<rect x="460" y="95" width="270" height="70" rx="8" fill="rgba(255,152,0,.08)" stroke="#ff9800" stroke-width="2"/>
+<text x="595" y="118" fill="#ff9800" font-size="12" text-anchor="middle" font-weight="600">SSTable L1 (Compacted)</text>
+<text x="595" y="135" fill="#8892b0" font-size="10" text-anchor="middle">(Birlestirilmis, buyuk)</text>
+<text x="595" y="152" fill="#fff" font-size="11" text-anchor="middle" font-family="monospace" id="l1d"></text>
+<rect x="20" y="110" width="150" height="40" rx="8" fill="rgba(239,83,80,.08)" stroke="#ef5350" stroke-width="1"/>
+<text x="95" y="133" fill="#ef5350" font-size="11" text-anchor="middle" font-weight="600">WAL (Crash recovery)</text>
+<rect x="20" y="200" width="710" height="60" rx="8" fill="rgba(255,255,255,.02)" stroke="#1e1e3a"/>
+<text x="375" y="225" fill="#d8d8e8" font-size="12" text-anchor="middle" id="lse">"Sonraki Adim"a tiklayin.</text>
+<text x="375" y="245" fill="#8892b0" font-size="11" text-anchor="middle" id="lse2"></text>
+</svg></div>
+<p>Kullanan sistemler: <span class="sc">LevelDB</span><span class="sc">RocksDB</span><span class="sc">Cassandra</span><span class="sc">HBase</span><span class="sc">Lucene (Elasticsearch)</span></p>
+<p><strong>Bloom Filter:</strong> Bellekte tutulan olasiliksal yapi &mdash; "bu anahtar bu segmentte yok" kesin soylenir, gereksiz disk okumalari onlenir.</p>
+
+<h3 class="st" id="ch3-bt">B-Tree</h3>
+<p>En yaygin indeks yapisi (1970'ler). Sabit boyutlu <strong>sayfa (page, 4KB)</strong> tabanli &mdash; her seferde bir sayfa okunur/yazilir. Diske donuk isaretciler ile agac yapisi.</p>
+<div class="dia">
+<h4 style="color:#fff;margin-bottom:8px">B-Tree Arama</h4>
+<div class="ctrl"><button class="btn pri" onclick="btS()">Anahtar 42'yi Ara</button><button class="btn" onclick="btR()">Sifirla</button></div>
+<svg viewBox="0 0 760 200" style="max-width:760px">
+<rect x="280" y="5" width="200" height="35" rx="6" fill="rgba(255,152,0,.12)" stroke="#ff9800" stroke-width="2" id="btr"/>
+<text x="330" y="27" fill="#fff" font-size="12" text-anchor="middle" font-weight="600">10</text>
+<text x="430" y="27" fill="#fff" font-size="12" text-anchor="middle" font-weight="600">50</text>
+<line x1="310" y1="40" x2="110" y2="70" stroke="#ff9800" stroke-width="1" opacity=".4"/>
+<line x1="380" y1="40" x2="380" y2="70" stroke="#ff9800" stroke-width="1" opacity=".4"/>
+<line x1="450" y1="40" x2="650" y2="70" stroke="#ff9800" stroke-width="1" opacity=".4"/>
+<rect x="10" y="70" width="200" height="35" rx="6" fill="rgba(255,152,0,.06)" stroke="#444" stroke-width="1" id="btl"/>
+<text x="60" y="92" fill="#8892b0" font-size="11" text-anchor="middle">2</text><text x="110" y="92" fill="#8892b0" font-size="11" text-anchor="middle">5</text><text x="160" y="92" fill="#8892b0" font-size="11" text-anchor="middle">8</text>
+<rect x="280" y="70" width="200" height="35" rx="6" fill="rgba(255,152,0,.06)" stroke="#444" stroke-width="1" id="btm"/>
+<text x="310" y="92" fill="#8892b0" font-size="11" text-anchor="middle">15</text><text x="360" y="92" fill="#8892b0" font-size="11" text-anchor="middle">30</text><text x="410" y="92" fill="#fff" font-size="11" text-anchor="middle" font-weight="600">42</text><text x="460" y="92" fill="#8892b0" font-size="11" text-anchor="middle">48</text>
+<rect x="550" y="70" width="200" height="35" rx="6" fill="rgba(255,152,0,.06)" stroke="#444" stroke-width="1"/>
+<text x="600" y="92" fill="#8892b0" font-size="11" text-anchor="middle">55</text><text x="650" y="92" fill="#8892b0" font-size="11" text-anchor="middle">72</text><text x="700" y="92" fill="#8892b0" font-size="11" text-anchor="middle">90</text>
+<line x1="410" y1="105" x2="410" y2="130" stroke="#ff9800" stroke-width="1" opacity=".3"/>
+<rect x="340" y="130" width="140" height="30" rx="6" fill="rgba(255,152,0,.04)" stroke="#333" id="btlf"/>
+<text x="410" y="149" fill="#8892b0" font-size="10" text-anchor="middle" id="btlt">... veri sayfasi ...</text>
+<text x="380" y="185" fill="#8892b0" font-size="11" text-anchor="middle" id="bte">Butona tiklayin.</text>
+</svg></div>
+<div class="info warn"><div class="it">Crash Guvenligi</div><p>B-Tree sayfalari yerinde gunceller &mdash; crash'te yarim yazilmis sayfa riski. Cozum: <strong>WAL</strong> (once log'a yaz, sonra sayfaya). Ayrica <strong>latch</strong> (hafif kilit) ile esanli erisim korumasi.</p></div>
+
+<h3 class="st" id="ch3-cmp">LSM-Tree vs B-Tree</h3>
+<table class="cmp"><tr><th>Boyut</th><th>LSM-Tree</th><th>B-Tree</th></tr>
+<tr><td><strong>Yazma</strong></td><td>Hizli &mdash; sirali append</td><td>Yavas &mdash; rastgele sayfa yazimi</td></tr>
+<tr><td><strong>Okuma</strong></td><td>Yavas &mdash; cok seviye kontrol</td><td>Hizli &mdash; tek yol kok→yaprak</td></tr>
+<tr><td><strong>Write amplification</strong></td><td>Compaction: coklu yazma</td><td>WAL + sayfa (en az 2x)</td></tr>
+<tr><td><strong>Disk alani</strong></td><td>Verimli (compaction)</td><td>Parcalanma (yarim sayfalar)</td></tr>
+<tr><td><strong>Tahmin edilebilirlik</strong></td><td>Compaction spike'lari</td><td>Daha kararlı</td></tr>
+<tr><td><strong>DB'ler</strong></td><td><span class="sc">RocksDB</span><span class="sc">Cassandra</span></td><td><span class="sc">PostgreSQL</span><span class="sc">MySQL/InnoDB</span></td></tr></table>
+
+<h3 class="st" id="ch3-oltp">OLTP vs OLAP</h3>
+<div class="g2">
+<div class="cc" style="border-left-color:#42a5f5"><h4 style="color:#42a5f5">OLTP</h4><p>Kucuk islemler, anahtar ile random erisim, kullanici girdisi, GB-kucuk TB, darbogazı: disk seek. Ornek: e-ticaret, banka, bilet satis.</p></div>
+<div class="cc" style="border-left-color:#66bb6a"><h4 style="color:#66bb6a">OLAP</h4><p>Cok kayit uzerinde aggregate (SUM, COUNT), ETL ile bulk import, TB-PB, darbogazı: disk bandwidth. Ornek: gelir raporu, kullanici davranis analizi.</p></div>
+</div>
+<p><strong>Data Warehouse:</strong> OLTP'den veri kopyala (ETL), analitik sorgulari burada calistir. <span class="sc">Redshift</span><span class="sc">BigQuery</span><span class="sc">Snowflake</span></p>
+
+<h3 class="st" id="ch3-col">Column-Oriented Storage</h3>
+<p>OLAP sorgusu 100+ sutunlu tablonun 3-5 sutununa ihtiyac duyar. Row storage TUM sutunlari okur. <strong>Cozum:</strong> Her sutunu ayri dosyada sakla &mdash; yalnizca gerekli sutunlar okunur. <strong>Bitmap encoding:</strong> Tekrarlanan degerleri bit dizisiyle sikistir. <strong>Materialized View / Data Cube:</strong> Sik kullanilan aggregate'ler onceden hesaplanip saklanir.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CHAPTER 4
+     ═══════════════════════════════════════════════════════════ -->
+<section class="ch" id="ch4" data-p="1" style="--ac:var(--c4)">
+<div class="chh"><div class="cn">Bolum 4</div><h2>Kodlama ve <b>Evrim</b></h2><p class="why">Uygulamalar degisir. Eski ve yeni kod ayni anda calisabilmeli &mdash; veri formatlari bunu desteklemeli.</p></div>
+<div class="toc"><a href="#ch4-fmt">Formatlar</a><a href="#ch4-evo">Schema Evolution</a><a href="#ch4-df">Veri Akis Modlari</a></div>
+
+<h3 class="st" id="ch4-fmt">Veri Kodlama Formatlari</h3>
+<p>Bellek ici yapilar ile disk/ag verisi farklidir. Ceviriye <strong>encoding</strong> (serialization), tersine <strong>decoding</strong> denir.</p>
+<table class="cmp"><tr><th>Format</th><th>Okunabilir?</th><th>Sema</th><th>Boyut</th><th>Sayi Destegi</th></tr>
+<tr><td><strong>JSON</strong></td><td>Evet</td><td>Opsiyonel</td><td>Orta</td><td>Float/Int ayrimi yok</td></tr>
+<tr><td><strong>XML</strong></td><td>Evet (verbose)</td><td>XML Schema</td><td>Buyuk</td><td>Dize olarak</td></tr>
+<tr><td><strong>Protocol Buffers</strong></td><td>Hayir (binary)</td><td>Zorunlu (.proto)</td><td>Kucuk</td><td>Zengin</td></tr>
+<tr><td><strong>Thrift</strong></td><td>Hayir</td><td>Zorunlu (.thrift)</td><td>Kucuk</td><td>Zengin</td></tr>
+<tr><td><strong>Avro</strong></td><td>Hayir</td><td>Zorunlu (JSON/IDL)</td><td>En kucuk</td><td>Zengin</td></tr></table>
+
+<div class="cc"><h4>Protobuf/Thrift: Tag Numaralari</h4><p>Her alan bir <strong>tag numarasi</strong> (1,2,3...) ve tip ile tanimlanir. Kodlanmis veride alan adi yok, sadece tag var. Alan adini degistir ama <strong>tag numarasi asla degismemeli</strong>.</p></div>
+<div class="cc"><h4>Avro: Yazici ve Okuyucu Semalari</h4><p>Kodlanmis veride tag bile yok &mdash; sadece degerler sirali. <strong>Writer schema</strong> ve <strong>reader schema</strong> arasindaki fark cozulur. Hadoop ekosisteminin standart formati.</p></div>
+
+<h3 class="st" id="ch4-evo">Schema Evolution</h3>
+<div class="g2">
+<div class="cc" style="border-left-color:#42a5f5"><h4 style="color:#42a5f5">Forward Compatibility</h4><p><strong>Eski kod</strong> yeni kodun yazdigini okuyabilir. Nasil: bilinmeyen tag'lari atla.</p></div>
+<div class="cc" style="border-left-color:#66bb6a"><h4 style="color:#66bb6a">Backward Compatibility</h4><p><strong>Yeni kod</strong> eski kodun yazdigini okuyabilir. Nasil: yeni alanlara varsayilan deger.</p></div>
+</div>
+
+<h3 class="st" id="ch4-df">Veri Akis Modlari</h3>
+<div class="g3">
+<div class="cc"><h4>Veritabani Uzerinden</h4><p>Yazma encode, okuma decode. DB uzun yillar kalici &mdash; <strong>data outlives code</strong>. 5 yil onceki format okunabilmeli.</p></div>
+<div class="cc"><h4>REST / RPC</h4><p><strong>REST:</strong> HTTP + kaynak tabanli. <strong>RPC:</strong> Uzak fonksiyon cagrisini yerel gibi goster (gRPC, Thrift). Sorun: ag cagrilari lokal cagrilardan temelden farkli.</p></div>
+<div class="cc"><h4>Asenkron Mesaj</h4><p>Broker uzerinden: <span class="sc">RabbitMQ</span><span class="sc">Kafka</span>. Tampon, yeniden deneme, alici cevrimdisi olabilir.</p></div>
+</div>
+</section>
+
+<!-- ═══════ CH 5-12 PLACEHOLDERS ═══════ -->
+<section class="ch" id="ch5" data-p="2" style="--ac:var(--c5)"><div class="chh"><div class="cn">Bolum 5</div><h2><b>Replikasyon</b></h2><p class="why">Ayni verinin kopyalarini birden fazla makinede tutmak.</p></div><div id="ch5-content"></div></section>
+<section class="ch" id="ch6" data-p="2" style="--ac:var(--c6)"><div class="chh"><div class="cn">Bolum 6</div><h2><b>Bolumleme</b> (Partitioning)</h2><p class="why">Buyuk veri setlerini parcalara bolup dagitmak.</p></div><div id="ch6-content"></div></section>
+<section class="ch" id="ch7" data-p="2" style="--ac:var(--c7)"><div class="chh"><div class="cn">Bolum 7</div><h2><b>Transaction'lar</b></h2><p class="why">Birkac okuma/yazmayi mantiksal birime gruplamak.</p></div><div id="ch7-content"></div></section>
+<section class="ch" id="ch8" data-p="2" style="--ac:var(--c8)"><div class="chh"><div class="cn">Bolum 8</div><h2>Dagitik Sistemlerin <b>Sorunlari</b></h2><p class="why">Ag, saat, surecler &mdash; her sey ters gidebilir.</p></div><div id="ch8-content"></div></section>
+<section class="ch" id="ch9" data-p="2" style="--ac:var(--c9)"><div class="chh"><div class="cn">Bolum 9</div><h2>Tutarlilik ve <b>Konsensus</b></h2><p class="why">Tum dugumlerin bir sey uzerinde anlasmasi.</p></div><div id="ch9-content"></div></section>
+<section class="ch" id="ch10" data-p="3" style="--ac:var(--c10)"><div class="chh"><div class="cn">Bolum 10</div><h2><b>Toplu Isleme</b> (Batch)</h2><p class="why">Unix felsefesinden MapReduce'a.</p></div><div id="ch10-content"></div></section>
+<section class="ch" id="ch11" data-p="3" style="--ac:var(--c11)"><div class="chh"><div class="cn">Bolum 11</div><h2><b>Akis Isleme</b> (Stream)</h2><p class="why">Veriyi olustugu anda islemek.</p></div><div id="ch11-content"></div></section>
+<section class="ch" id="ch12" data-p="3" style="--ac:var(--c12)"><div class="chh"><div class="cn">Bolum 12</div><h2>Veri Sistemlerinin <b>Gelecegi</b></h2><p class="why">Tum parcalari birlestirmek.</p></div><div id="ch12-content"></div></section>
+
+<button class="fmap" onclick="go(12)" title="Kavram Haritasi">&#x1f5fa;</button>
+
+<script>
+const CH={1:{p:1,t:'Guvenilirlik, Olceklenebilirlik, Bakilabilirlik'},2:{p:1,t:'Veri Modelleri & Sorgu Dilleri'},3:{p:1,t:'Depolama & Erisim'},4:{p:1,t:'Kodlama & Evrim'},5:{p:2,t:'Replikasyon'},6:{p:2,t:'Bolumleme'},7:{p:2,t:"Transaction'lar"},8:{p:2,t:'Dagitik Sistem Sorunlari'},9:{p:2,t:'Tutarlilik & Konsensus'},10:{p:3,t:'Toplu Isleme (Batch)'},11:{p:3,t:'Akis Isleme (Stream)'},12:{p:3,t:'Gelecek'}};
+let cP=1,cC=1;const PC={1:'--p1',2:'--p2',3:'--p3'};
+function goPart(p){cP=p;document.querySelectorAll('.ptab').forEach(t=>t.classList.toggle('on',+t.dataset.p===p));rnav();const f=Object.keys(CH).find(c=>CH[c].p===p);if(f)go(+f)}
+function rnav(){const n=document.getElementById('cnav');const chs=Object.entries(CH).filter(([,v])=>v.p===cP);n.innerHTML=chs.map(([k,v])=>`<button class="ctab ${+k===cC?'on':''}" style="--ac:var(${PC[cP]})" onclick="go(${k})">Ch ${k}</button>`).join('')}
+function go(n){cC=n;cP=CH[n].p;document.querySelectorAll('.ptab').forEach(t=>t.classList.toggle('on',+t.dataset.p===cP));rnav();document.querySelectorAll('.ch').forEach(s=>s.classList.remove('on'));const el=document.getElementById('ch'+n);if(el){el.classList.add('on');el.scrollIntoView({behavior:'smooth',block:'start'})}history.replaceState(null,'','#ch'+n)}
+window.addEventListener('scroll',()=>{const h=document.documentElement.scrollHeight-window.innerHeight;document.getElementById('progress').style.width=(window.scrollY/h*100)+'%'});
+function stab(b,id){const c=b.closest('.tabs');c.querySelectorAll('.tbtn').forEach(x=>x.classList.remove('on'));c.querySelectorAll('.tpan').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.getElementById(id).classList.add('on')}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){const n=cC+1;if(CH[n])go(n)}else if(e.key==='ArrowLeft'){const n=cC-1;if(CH[n])go(n)}});
+
+// Fan-out
+function updFo(){const f=+document.getElementById('fo-s').value;document.getElementById('fo-v').textContent=f.toLocaleString();document.getElementById('fo-w').textContent=(4600*f).toLocaleString()}
+
+// Percentile
+function genPerc(){const d=[];for(let i=0;i<1000;i++){let t=50+Math.random()*100;if(Math.random()<.1)t+=Math.random()*500;if(Math.random()<.02)t+=Math.random()*3000;d.push(Math.round(t))}d.sort((a,b)=>a-b);
+const p50=d[499],p95=d[949],p99=d[989],p999=d[998];
+document.getElementById('vp50').textContent=p50+'ms';document.getElementById('vp95').textContent=p95+'ms';document.getElementById('vp99').textContent=p99+'ms';document.getElementById('vp999').textContent=p999+'ms';
+const mx=d[999],bk=40,bs=mx/bk,ct=Array(bk).fill(0);d.forEach(v=>{const b=Math.min(Math.floor(v/bs),bk-1);ct[b]++});const mc=Math.max(...ct);
+document.getElementById('hist').innerHTML=ct.map((c,i)=>{const h=c/mc*100,v=Math.round((i+.5)*bs);let cl=v<=p50?'#42a5f5':v<=p95?'#ff9800':'#ef5350';return`<div class="hbar" style="height:${h}%;background:${cl}" title="${v}ms: ${c}"></div>`}).join('');
+document.getElementById('pi').textContent=`Min:${d[0]}ms Max:${d[999]}ms`}
+
+// LSM
+let ls=0;const LSS=[
+{m:'a:1, c:3, b:2',l0:'',l1:'',e:'Adim 1: Yazmalar Memtable\'a (bellekte sirali agac)',e2:'Ayni anda WAL\'a yazilir (crash recovery)',a1:0,a2:0},
+{m:'a:1, b:2, c:3',l0:'',l1:'',e:'Adim 2: Memtable verileri otomatik siralar',e2:'Red-Black Tree / AVL Tree kullanilir',a1:0,a2:0},
+{m:'(bos)',l0:'a:1, b:2, c:3',l1:'',e:'Adim 3: Memtable dolunca diske FLUSH → SSTable L0',e2:'SSTable immutable. Yeni yazmalar yeni Memtable\'a',a1:1,a2:0},
+{m:'d:4, e:5',l0:'a:1, b:2, c:3',l1:'',e:'Adim 4: Yeni yazmalar yeni Memtable\'da birikiyor',e2:'Birden fazla SSTable birikmis...',a1:0,a2:0},
+{m:'d:4, e:5',l0:'',l1:'a:1, b:2, c:3, d:4, e:5',e:'Adim 5: COMPACTION — merge-sort ile birlestir',e2:'Eski degerler atilir, disk alani geri kazanilir',a1:0,a2:1}];
+function lsmN(){ls=Math.min(ls+1,LSS.length);updLsm()}function lsmR(){ls=0;updLsm()}
+function updLsm(){if(!ls){['lmd','l0d','l1d'].forEach(i=>document.getElementById(i).textContent='');document.getElementById('lse').textContent='"Sonraki Adim"a tiklayin.';document.getElementById('lse2').textContent='';document.getElementById('la1').setAttribute('opacity',0);document.getElementById('la2').setAttribute('opacity',0)}else{const s=LSS[ls-1];document.getElementById('lmd').textContent=s.m;document.getElementById('l0d').textContent=s.l0;document.getElementById('l1d').textContent=s.l1;document.getElementById('lse').textContent=s.e;document.getElementById('lse2').textContent=s.e2;document.getElementById('la1').setAttribute('opacity',s.a1);document.getElementById('la2').setAttribute('opacity',s.a2)}document.getElementById('lsi').textContent=ls+'/'+LSS.length}
+
+// B-Tree search
+function btS(){btR();setTimeout(()=>{document.getElementById('btr').setAttribute('stroke-width','3');document.getElementById('btr').setAttribute('fill','rgba(255,152,0,.25)');document.getElementById('bte').textContent='Kok: 10 < 42 < 50 → orta alta git'},300);
+setTimeout(()=>{document.getElementById('btr').setAttribute('fill','rgba(255,152,0,.12)');document.getElementById('btr').setAttribute('stroke-width','2');document.getElementById('btm').setAttribute('stroke','#ff9800');document.getElementById('btm').setAttribute('stroke-width','3');document.getElementById('btm').setAttribute('fill','rgba(255,152,0,.2)');document.getElementById('bte').textContent='Orta sayfa: 30 < 42 < 48 → bulundu!'},1400);
+setTimeout(()=>{document.getElementById('btm').setAttribute('fill','rgba(255,152,0,.06)');document.getElementById('btm').setAttribute('stroke-width','1');document.getElementById('btlf').setAttribute('stroke','#ff9800');document.getElementById('btlf').setAttribute('stroke-width','2');document.getElementById('btlt').textContent='42 → {data}';document.getElementById('bte').textContent='Yaprak sayfadan veri okundu. B-Tree derinligi: genellikle 3-4 seviye.'}, 2500)}
+function btR(){['btr','btl','btm','btlf'].forEach(id=>{const e=document.getElementById(id);if(id==='btr'){e.setAttribute('stroke','#ff9800');e.setAttribute('stroke-width','2');e.setAttribute('fill','rgba(255,152,0,.12)')}else{e.setAttribute('stroke','#444');e.setAttribute('stroke-width','1');e.setAttribute('fill','rgba(255,152,0,.06)')}});document.getElementById('btlt').textContent='... veri sayfasi ...';document.getElementById('bte').textContent='Butona tiklayin.'}
+
+// Init
+document.addEventListener('DOMContentLoaded',()=>{rnav();genPerc();const h=location.hash;if(h&&h.startsWith('#ch')){const n=parseInt(h.slice(3));if(CH[n]){cP=CH[n].p;go(n)}}populateChapters()});
+
+// ═══ POPULATE CHAPTERS 5-12 ═══
+function populateChapters(){
+// CH5
+document.getElementById('ch5-content').innerHTML=`
+<div class="toc"><a href="#ch5-lf">Leader-Follower</a><a href="#ch5-lag">Replication Lag</a><a href="#ch5-ml">Multi-Leader</a><a href="#ch5-ll">Leaderless</a><a href="#ch5-q">Quorum</a></div>
+<p>Uc temel sebep: <strong>Gecikme</strong> (veriyi yakin tut), <strong>Yuksek Erisilebilirlik</strong> (parcalar cokse bile calis), <strong>Okuma Olcekleme</strong> (okumalari dagit). Zorluk: degisen veriyi kopyalamak.</p>
+
+<h3 class="st" id="ch5-lf">Leader-Follower Replication</h3>
+<p>Tum yazmalar <strong>leader</strong>'a gider, degisiklikler <strong>replication log</strong> ile follower'lara gonderilir. Okumalar leader veya follower'dan.</p>
+<div class="g2">
+<div class="cc" style="border-left-color:#42a5f5"><h4 style="color:#42a5f5">Senkron</h4><p>Leader follower'in onayini bekler. Guncel kopya garantisi ama follower cevap vermezse yazmalar durur.</p></div>
+<div class="cc" style="border-left-color:#ff9800"><h4 style="color:#ff9800">Asenkron</h4><p>Beklenmez. Hicbir follower engellemez ama leader cokerse henuz replike edilmemis yazmalar <em>kaybolur</em>.</p></div>
+</div>
+<p><strong>Semi-senkron:</strong> BIR follower senkron, digerler asenkron. En az 2 node'da guncel kopya. <span class="sc">PostgreSQL</span><span class="sc">MySQL</span><span class="sc">MongoDB</span><span class="sc">Kafka</span></p>
+<div class="info warn"><div class="it">Failover Tehlikeleri</div><p><strong>Kayip yazmalar:</strong> Yeni leader eski leader'in son yazmalarini almamis olabilir. <strong>GitHub vakasi:</strong> Autoincrement counter gerideydi → Redis'teki ID'lerle cakisma → <em>ozel verilerin yanlis kullanicilara gosterilmesi</em>. <strong>Split brain:</strong> 2 node lider olduguna inanir → veri kaybi.</p></div>
+
+<h3 class="st" id="ch5-lag">Replication Lag Sorunlari</h3>
+<div class="g3">
+<div class="cc"><h4>1. Kendi Yazini Okuma</h4><p>Kullanici gunceller (leader), sayfayi yeniler (stale follower) → "kayboldu!" Cozum: kullanicinin kendi verisini leader'dan oku.</p></div>
+<div class="cc"><h4>2. Monotonic Reads</h4><p>Ayni sorgu 2 kez: ilk taze follower (yorum var), ikinci stale (yorum yok) → zaman geri gidiyor! Cozum: her kullanici ayni follower.</p></div>
+<div class="cc"><h4>3. Tutarli Onek Okumalari</h4><p>Sohbet: cevap sorudan once gorunuyor! Cozum: nedensel iliskili yazmalari ayni partition'a yaz.</p></div>
+</div>
+
+<h3 class="st" id="ch5-ml">Multi-Leader Replication</h3>
+<p>Birden fazla node yazma kabul eder. <strong>Kullanim:</strong> Multi-datacenter (her DC kendi leader'i), offline islem (takvim app), isbirlikci duzenleme (Google Docs).</p>
+<div class="cc"><h4>Catisma Cozum Stratejileri</h4><p><strong>LWW:</strong> Timestamp ile kazanan sec — veri kaybi riski! <strong>Catismadan kacin:</strong> Kaydin tum yazmalari ayni leader'a. <strong>CRDT:</strong> Otomatik birlestiren veri yapilari. <strong>Operational Transform:</strong> Google Docs'un algoritmasi.</p></div>
+
+<h3 class="st" id="ch5-ll">Leaderless Replication</h3>
+<p>Leader yok — istemci yazmayi birden fazla replica'ya gonderir. <span class="sc">Riak</span><span class="sc">Cassandra</span><span class="sc">Voldemort</span> (Dynamo-style).</p>
+<p><strong>Guncel kalma:</strong> Read repair (okuma sirasinda stale tespit → geri yaz) + Anti-entropy process (arka plan karsilastirma).</p>
+
+<h3 class="st" id="ch5-q">Quorum: w + r > n</h3>
+<p>n replica, w yazma onayi, r okuma onayi. <strong>w + r > n</strong> ise en az bir node guncel dondurur. Yaygin: n=3, w=2, r=2 (1 ariza tolere). Ama <strong>mutlak degil</strong> — sloppy quorum, concurrent write, timing kenarlarinda stale olabilir.</p>
+<div class="cc"><h4>Version Vector</h4><p>Her replica icin ayri surum numarasi. Concurrent yazmalari overwite'dan ayirt eder. Riak 2.0: <strong>dotted version vector</strong>.</p></div>
+`;
+
+// CH6
+document.getElementById('ch6-content').innerHTML=`
+<div class="toc"><a href="#ch6-s">Stratejiler</a><a href="#ch6-si">Ikincil Indeksler</a><a href="#ch6-rb">Rebalancing</a><a href="#ch6-rr">Routing</a></div>
+<p><strong>Partition</strong> = shard = region = tablet = vnode. Amac: veri ve sorgu yukunu esit dagitmak. Esitsiz = <strong>skew</strong>, asiri yuklu = <strong>hot spot</strong>.</p>
+
+<h3 class="st" id="ch6-s">Bolumleme Stratejileri</h3>
+<div class="g2">
+<div class="cc" style="border-left-color:#42a5f5"><h4 style="color:#42a5f5">Key Range</h4><p>Anahtarlar sirali, her partition bir aralik. Range query verimli. Hot spot riski (timestamp). <span class="sc">HBase</span><span class="sc">BigTable</span></p></div>
+<div class="cc" style="border-left-color:#f48fb1"><h4 style="color:#f48fb1">Hash</h4><p>Hash degerine gore. Esit dagitim. Range query imkansiz. <span class="sc">Cassandra</span><span class="sc">MongoDB</span></p></div>
+</div>
+<p><strong>Cassandra hibrit:</strong> Compound key — ilk kolon hash ile partition, kalan kolonlar partition icinde sirali.</p>
+
+<h3 class="st" id="ch6-si">Ikincil Indekslerle Bolumleme</h3>
+<div class="g2">
+<div class="cc"><h4>Document-Partitioned (Yerel)</h4><p>Her partition kendi indeksini tutar. Yazma hizli. Okuma: TUM partition'lara sor (scatter/gather). <span class="sc">MongoDB</span><span class="sc">Elasticsearch</span></p></div>
+<div class="cc"><h4>Term-Partitioned (Global)</h4><p>Global indeks, kendisi de bolumlu. Okuma verimli (tek partition). Yazma yavas (birden fazla partition). Genellikle asenkron. <span class="sc">DynamoDB</span></p></div>
+</div>
+
+<h3 class="st" id="ch6-rb">Yeniden Dengeleme</h3>
+<div class="info warn"><div class="it">Yanlis: hash mod N</div><p>N degistiginde cogu anahtar yer degistirir — pahali!</p></div>
+<p><strong>Dogru:</strong> Sabit partition sayisi (Riak, ES), dinamik bolumleme (HBase), node basina sabit partition (Cassandra). <strong>Onerilen:</strong> Otomatik plan, insan onayi.</p>
+
+<h3 class="st" id="ch6-rr">Request Routing</h3>
+<div class="g3">
+<div class="cc"><h4>Herhangi Node</h4><p>Load balancer → node, gerekirse iletir.</p></div>
+<div class="cc"><h4>Routing Tier</h4><p>Partition-aware katman dogru node'a yonlendirir.</p></div>
+<div class="cc"><h4>Client-Aware</h4><p>Istemci haritayi bilir, dogrudan baglanir.</p></div>
+</div>
+<p><strong>Koordinasyon:</strong> <span class="sc">ZooKeeper</span> (HBase, Kafka) veya <strong>gossip protokolu</strong> (Cassandra, Riak).</p>
+`;
+
+// CH7
+document.getElementById('ch7-content').innerHTML=`
+<div class="toc"><a href="#ch7-acid">ACID</a><a href="#ch7-iso">Isolation Seviyeleri</a><a href="#ch7-ser">Serializability</a></div>
+
+<h3 class="st" id="ch7-acid">ACID Nedir?</h3>
+<div class="g2">
+<div class="cc" style="border-left-color:#ffb74d"><h4>A — Atomicity</h4><p>"Ya hep ya hic" degil — <strong>abortability</strong>. Islem yarisinda hata olursa TUM degisiklikler geri alinir.</p></div>
+<div class="cc" style="border-left-color:#ffb74d"><h4>C — Consistency</h4><p>Aslinda DB'nin degil <em>uygulamanin</em> sorumlulugu. "Bakiye negatif olmamali" gibi invariant'lar uygulama zorlar.</p></div>
+<div class="cc" style="border-left-color:#ffb74d"><h4>I — Isolation</h4><p>Esanli transaction'lar birbirini etkilemez — sanki seri calisiyorlarmis gibi. Pratikte zayiflatilmis seviyeler.</p></div>
+<div class="cc" style="border-left-color:#ffb74d"><h4>D — Durability</h4><p>Commit edilen kaybolmaz. Diske yazma + WAL. Dagitik: replikasyon. Mutlak yoktur — tum replikalar cokebilir.</p></div>
+</div>
+
+<h3 class="st" id="ch7-iso">Isolation Seviyeleri</h3>
+<p><strong>Read Committed:</strong> Dirty read yok + dirty write yok. En temel seviye.</p>
+<p><strong>Snapshot Isolation (MVCC):</strong> Her transaction baslangic aninin snapshot'ini gorur. Arada degisiklik olsa bile tutarli okuma.</p>
+<div class="cc"><h4>Write Skew Problemi</h4><p>Hastane: en az 1 doktor nobette olmali. Alice ve Bob esanli "kac doktor var?" kontrol eder (2), ikisi de iptal eder → 0 doktor! Farkli nesneler guncellenir ama ayni kosul kontrol edilir.</p></div>
+
+<h3 class="st" id="ch7-ser">Serializability</h3>
+<div class="g3">
+<div class="cc"><h4>1. Gercek Seri</h4><p>Tek thread. RAM'e sigan veri → disk I/O yok → sasirtici hizli. <span class="sc">VoltDB</span><span class="sc">Redis</span></p></div>
+<div class="cc"><h4>2. Two-Phase Locking (2PL)</h4><p>Okuyucular yazicilari, yazicilar okuyuculari bloklar. 30 yildir standart. Yavas, deadlock riski.</p></div>
+<div class="cc"><h4>3. SSI (Iyimser)</h4><p>Bloksuz calis, commit'te kontrol et. Catisma varsa abort. <span class="sc">PostgreSQL 9.1+</span></p></div>
+</div>
+
+<table class="cmp"><tr><th>Anomali</th><th>Read Committed</th><th>Snapshot</th><th>Serializable</th></tr>
+<tr><td>Dirty Read</td><td style="color:#66bb6a">Engellenir</td><td style="color:#66bb6a">Engellenir</td><td style="color:#66bb6a">Engellenir</td></tr>
+<tr><td>Non-repeatable Read</td><td style="color:#ef5350">Olabilir</td><td style="color:#66bb6a">Engellenir</td><td style="color:#66bb6a">Engellenir</td></tr>
+<tr><td>Write Skew</td><td style="color:#ef5350">Olabilir</td><td style="color:#ef5350">Olabilir</td><td style="color:#66bb6a">Engellenir</td></tr>
+<tr><td>Phantom</td><td style="color:#ef5350">Olabilir</td><td style="color:#ef5350">Olabilir</td><td style="color:#66bb6a">Engellenir</td></tr></table>
+`;
+
+// CH8
+document.getElementById('ch8-content').innerHTML=`
+<div class="toc"><a href="#ch8-pf">Kismi Arizalar</a><a href="#ch8-net">Guvenilmez Aglar</a><a href="#ch8-clk">Guvenilmez Saatler</a><a href="#ch8-truth">Bilgi ve Dogruluk</a></div>
+<div class="anl"><div class="at">Tek Makine vs Dagitik</div><p><strong>Tek makine:</strong> Ya calisir ya coker — arada yok. <strong>Dagitik:</strong> Bazilari calisir bazilari coker, arada belirsiz: <strong>kismi ariza (partial failure)</strong> — nondeterministik.</p></div>
+
+<h3 class="st" id="ch8-pf">Kismi Arizalar</h3>
+<p><strong>HPC:</strong> Tek makine gibi davran, node cokerse durdur, checkpoint'ten devam. <strong>Internet servisleri:</strong> Her an hizmet vermeli → kismi arizalara toleransli yazilim gerekli.</p>
+
+<h3 class="st" id="ch8-net">Guvenilmez Aglar</h3>
+<p>Istek kayboluabilir, kuyrukta bekleyebilir, uzak node cokmis olabilir, cevap kaybolabilir, gecikebilir. <strong>Cevap gelmediginde nedenini bilemezsiniz.</strong></p>
+<p><strong>Timeout:</strong> Uzun → gercek olum icin uzun bekleme. Kisa → canli node'u yanlistlikla olu ilan → gereksiz failover → ek yuk.</p>
+
+<h3 class="st" id="ch8-clk">Guvenilmez Saatler</h3>
+<div class="g2">
+<div class="cc"><h4>Time-of-Day Clock</h4><p>NTP senkronize. Atlayabilir (ileri/geri). Sure farki icin uygun degil.</p></div>
+<div class="cc"><h4>Monotonic Clock</h4><p>Sadece ileri gider. Sure farki icin <em>tek guvenilir</em> saat.</p></div>
+</div>
+<div class="info warn"><div class="it">Saatlere Guvenmeyin!</div><p><strong>LWW tehlikesi:</strong> Kayik saatli node'un yazmasi "daha yeni" gorulur → veri kaybi. <strong>Cozum:</strong> Mantiksal saatler (Lamport timestamp, version vector) — fiziksel zaman degil nedensellik.</p></div>
+<p><strong>Process Pause:</strong> GC pause (saniyeler), VM suspend, swap. <strong>Fencing token:</strong> Her kilit artan numara ile — eski numara reddedilir.</p>
+
+<h3 class="st" id="ch8-truth">Bilgi, Dogruluk ve Yalanlar</h3>
+<p><strong>Cogunluk karar verir (quorum).</strong> Bir node "liderim" dese bile cogunluk kabul etmiyorsa degildir. <strong>Byzantine fault:</strong> Node'lar yalan soyleyebilir — sadece blockchain, havacilik, askeri sistemlerde gerekli.</p>
+`;
+
+// CH9
+document.getElementById('ch9-content').innerHTML=`
+<div class="toc"><a href="#ch9-lin">Linearizability</a><a href="#ch9-ord">Siralama</a><a href="#ch9-2pc">2PC</a><a href="#ch9-con">Consensus</a></div>
+
+<h3 class="st" id="ch9-lin">Linearizability</h3>
+<p>En guclu tutarlilik: <strong>tek veri kopyasi varmis gibi, tum islemler atomik.</strong> Birden fazla replica olsa bile istemci habersiz.</p>
+<div class="cc"><h4>Linearizability vs Serializability</h4><p><strong>Serializability:</strong> Transaction'lar bir sirada calistirilmis gibi — ama o sira herhangi sira olabilir. <strong>Linearizability:</strong> En son yazilan deger hemen okunabilir — <em>zaman</em> odakli. Ikisi farkli seyler. Ikisini birden: <strong>strict serializability</strong>.</p></div>
+<p><strong>Nerede gerekli:</strong> Lider secimi (split brain onleme), tekil kisitlamalar (benzersiz kullanici adi), cross-channel siralama.</p>
+<div class="info"><div class="it">CAP Teoremi</div><p><strong>Ag bolumlenmesi sirasinda C mi A mi?</strong> Linearizable sistem bazi istekleri reddeder (C). Available sistem her istege cevap verir ama stale olabilir (A). CAP dar bir teorem — sadece linearizability ve network partition hakkinda konusur.</p></div>
+
+<h3 class="st" id="ch9-ord">Siralama Garantileri</h3>
+<p><strong>Nedensel siralama:</strong> A→B ise A once. Bagimsiz olaylar herhangi sirada (kismi). <strong>Toplam siralama:</strong> Her iki olay karsilastirilabilir. <strong>Lamport Timestamp:</strong> (counter, nodeId) — total order ama gercek zamanli karar icin yetersiz.</p>
+<p><strong>Total Order Broadcast:</strong> Tum node'lar tum mesajlari <em>ayni sirada</em> alir. Linearizable register + total order broadcast + consensus: <strong>hepsi birbirine esdeger.</strong></p>
+
+<h3 class="st" id="ch9-2pc">Two-Phase Commit (2PC)</h3>
+<div class="cc"><h4>2PC Nasil Calisir?</h4><p><strong>Faz 1 (Prepare):</strong> Koordinator "commit edebilir misin?" sorar. "Evet" = soz → geri donemez.<br><strong>Faz 2 (Commit/Abort):</strong> Tum "evet" → commit gonder. Herhangi "hayir" → abort.<br><strong>Sorun:</strong> Koordinator prepare sonrasi cokerse katilimcilar <em>belirsiz durumda</em> — ne commit ne abort, kilit tutarlar. <strong>Bloklama protokolu.</strong></p></div>
+
+<h3 class="st" id="ch9-con">Consensus Algoritmalari</h3>
+<p>Tum node'lar bir deger uzerinde anlasir. <strong>4 ozellik:</strong> Uniform agreement (ayni karar), integrity (tek karar), validity (onerilmis deger), termination (cokmeyen karar verir). 2f+1 node ile f ariza tolere edilir.</p>
+<div class="g3">
+<div class="cc"><h4>Paxos</h4><p>En unlu, en zor anlasilir. Lamport (1989). Temel ama pratikte karmasik.</p></div>
+<div class="cc"><h4>Raft</h4><p>Anlasilabilirlik icin tasarlandi (2014). <span class="sc">etcd</span> kullanir. Leader election + log replication.</p></div>
+<div class="cc"><h4>Zab</h4><p><span class="sc">ZooKeeper</span> kullanir. Total order broadcast temelli.</p></div>
+</div>
+<p><strong>ZooKeeper/etcd:</strong> Consensus'u bir kez coz, uygulamalar ustune insaa etsin: lider secimi, dagitik kilit, servis kesfı. "Consensus outsource et."</p>
+`;
+
+// CH10
+document.getElementById('ch10-content').innerHTML=`
+<div class="toc"><a href="#ch10-unix">Unix Felsefesi</a><a href="#ch10-mr">MapReduce</a><a href="#ch10-beyond">MapReduce Otesi</a></div>
+
+<h3 class="st" id="ch10-unix">Unix Felsefesi ve Batch</h3>
+<div class="cb">cat /var/log/nginx/access.log | awk '{print $7}' | sort | uniq -c | sort -rn | head -n 5</div>
+<p>En populer 5 URL. <strong>Unix felsefesi:</strong> Tek is yap iyi yap, ciktiyi baska programin girdisi yap, erken prototiple. <code>sort</code> bellege sigmayan verileri diske tasirip merge-sort yapar — sasirtici derecede guclu.</p>
+
+<h3 class="st" id="ch10-mr">MapReduce</h3>
+<p>Unix pipe'larinin dagitik versiyonu. <strong>Map:</strong> Her kayittan key-value ciftleri uret. <strong>Reduce:</strong> Ayni anahtardaki degerleri birlestir. Cikti HDFS'e yazilir — bir sonraki isin girdisi.</p>
+<div class="cc"><h4>MapReduce Join'leri</h4><p><strong>Sort-merge join:</strong> Iki veri seti ayni anahtara gore mapper ile etiketlenir, reducer eslestirip birlestir. <strong>Broadcast hash join:</strong> Kucuk tabloyu tum mapper'lara gonder. <strong>Map-side merge join:</strong> Her iki girdi ayni sekilde bolunmus ve siraliysa, mapper tek basina birlesirir (reducer gereksiz).</p></div>
+
+<h3 class="st" id="ch10-beyond">MapReduce Otesi</h3>
+<p>MapReduce'un sorunu: her adim diske yazar (materialization). <strong>Spark, Flink, Tez:</strong> Tum is akisini bir graf olarak modeller, gereksiz disk yazimlarini onler, operator'leri pipeline'lar. 10-100x daha hizli olabilir.</p>
+<p><strong>Graph processing:</strong> PageRank gibi algoritmalar icin Pregel modeli (BSP) — her vertex komsularina mesaj gonderir, her turda isler.</p>
+`;
+
+// CH11
+document.getElementById('ch11-content').innerHTML=`
+<div class="toc"><a href="#ch11-ev">Event Streams</a><a href="#ch11-db">DB & Streams</a><a href="#ch11-proc">Stream Isleme</a></div>
+
+<h3 class="st" id="ch11-ev">Event Streams</h3>
+<p>Batch: input bounded (sinirli). Stream: input <strong>unbounded</strong> — veri surekli akar, hic "tamamlanmaz."</p>
+<p><strong>Event:</strong> Bir zaman noktasinda olan kucuk, degismez bir kayit. Producer uretir, consumer tuketir, topic'lerde gruplanir.</p>
+<div class="g2">
+<div class="cc"><h4>Mesajlasma Sistemleri</h4><p><strong>Direct:</strong> UDP multicast, ZeroMQ. <strong>Message broker:</strong> <span class="sc">RabbitMQ</span><span class="sc">ActiveMQ</span> — producer/consumer ayirir, kuyruklar, teslimat garantisi, fan-out.</p></div>
+<div class="cc"><h4>Partitioned Log</h4><p><span class="sc">Kafka</span><span class="sc">Kinesis</span>: Append-only log, partition'lara bolunmus. Consumer offset ile takip — istedigine geri sar. Log compaction: eski kayitlarin en son sürumu tutulur.</p></div>
+</div>
+
+<h3 class="st" id="ch11-db">Veritabanlari ve Stream'ler</h3>
+<div class="g3">
+<div class="cc"><h4>Change Data Capture (CDC)</h4><p>DB'deki her degisikligi event stream'e cevir. Turetilmis sistemleri (cache, search index) guncel tut. Sistemlerin dogruluK kaynagi DB, geri kalan turetilmis.</p></div>
+<div class="cc"><h4>Event Sourcing</h4><p>Mevcut durumu degil <em>olaylari</em> sakla. Durum olaylardan yeniden turetilir. DDD ile populer. Degistirilemez log — tam denetim izi.</p></div>
+<div class="cc"><h4>State + Stream + Immutability</h4><p>Mutable state = immutable event log'un integrali. Log replay = state rebuild. Accountancy: append-only transaction log, bakiye = turevi.</p></div>
+</div>
+
+<h3 class="st" id="ch11-proc">Stream Processing</h3>
+<p><strong>Kullanim alanlari:</strong> Karmasik olay isleme (CEP), stream analitik (pencereli aggregate), search on streams (sorguyu sakla, olaylar gelince esle), mesaj iletme/zenginlestirme.</p>
+<div class="cc"><h4>Zaman Sorunu</h4><p><strong>Event time</strong> (olustugu zaman) vs <strong>processing time</strong> (islendigi zaman). Fark saniyeler ile dakikalar arasi. Pencere turleri: tumbling (sabit), hopping (kayar), session (aktivite bazli). Gec gelen event'ler: <strong>watermark</strong> ile "bu zamana kadarki olaylarin hepsi geldi" tahmini.</p></div>
+<p><strong>Hata toleransi:</strong> Microbatch (Spark Streaming), checkpoint (Flink), transaction (Kafka exactly-once), idempotent writes.</p>
+`;
+
+// CH12
+document.getElementById('ch12-content').innerHTML=`
+<div class="toc"><a href="#ch12-int">Veri Entegrasyonu</a><a href="#ch12-ub">Unbundling</a><a href="#ch12-cor">Dogruluk</a><a href="#ch12-eth">Etik</a></div>
+
+<h3 class="st" id="ch12-int">Veri Entegrasyonu</h3>
+<p>Gercek dunyada bir uygulama birden fazla veri deposu kullanir (OLTP DB + cache + search index + data warehouse). <strong>Derived data:</strong> CDC veya event log ile turetilmis veri kaynaklari. <strong>Total ordering:</strong> Tum girdiler tek siralanmis log'dan okunursa, turetilmis sistemler deterministik ve tutarli olur.</p>
+<div class="cc"><h4>Lambda vs Kappa Mimarisi</h4><p><strong>Lambda:</strong> Batch katmani (tam dogruluk) + speed katmani (dusuk gecikme). Karmasik — iki farkli kod tabani. <strong>Kappa:</strong> Her sey stream. Log'u replay et = batch islemi. Tek kod tabani, daha basit.</p></div>
+
+<h3 class="st" id="ch12-ub">Unbundling Databases</h3>
+<p>Geleneksel DB iki isi birlestirir: <strong>state management</strong> + <strong>query processing.</strong> Gelecekte bunlar ayrilabilir — ozellestirilmis araclar birlestirilir: <strong>"database inside-out"</strong> (Martin Kleppmann'in tabiri). Indeks = turetilmis veri, cache = turetilmis, materialized view = turetilmis. Hepsinin kaynagi: immutable event log.</p>
+<div class="cc"><h4>Dataflow Tabanli Tasarim</h4><p>Uygulama: write path (event log'a yaz) + read path (turetilmis view'dan oku). <strong>Write path:</strong> Eager hesaplama (onceden isle). <strong>Read path:</strong> Lazy hesaplama (sorgu aninda isle). Her iki ucun karmasikligi arasinda denge. Cache bunun en basit ornegi.</p></div>
+
+<h3 class="st" id="ch12-cor">Dogruluk Icin Hedeflemek</h3>
+<p><strong>End-to-end argument:</strong> Dusuk seviyelerde saglanan guvenilirlik yeterli degil — dogruluk uygulama seviyesinde uctan uca saglanmali. DB ACID garantisi verse bile ag, uygulama hatalari dogruluGU bozabilir. <strong>Idempotency + immutable event log + deterministic processing = exactly-once semantics.</strong></p>
+<div class="cc"><h4>Enforcing Constraints</h4><p><strong>Uniqueness:</strong> Tek partition'a yonlendir (o partition siralama belirler). <strong>Asenkron constraint checking:</strong> Catisma nadirse, sonradan telafi (apology/compensation). Bankacilik bile boyle calisir — asim cekme izin ver, sonradan ucret kes.</p></div>
+
+<h3 class="st" id="ch12-eth">Dogru Olanı Yapmak</h3>
+<p>Kitabin son bolumu <strong>etik</strong> ile biter. Veri sistemleri insanlari etkiler: gozetim, ayrimcilik, filtre balonlari. <strong>Predictive analytics</strong> tehlikeleri: insanlari gecmis veriye dayanarak etiketlemek, yanlis korelasyonlar, kendini gerceklestiren kehanetler.</p>
+<p><strong>Privacy:</strong> Veri toplama asymmetrik guc yaratir. Kullanicilarin verilerini kontrol edebilmesi gerekir. <strong>Hedef:</strong> Teknoloji insanligin yararina kullanilmali — bu muhendislerin sorumlulugu.</p>
+`;
+}
+</script>
+</body>
+</html>

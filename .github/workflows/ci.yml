@@ -1,0 +1,153 @@
+# TicketHub CI Pipeline
+# Lint → Type Check → Unit Test → Integration Test → Build → Docker
+#
+# NEDEN CI PIPELINE?
+# Her commit'te otomatik kontrol → kırık kod main branch'e GİREMEZ.
+# "Bende çalışıyordu" sorunu → Docker ile tutarlı ortam.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  lint-and-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - run: npm ci
+
+      - run: npx prisma generate
+
+      - name: Biome lint
+        run: npx @biomejs/biome ci .
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+
+  unit-test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npx prisma generate
+
+      - name: Run unit tests
+        run: npx vitest run --coverage
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          JWT_ACCESS_SECRET: ci-test-access-secret-at-least-32-characters
+          JWT_REFRESH_SECRET: ci-test-refresh-secret-at-least-32-characters
+          TICKET_HMAC_SECRET: ci-test-hmac-secret-at-least-32-characters-x
+          STRIPE_SECRET_KEY: sk_test_placeholder
+          STRIPE_WEBHOOK_SECRET: whsec_placeholder
+
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: unit-test
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: tickethub_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/tickethub_test
+
+      - name: Run integration tests
+        run: npx vitest run --config vitest.integration.config.ts
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://test:test@localhost:5432/tickethub_test
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          JWT_ACCESS_SECRET: ci-test-access-secret-at-least-32-characters
+          JWT_REFRESH_SECRET: ci-test-refresh-secret-at-least-32-characters
+          TICKET_HMAC_SECRET: ci-test-hmac-secret-at-least-32-characters-x
+          STRIPE_SECRET_KEY: sk_test_placeholder
+          STRIPE_WEBHOOK_SECRET: whsec_placeholder
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [unit-test, integration-test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run build
+
+      - name: Build Docker image
+        run: docker build -t tickethub:${{ github.sha }} .
+
+  dependency-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm audit --audit-level=high
