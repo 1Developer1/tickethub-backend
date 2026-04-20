@@ -29,12 +29,11 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
-# Güvenlik: root kullanıcı olarak çalıştırma
+# Güvenlik: non-root kullanıcı oluştur (henüz switch yapma)
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 tickethub
-USER tickethub
 
-# Sadece production dependencies
+# Sadece production dependencies (root olarak kur, izin sorunu olmasın)
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
@@ -44,6 +43,10 @@ COPY prisma ./prisma
 
 # Compiled JavaScript (builder'dan)
 COPY --from=builder /app/dist ./dist
+
+# Sahipliği tickethub'a ver ve kullanıcıyı değiştir (güvenlik)
+RUN chown -R tickethub:nodejs /app
+USER tickethub
 
 ENV NODE_ENV=production
 EXPOSE 3000
