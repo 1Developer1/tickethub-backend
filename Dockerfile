@@ -12,8 +12,9 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Önce dependency dosyalarını kopyala (Docker cache layer — sadece package.json değişince rebuild)
+# --ignore-scripts: husky prepare script'i container'da gerekmez (sadece dev'de git hook kurar)
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 # Prisma schema'yı kopyala ve generate et (client oluştur)
 COPY prisma ./prisma
@@ -34,8 +35,9 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 tickethub
 
 # Sadece production dependencies (root olarak kur, izin sorunu olmasın)
+# --ignore-scripts: husky devDependency, --omit=dev ile yok → prepare script fail olur
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev --ignore-scripts
 
 # Prisma client (builder'dan)
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
