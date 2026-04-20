@@ -3,225 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TicketHub — Interactive Documentation</title>
+<title>TicketHub — Event Storming Workshop</title>
+<meta http-equiv="refresh" content="0; url=event-storming-workshop.html">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
   body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: #0f0f1a; color: #e0e0e0; line-height: 1.7;
-    min-height: 100vh;
+    background: #0f0f1a; color: #e0e0e0;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; margin: 0; text-align: center;
   }
-
-  .hero {
-    background: linear-gradient(135deg, #16213e 0%, #0f3460 50%, #533483 100%);
-    padding: 80px 40px; text-align: center; border-bottom: 4px solid #e94560;
-  }
-  .hero h1 { font-size: 3rem; color: #fff; margin-bottom: 16px; letter-spacing: -1px; }
-  .hero .subtitle { font-size: 1.25rem; color: #a0aec0; max-width: 700px; margin: 0 auto; }
-  .hero .tags { margin-top: 24px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-  .hero .tag {
-    padding: 6px 16px; border-radius: 20px; font-size: 0.85rem;
-    background: rgba(233,69,96,0.15); border: 1px solid rgba(233,69,96,0.4); color: #e94560;
-  }
-
-  .container {
-    max-width: 1200px; margin: 0 auto; padding: 60px 30px;
-  }
-
-  .intro {
-    text-align: center; max-width: 800px; margin: 0 auto 60px;
-  }
-  .intro h2 { font-size: 1.8rem; color: #fff; margin-bottom: 16px; }
-  .intro p { color: #b0b0c0; font-size: 1.05rem; }
-
-  .docs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 24px;
-  }
-
-  .doc-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid #2a2a4a;
-    border-radius: 12px;
-    padding: 28px;
-    text-decoration: none;
-    color: inherit;
-    transition: all 0.25s;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden;
-  }
-  .doc-card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 4px;
-    background: var(--accent);
-    transition: width 0.25s;
-  }
-  .doc-card:hover {
-    transform: translateY(-4px);
-    background: rgba(255,255,255,0.06);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-  }
-  .doc-card:hover::before { width: 8px; }
-
-  .doc-card .icon {
-    font-size: 2.2rem; margin-bottom: 12px; display: block;
-  }
-  .doc-card h3 {
-    color: #fff; font-size: 1.3rem; margin-bottom: 10px;
-  }
-  .doc-card p {
-    color: #a0aec0; font-size: 0.95rem; flex-grow: 1; margin-bottom: 16px;
-  }
-  .doc-card .cta {
-    color: var(--accent);
-    font-weight: 600;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .doc-card .cta::after {
-    content: '→';
-    transition: transform 0.2s;
-  }
-  .doc-card:hover .cta::after {
-    transform: translateX(6px);
-  }
-  .doc-card .tags {
-    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px;
-  }
-  .doc-card .tag-pill {
-    font-size: 0.72rem;
-    padding: 3px 10px;
-    border-radius: 12px;
-    background: rgba(255,255,255,0.05);
-    color: #808090;
-    border: 1px solid #2a2a4a;
-  }
-
-  .doc-card.featured {
-    grid-column: 1 / -1;
-    padding: 40px;
-    background: linear-gradient(135deg, rgba(233,69,96,0.08), rgba(83,52,131,0.08));
-    border-color: #e94560;
-  }
-  .doc-card.featured::before { width: 6px; }
-  .doc-card.featured h3 { font-size: 1.6rem; }
-  .doc-card.featured .icon { font-size: 3rem; }
-
-  .footer {
-    text-align: center; padding: 40px 20px; color: #606070;
-    border-top: 1px solid #2a2a4a; margin-top: 60px;
-  }
-  .footer a { color: #e94560; text-decoration: none; }
-
-  @media (max-width: 768px) {
-    .hero h1 { font-size: 2rem; }
-    .hero .subtitle { font-size: 1rem; }
-    .container { padding: 30px 16px; }
-  }
+  a { color: #e94560; text-decoration: none; font-size: 1.2rem; }
+  a:hover { text-decoration: underline; }
+  p { color: #a0aec0; margin-top: 16px; }
 </style>
 </head>
 <body>
-
-<div class="hero">
-  <h1>TicketHub — Interactive Docs</h1>
-  <p class="subtitle">Visual, interactive documentation covering Domain-Driven Design, Event Storming and the architectural decisions behind this project.</p>
-  <div class="tags">
-    <span class="tag">DDD</span>
-    <span class="tag">Event Storming</span>
-    <span class="tag">Modular Monolith</span>
-    <span class="tag">Node.js</span>
-    <span class="tag">TypeScript</span>
-  </div>
+<div>
+  <h1>Redirecting to Event Storming Workshop...</h1>
+  <p>If you are not redirected automatically, <a href="event-storming-workshop.html">click here</a>.</p>
 </div>
-
-<div class="container">
-
-  <div class="intro">
-    <h2>5 Interactive Documents</h2>
-    <p>Instead of dry wiki pages, this project's architecture is documented through interactive visualizations — post-its, timelines, state machines, animations and comparison tables. Pick any document below to explore.</p>
-  </div>
-
-  <div class="docs-grid">
-
-    <!-- Featured: Event Storming -->
-    <a href="event-storming-workshop.html" class="doc-card featured" style="--accent:#e94560">
-      <span class="icon">📋</span>
-      <h3>Event Storming Workshop</h3>
-      <p>The complete event storming session for TicketHub — from chaos to bounded contexts. Follow the 8-step workshop with draggable post-its: domain events, commands, actors, policies, read models and hotspots. See how 3 bounded contexts (Identity, Catalog, Sales) emerge from 30+ events, and how each post-it becomes actual code.</p>
-      <div class="tags">
-        <span class="tag-pill">Event Storming</span>
-        <span class="tag-pill">DDD</span>
-        <span class="tag-pill">Bounded Contexts</span>
-        <span class="tag-pill">Aggregate Roots</span>
-        <span class="tag-pill">Value Objects</span>
-        <span class="tag-pill">3 Languages (Node.js / C# / Java)</span>
-      </div>
-      <span class="cta" style="margin-top: 20px;">Open Workshop</span>
-    </a>
-
-    <a href="ddia-interactive.html" class="doc-card" style="--accent:#42a5f5">
-      <span class="icon">📚</span>
-      <h3>DDIA Interactive Guide</h3>
-      <p>Visual summary of Designing Data-Intensive Applications by Martin Kleppmann. Replication, partitioning, transactions, consensus — with interactive diagrams.</p>
-      <div class="tags">
-        <span class="tag-pill">Replication</span>
-        <span class="tag-pill">Partitioning</span>
-        <span class="tag-pill">Consensus</span>
-      </div>
-      <span class="cta">Open Guide</span>
-    </a>
-
-    <a href="postit-to-code.html" class="doc-card" style="--accent:#ab47bc">
-      <span class="icon">💻</span>
-      <h3>Post-it to Code</h3>
-      <p>How a sticky-note on the workshop wall turns into actual TypeScript code. Each post-it color mapped to its code counterpart with live examples.</p>
-      <div class="tags">
-        <span class="tag-pill">DDD</span>
-        <span class="tag-pill">TypeScript</span>
-        <span class="tag-pill">Evolution</span>
-      </div>
-      <span class="cta">Open</span>
-    </a>
-
-    <a href="lifecycle.html" class="doc-card" style="--accent:#66bb6a">
-      <span class="icon">🔄</span>
-      <h3>Reservation Lifecycle</h3>
-      <p>State machine visualization of a reservation: PENDING → CONFIRMED → FULFILLED / EXPIRED / CANCELLED. Each transition with guards and events.</p>
-      <div class="tags">
-        <span class="tag-pill">State Machine</span>
-        <span class="tag-pill">Domain Events</span>
-      </div>
-      <span class="cta">Open</span>
-    </a>
-
-    <a href="backend-developer-studysheet.html" class="doc-card" style="--accent:#ff9800">
-      <span class="icon">📖</span>
-      <h3>Backend Developer Study Sheet</h3>
-      <p>25 topics covering the full backend developer curriculum: OS, networking, DDD, databases, C#/.NET, DevOps, security, career planning. 8 parts in a single page.</p>
-      <div class="tags">
-        <span class="tag-pill">Curriculum</span>
-        <span class="tag-pill">Fundamentals</span>
-        <span class="tag-pill">Career</span>
-      </div>
-      <span class="cta">Open</span>
-    </a>
-
-  </div>
-
-  <div class="footer">
-    <p>TicketHub is an educational project demonstrating production-grade backend patterns.<br>
-    Back to <a href="https://github.com/1Developer1/tickethub-backend">GitHub repository</a></p>
-  </div>
-
-</div>
-
 </body>
 </html>
