@@ -2,6 +2,26 @@
 
 > Konserler, tiyatrolar, spor maçları, festivaller için modern bilet satış backend'i.
 
+## 🎨 Interactive Documentation (Event Storming + DDD)
+
+This project's architecture is documented through **interactive HTML visualizations** — not dry wiki pages. Post-it notes, state machines, timelines and animations that explain every decision.
+
+**👉 [Open Interactive Docs](https://1developer1.github.io/tickethub-backend/)** *(enable GitHub Pages first — see below)*
+
+| Document | What it shows |
+|----------|---------------|
+| 📋 **[Event Storming Workshop](docs/event-storming-workshop.html)** | Full 8-step event storming session with draggable post-its. From chaos → bounded contexts → code. 3 languages (Node.js / C# / Java) |
+| 🔄 **[Reservation Lifecycle](docs/lifecycle.html)** | State machine: PENDING → CONFIRMED → FULFILLED with guards and events |
+| 💻 **[Post-it to Code](docs/postit-to-code.html)** | How each sticky note becomes actual TypeScript |
+| 📚 **[DDIA Interactive Guide](docs/ddia-interactive.html)** | Visual summary of Designing Data-Intensive Applications |
+| 📖 **[Backend Developer Study Sheet](docs/backend-developer-studysheet.html)** | 25-topic curriculum (OS, networking, DDD, databases, DevOps) |
+
+### 📸 Event Storming Preview
+
+The workshop documents the complete domain discovery process — identifying domain events (orange), commands (blue), actors (yellow), policies (purple), and read models (green) across 3 bounded contexts (Identity, Catalog, Sales).
+
+> **To view the docs live:** Go to your repo's **Settings → Pages** → Source: **GitHub Actions**. After the next push, the site is live at `https://1developer1.github.io/tickethub-backend/`.
+
 ## Mimari
 
 **Modüler Monolith** — her iş alanı ayrı modül ama tek deployment. Büyük şirketler başlangıçta bunu yapıyor, mikroservislere geçiş gerektiğinde modül sınırları zaten hazır.
