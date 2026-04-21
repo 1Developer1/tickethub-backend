@@ -11,6 +11,7 @@ on:
     branches: [main]
     paths:
       - 'docs/**'
+      - 'scripts/build-pages.cjs'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -32,53 +33,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Prepare docs (remove DDD Building Blocks section)
-        run: |
-          # Copy docs to a temp folder we can modify without touching the repo
-          mkdir -p pages-build
-          cp -r docs/. pages-build/
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-          # Strip Step 8 (DDD Yapi Taslari) from the workshop HTML
-          node <<'EOF'
-          const fs = require('fs');
-          const path = 'pages-build/event-storming-workshop.html';
-          let html = fs.readFileSync(path, 'utf8');
-
-          // 1. Remove the nav link to #step8
-          //    Pattern: <a href="#step8" ...>8. DDD Yapi Taslari</a>
-          html = html.replace(
-            /\s*<a href="#step8"[^>]*>[^<]*<\/a>/,
-            ''
-          );
-
-          // 2. Remove the entire Step 8 section
-          //    From the comment "STEP 8 — DDD YAPI TASLARI" up to and
-          //    including the closing </div> of that section.
-          const startMarker = '<!-- ══════════════════════════════════════════════════════════════\n     STEP 8 — DDD YAPI TASLARI';
-          const startIdx = html.indexOf(startMarker);
-          if (startIdx === -1) {
-            console.error('Start marker not found — section may have been renamed');
-            process.exit(1);
-          }
-
-          // Find the next top-level closing boundary: either end of step 8 div
-          // or the INTERACTIVE CODE PANEL comment that follows it.
-          const endMarker = '<!-- ══════════════════════════════════════════════════════════════\n     INTERACTIVE CODE PANEL';
-          const endIdx = html.indexOf(endMarker, startIdx);
-          if (endIdx === -1) {
-            console.error('End marker not found');
-            process.exit(1);
-          }
-
-          html = html.slice(0, startIdx) + html.slice(endIdx);
-          fs.writeFileSync(path, html);
-
-          console.log('Step 8 (DDD Building Blocks) removed from Pages build.');
-          EOF
+      - name: Build pages (strip DDD Building Blocks)
+        run: node scripts/build-pages.cjs
 
       - uses: actions/configure-pages@v5
 
-      - name: Upload processed docs
+      - name: Upload pages-build/
         uses: actions/upload-pages-artifact@v3
         with:
           path: 'pages-build/'
