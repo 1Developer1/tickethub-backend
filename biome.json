@@ -33,6 +33,15 @@
     }
   },
   "files": {
-    "ignore": ["node_modules", "dist", "prisma/migrations", "*.generated.*", "docs/**"]
+    "ignore": [
+      "node_modules",
+      "dist",
+      "coverage",
+      "pages-build",
+      "prisma/migrations",
+      "*.generated.*",
+      "docs/**",
+      "frontend/**"
+    ]
   }
 }

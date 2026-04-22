@@ -9,8 +9,8 @@
  * Output:        pages-build/
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const SRC_DIR = 'docs';
 const DST_DIR = 'pages-build';
@@ -80,7 +80,9 @@ while (searchFrom < html.length) {
 
 if (endIdx === -1) {
   console.error('[build-pages] ERROR: Could not find end of Step 8 section');
-  console.error('[build-pages] Looking for "INTERACTIVE CODE PANEL" or "CODE PANEL" comment after startIdx=' + startIdx);
+  console.error(
+    `[build-pages] Looking for "INTERACTIVE CODE PANEL" or "CODE PANEL" comment after startIdx=${startIdx}`,
+  );
   process.exit(1);
 }
 
@@ -88,5 +90,7 @@ html = html.slice(0, startIdx) + html.slice(endIdx);
 const bytesRemoved = originalLength - html.length;
 
 fs.writeFileSync(workshopPath, html);
-console.log(`[build-pages] Removed Step 8 from ${WORKSHOP} (${bytesRemoved.toLocaleString()} bytes stripped)`);
+console.log(
+  `[build-pages] Removed Step 8 from ${WORKSHOP} (${bytesRemoved.toLocaleString()} bytes stripped)`,
+);
 console.log('[build-pages] Done.');
