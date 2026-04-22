@@ -1,12 +1,12 @@
 import { apiClient } from './client';
-import type { ApiResponse, Reservation, SeatSelection } from '@/types';
+import type { ApiResponse, Reservation, ReservationHold, SeatSelection } from '@/types';
 
 export const bookingsApi = {
   async hold(input: {
     eventId: string;
     seats: SeatSelection[];
-  }): Promise<Reservation> {
-    const { data } = await apiClient.post<ApiResponse<Reservation>>('/bookings/hold', input);
+  }): Promise<ReservationHold> {
+    const { data } = await apiClient.post<ApiResponse<ReservationHold>>('/bookings/hold', input);
     return data.data;
   },
 

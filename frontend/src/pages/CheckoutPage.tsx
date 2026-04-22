@@ -80,7 +80,7 @@ export function CheckoutPage() {
         <div className="bg-white rounded-2xl p-6 shadow-card border border-gray-100 mb-4">
           <h3 className="font-bold text-secondary mb-4">Seçilen Koltuklar</h3>
           <div className="space-y-2">
-            {reservation.seatHolds.map((s, i) => (
+            {reservation.seats.map((s, i) => (
               <div
                 key={i}
                 className="flex items-center justify-between text-sm border-b border-gray-100 pb-2 last:border-0"

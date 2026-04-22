@@ -2,9 +2,9 @@ import { apiClient } from './client';
 import type { ApiResponse } from '@/types';
 
 export interface PaymentResponse {
-  id: string;
-  status: 'SUCCEEDED' | 'FAILED' | 'PENDING';
-  amountInCents: number;
+  success: boolean;
+  paymentIntentId: string;
+  status: 'succeeded' | 'failed' | 'pending';
 }
 
 export const paymentsApi = {

@@ -45,7 +45,7 @@ export function EventDetailPage() {
     mutationFn: () => bookingsApi.hold({ eventId: id!, seats: selected }),
     onSuccess: (reservation) => {
       toast.success('Koltuklar 10 dakikalığına rezerve edildi');
-      navigate(`/checkout/${reservation.id}`);
+      navigate(`/checkout/${reservation.reservationId}`);
     },
     onError: (err) => {
       toast.error(extractError(err));

@@ -50,7 +50,7 @@ export function PaymentPage() {
         amountInCents: reservation.totalPriceInCents,
         idempotencyKey,
       });
-      await bookingsApi.confirm(reservation.id, payment.id);
+      await bookingsApi.confirm(reservation.id, payment.paymentIntentId);
       toast.success('Ödeme başarılı! Biletlerin hazır.');
       navigate('/tickets');
     } catch (err) {

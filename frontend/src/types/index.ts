@@ -65,13 +65,23 @@ export type ReservationStatus = 'PENDING' | 'CONFIRMED' | 'EXPIRED' | 'CANCELLED
 
 export interface Reservation {
   id: string;
-  userId: string;
   eventId: string;
   status: ReservationStatus;
   totalPriceInCents: number;
+  totalPrice: string;
   expiresAt: string;
   confirmedAt: string | null;
-  seatHolds: SeatHold[];
+  cancelledAt?: string | null;
+  seats: SeatHold[];
+}
+
+/** Response shape for POST /bookings/hold — note: reservationId, not id. */
+export interface ReservationHold {
+  reservationId: string;
+  expiresAt: string;
+  totalPriceInCents: number;
+  totalPrice: string;
+  seats: SeatHold[];
 }
 
 export interface CurrentPrice {
@@ -84,9 +94,21 @@ export interface CurrentPrice {
 export interface Ticket {
   id: string;
   reservationId: string;
-  status: 'VALID' | 'USED' | 'CANCELLED';
+  status: 'VALID' | 'USED' | 'REVOKED' | 'CANCELLED';
   qrPayload: string;
   createdAt: string;
+  usedAt?: string | null;
+  event?: {
+    id?: string;
+    name: string;
+    startsAt: string;
+    posterUrl?: string | null;
+  };
+  seat?: {
+    section: string;
+    row: number;
+    seat: number;
+  };
 }
 
 // ── API wrapper ──
