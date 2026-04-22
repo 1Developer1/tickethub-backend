@@ -15,6 +15,7 @@
  */
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import fp from 'fastify-plugin';
 import jwt from 'jsonwebtoken';
 import { ForbiddenError, UnauthorizedError } from '../errors/http-errors.js';
 
@@ -47,8 +48,11 @@ declare module 'fastify' {
 /**
  * Authentication hook — token doğrula, request.user'a ata.
  * Route seviyesinde { config: { public: true } } ile bypass edilebilir.
+ *
+ * fastify-plugin ile sarılı: onRequest hook'u parent scope'ta register olur,
+ * böylece sibling olarak register edilen tüm API route'larında çalışır.
  */
-export async function authPlugin(app: FastifyInstance): Promise<void> {
+export const authPlugin = fp(async (app: FastifyInstance): Promise<void> => {
   app.decorateRequest('user', undefined);
 
   app.addHook('onRequest', async (request: FastifyRequest, _reply: FastifyReply) => {
@@ -81,7 +85,7 @@ export async function authPlugin(app: FastifyInstance): Promise<void> {
       throw err;
     }
   });
-}
+});
 
 /**
  * Authorization guard — belirli roller için erişim kontrolü.
