@@ -49,6 +49,41 @@ export const ticketsService = {
   },
 
   /**
+   * Kullanıcının tüm biletlerini listele (en yeniden eskiye).
+   */
+  async listForUser(userId: string) {
+    const tickets = await prisma.ticket.findMany({
+      where: { userId },
+      include: {
+        seatHold: true,
+        reservation: {
+          include: { event: { select: { id: true, name: true, startsAt: true, posterUrl: true } } },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return tickets.map((t) => ({
+      id: t.id,
+      status: t.status,
+      qrPayload: t.qrPayload,
+      createdAt: t.createdAt.toISOString(),
+      usedAt: t.usedAt?.toISOString() ?? null,
+      event: {
+        id: t.reservation.event.id,
+        name: t.reservation.event.name,
+        startsAt: t.reservation.event.startsAt.toISOString(),
+        posterUrl: t.reservation.event.posterUrl,
+      },
+      seat: {
+        section: t.seatHold.sectionName,
+        row: t.seatHold.row,
+        seat: t.seatHold.seat,
+      },
+    }));
+  },
+
+  /**
    * Bilet detayı getir (kullanıcı kendi biletini görür).
    */
   async getTicket(ticketId: string, userId: string) {
@@ -69,8 +104,10 @@ export const ticketsService = {
 
     return {
       id: ticket.id,
+      reservationId: ticket.reservationId,
       status: ticket.status,
       qrPayload: ticket.qrPayload,
+      createdAt: ticket.createdAt.toISOString(),
       event: {
         name: ticket.reservation.event.name,
         startsAt: ticket.reservation.event.startsAt.toISOString(),

@@ -12,6 +12,12 @@ const validateSchema = z.object({
 });
 
 export async function ticketRoutes(app: FastifyInstance): Promise<void> {
+  // ── GET /api/v1/tickets ── (Kullanıcının biletleri)
+  app.get('/', async (request, reply) => {
+    const tickets = await ticketsService.listForUser(requireUser(request).sub);
+    return reply.send({ data: tickets });
+  });
+
   // ── GET /api/v1/tickets/:id ── (Bilet detayı — bilet sahibi)
   app.get('/:id', async (request, reply) => {
     const { id } = request.params as { id: string };

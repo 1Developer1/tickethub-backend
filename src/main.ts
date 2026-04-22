@@ -19,6 +19,8 @@
  */
 
 import { buildApp } from './app.js';
+import { startNotificationWorkers } from './modules/notifications/notifications.worker.js';
+import { startTicketWorkers } from './modules/tickets/tickets.worker.js';
 import { disconnectDatabase } from './shared/database/prisma-client.js';
 import { asyncEventBus } from './shared/events/async-event-bus.js';
 import { logger } from './shared/logger/index.js';
@@ -27,6 +29,10 @@ import { disconnectRedis } from './shared/redis/redis-client.js';
 
 async function main(): Promise<void> {
   const app = await buildApp();
+
+  // Background workers — dinler async event bus'ı
+  startTicketWorkers();
+  startNotificationWorkers();
 
   const port = Number(process.env.PORT ?? 3000);
   const host = process.env.HOST ?? '0.0.0.0';
