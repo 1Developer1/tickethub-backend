@@ -163,10 +163,69 @@ async function main(): Promise<void> {
     },
   });
 
+  // ── Pricing: BASE_PRICE_SET event + CurrentPrice projection per (event, section) ──
+  type SeatSection = { rows: number; seatsPerRow: number; basePriceInCents: number };
+  const eventVenuePairs: Array<{
+    eventId: string;
+    venueId: string;
+    layout: Record<string, SeatSection>;
+  }> = [
+    {
+      eventId: '00000000-0000-0000-0000-000000000010',
+      venueId: venue1.id,
+      layout: venue1.seatLayout as Record<string, SeatSection>,
+    },
+    {
+      eventId: '00000000-0000-0000-0000-000000000011',
+      venueId: venue2.id,
+      layout: venue2.seatLayout as Record<string, SeatSection>,
+    },
+    {
+      eventId: '00000000-0000-0000-0000-000000000012',
+      venueId: venue1.id,
+      layout: venue1.seatLayout as Record<string, SeatSection>,
+    },
+  ];
+
+  for (const { eventId, layout } of eventVenuePairs) {
+    for (const [sectionName, section] of Object.entries(layout)) {
+      await prisma.pricingEvent.create({
+        data: {
+          eventId,
+          sectionName,
+          type: 'BASE_PRICE_SET',
+          payload: {
+            type: 'BASE_PRICE_SET',
+            eventId,
+            sectionName,
+            priceInCents: section.basePriceInCents,
+            setBy: admin.id,
+          },
+        },
+      });
+      await prisma.currentPrice.upsert({
+        where: { eventId_sectionName: { eventId, sectionName } },
+        create: {
+          eventId,
+          sectionName,
+          basePriceInCents: section.basePriceInCents,
+          currentPriceInCents: section.basePriceInCents,
+          multiplier: 1,
+        },
+        update: {
+          basePriceInCents: section.basePriceInCents,
+          currentPriceInCents: section.basePriceInCents,
+          multiplier: 1,
+        },
+      });
+    }
+  }
+
   console.log('✅ Seed complete!');
   console.log(`  Users: admin (${admin.id}), organizer (${organizer.id}), user (${user.id})`);
   console.log(`  Venues: ${venue1.name}, ${venue2.name}`);
   console.log('  Events: 3 events created');
+  console.log('  Pricing: base prices set for all event×section combinations');
 }
 
 main()
